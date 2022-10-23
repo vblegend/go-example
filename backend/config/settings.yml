@@ -1,0 +1,51 @@
+Settings:
+  Application:
+    Host: 0.0.0.0
+    Mode: dev
+    Name: AppSidecar
+    Port: 8000
+  DataMock:
+    Interval: 2
+    MockState: true
+    WriteRedisMax: 5000
+  Database:
+    ConnMaxIdleTime: 0
+    ConnMaxLifeTime: 0
+    Driver: sqlite3
+    MaxIdleConns: 0
+    MaxOpenConns: 0
+    Registers: null
+    Source: ./sqlite.db
+  Extend:
+    AMap:
+      Key: ""
+  Gen:
+    DBName: dbname
+    FrontPath: ../web/src
+  Jwt:
+    Secret: App-Sidecar
+    Timeout: 3600
+  Logger:
+    Cap: 0
+    Level: info
+    Location: false
+    Path: ./temp/logs
+    Stdout: ""
+  Mysql:
+    host: 10.163.100.128
+    password: siteweb1!
+    port: 3306
+    user: root
+  Queue:
+    Memory:
+      PoolSize: 100
+  Redis:
+    db: 0
+    host: 10.169.42.163
+    password: siteweb1!
+    port: 6379
+  Ssl:
+    Domain: localhost:8000
+    Enable: false
+    Key: ./temp/domain.key
+    Pem: ./temp/domain.crt
