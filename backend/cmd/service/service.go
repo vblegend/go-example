@@ -3,7 +3,8 @@ package service
 import (
 	"backend/cmd/service/commands"
 	"backend/common/global"
-	log "backend/core/logger"
+	"backend/core/log"
+	"fmt"
 	"os"
 	"runtime"
 
@@ -14,25 +15,14 @@ var (
 	ServiceCmd = &cobra.Command{
 		Use:               "service",
 		SilenceUsage:      true,
-		Short:             "siteweb-manager control service",
-		Example:           "siteweb-manager service start/stop/restart/install/uninstall/status",
+		Short:             fmt.Sprintf("%s control service", global.AppFileName),
+		Example:           fmt.Sprintf("%s service start/stop/restart/install/uninstall/status", global.AppFileName),
 		PersistentPreRunE: func(*cobra.Command, []string) error { return nil },
 		Args: func(cmd *cobra.Command, args []string) error {
-
-			// init logs
-			// logger.SetupLogger(
-			// 	logger.WithPath("./temp/logs"),
-			// 	logger.WithLevel("trace"),
-			// 	logger.WithStdout(""),
-			// 	logger.WithCap(0),
-			// 	logger.WithLocation(false),
-			// )
-
 			if runtime.GOOS != "linux" {
 				log.Error("error: The service command supports only linux.")
 				os.Exit(1)
 			}
-
 			if len(args) < 1 {
 				global.PrintCobraHelp()
 				os.Exit(1)

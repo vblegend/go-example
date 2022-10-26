@@ -7,16 +7,8 @@ type Database struct {
 	ConnMaxLifeTime int
 	MaxIdleConns    int
 	MaxOpenConns    int
-	Registers       []DBResolverConfig
-}
-
-type DBResolverConfig struct {
-	Sources  []string
-	Replicas []string
-	Policy   string
-	Tables   []string
 }
 
 var (
-	DatabaseConfig = new(Database)
+	DatabaseConfig = map[string]*Database{}
 )

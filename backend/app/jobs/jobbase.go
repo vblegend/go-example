@@ -2,25 +2,23 @@ package jobs
 
 import (
 	models2 "backend/app/jobs/models"
-	log "backend/core/logger"
+	"backend/common/database"
+	"backend/core/log"
 	"backend/core/sdk"
 	"fmt"
+	"reflect"
 	"sync"
 	"time"
 
-	"gorm.io/gorm"
-
 	"github.com/robfig/cron/v3"
 
-	"backend/core/sdk/pkg"
 	"backend/core/sdk/pkg/cronjob"
 )
 
 var timeFormat = "2006-01-02 15:04:05"
-var retryCount = 3
-
-var jobList map[string]JobsExec
+var customJobTypedList map[string]reflect.Type = make(map[string]reflect.Type)
 var lock sync.Mutex
+var crontab *cron.Cron
 
 type JobCore struct {
 	InvokeTarget   string
@@ -31,18 +29,11 @@ type JobCore struct {
 	Args           string
 }
 
-// 任务类型 http
-type HttpJob struct {
-	JobCore
-}
-
-type ExecJob struct {
-	JobCore
-}
-
-func (e *ExecJob) Run() {
+func (e *JobCore) Run() {
 	startTime := time.Now()
-	var obj = jobList[e.InvokeTarget]
+	typed := customJobTypedList[e.InvokeTarget]
+	obj := reflect.New(typed).Interface()
+
 	if obj == nil {
 		log.Warn("ExecJob Run job nil")
 		return
@@ -54,56 +45,35 @@ func (e *ExecJob) Run() {
 	}
 	// 结束时间
 	endTime := time.Now()
-
 	// 执行时间
 	latencyTime := endTime.Sub(startTime)
 	//TODO: 待完善部分
-	//str := time.Now().Format(timeFormat) + "[INFO] JobCore " + string(e.EntryId) + "exec success , spend :" + latencyTime.String()
-	//ws.SendAll(str)
 	log.Infof("JobCore %s exec success , spend :%v", e.Name, latencyTime)
 	return
 }
 
-//http 任务接口
-func (h *HttpJob) Run() {
-
-	startTime := time.Now()
-	var count = 0
-	var err error
-	var str string
-	/* 循环 */
-LOOP:
-	if count < retryCount {
-		/* 跳过迭代 */
-		str, err = pkg.Get(h.InvokeTarget)
-		if err != nil {
-			// 如果失败暂停一段时间重试
-			log.Errorf("mission failed! \nRetry after the task fails %d seconds! %s %v", (count+1)*5, str, err)
-			time.Sleep(time.Duration(count+1) * 5 * time.Second)
-			count = count + 1
-			goto LOOP
-		}
+func (h *JobCore) addJob(c *cron.Cron) (int, error) {
+	id, err := c.AddJob(h.CronExpression, h)
+	if err != nil {
+		log.Errorf("JobCore AddJob error\n%v", err)
+		return 0, err
 	}
-	// 结束时间
-	endTime := time.Now()
+	EntryId := int(id)
+	return EntryId, nil
+}
 
-	// 执行时间
-	latencyTime := endTime.Sub(startTime)
-	//TODO: 待完善部分
-
-	log.Infof("JobCore %s exec success , spend :%v", h.Name, latencyTime)
-	return
+func RegisterClass(obejct JobsExec) {
+	typed := reflect.TypeOf(obejct)
+	name := typed.Name()
+	customJobTypedList[name] = typed
 }
 
 // 初始化
-func Setup(db *gorm.DB) {
+func Setup() {
 	log.Info("JobCore Starting...")
+	db := sdk.Runtime.GetDb(database.Default)
 	sdk.Runtime.SetCrontab("*", cronjob.NewWithSeconds())
-	setup(db)
-}
-
-func setup(db *gorm.DB) {
-	crontab := sdk.Runtime.GetCrontabKey("*")
+	crontab = sdk.Runtime.GetCrontab("*")
 	sysJob := models2.SysJob{}
 	jobList := make([]models2.SysJob, 0)
 	err := sysJob.GetList(db, &jobList)
@@ -120,23 +90,13 @@ func setup(db *gorm.DB) {
 	}
 
 	for i := 0; i < len(jobList); i++ {
-		if jobList[i].JobType == 1 {
-			j := &HttpJob{}
-			j.InvokeTarget = jobList[i].InvokeTarget
-			j.CronExpression = jobList[i].CronExpression
-			j.JobId = jobList[i].JobId
-			j.Name = jobList[i].JobName
-
-			sysJob.EntryId, err = AddJob(crontab, j)
-		} else if jobList[i].JobType == 2 {
-			j := &ExecJob{}
-			j.InvokeTarget = jobList[i].InvokeTarget
-			j.CronExpression = jobList[i].CronExpression
-			j.JobId = jobList[i].JobId
-			j.Name = jobList[i].JobName
-			j.Args = jobList[i].Args
-			sysJob.EntryId, err = AddJob(crontab, j)
-		}
+		j := &JobCore{}
+		j.InvokeTarget = jobList[i].InvokeTarget
+		j.CronExpression = jobList[i].CronExpression
+		j.JobId = jobList[i].JobId
+		j.Name = jobList[i].JobName
+		j.Args = jobList[i].Args
+		sysJob.EntryId, err = AddJob(j)
 		err = sysJob.Update(db, jobList[i].JobId)
 	}
 
@@ -149,39 +109,19 @@ func setup(db *gorm.DB) {
 }
 
 // 添加任务 AddJob(invokeTarget string, jobId int, jobName string, cronExpression string)
-func AddJob(c *cron.Cron, job Job) (int, error) {
+func AddJob(job Job) (int, error) {
 	if job == nil {
 		fmt.Println("unknown")
 		return 0, nil
 	}
-	return job.addJob(c)
-}
-
-func (h *HttpJob) addJob(c *cron.Cron) (int, error) {
-	id, err := c.AddJob(h.CronExpression, h)
-	if err != nil {
-		log.Errorf("JobCore AddJob error\n%v", err)
-		return 0, err
-	}
-	EntryId := int(id)
-	return EntryId, nil
-}
-
-func (h *ExecJob) addJob(c *cron.Cron) (int, error) {
-	id, err := c.AddJob(h.CronExpression, h)
-	if err != nil {
-		log.Errorf("JobCore AddJob error\n%v", err)
-		return 0, err
-	}
-	EntryId := int(id)
-	return EntryId, nil
+	return job.addJob(crontab)
 }
 
 // 移除任务
-func Remove(c *cron.Cron, entryID int) chan bool {
+func Remove(entryID int) chan bool {
 	ch := make(chan bool)
 	go func() {
-		c.Remove(cron.EntryID(entryID))
+		crontab.Remove(cron.EntryID(entryID))
 		log.Info("JobCore Remove success ,info entryID :", entryID)
 		ch <- true
 	}()
@@ -189,11 +129,11 @@ func Remove(c *cron.Cron, entryID int) chan bool {
 }
 
 // 任务停止
-//func Stop() chan bool {
-//	ch := make(chan bool)
-//	go func() {
-//		global.GADMCron.Stop()
-//		ch <- true
-//	}()
-//	return ch
-//}
+// func Stop() chan bool {
+// 	ch := make(chan bool)
+// 	go func() {
+// 		global.GADMCron.Stop()
+// 		ch <- true
+// 	}()
+// 	return ch
+// }

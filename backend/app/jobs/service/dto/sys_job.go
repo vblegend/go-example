@@ -2,7 +2,7 @@ package dto
 
 import (
 	"backend/app/jobs/models"
-	"backend/core/sdk/api"
+	"backend/core/api"
 
 	"github.com/gin-gonic/gin"
 

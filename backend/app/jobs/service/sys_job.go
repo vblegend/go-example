@@ -7,8 +7,6 @@ import (
 
 	"backend/core/sdk/service"
 
-	"github.com/robfig/cron/v3"
-
 	"backend/app/jobs"
 	"backend/app/jobs/models"
 	"backend/common/dto"
@@ -16,7 +14,6 @@ import (
 
 type SysJob struct {
 	service.Service
-	Cron *cron.Cron
 }
 
 // RemoveJob 删除job
@@ -28,7 +25,7 @@ func (e *SysJob) RemoveJob(c *dto.GeneralDelDto) error {
 		e.Log.Errorf("db error: %s", err)
 		return err
 	}
-	cn := jobs.Remove(e.Cron, data.EntryId)
+	cn := jobs.Remove(data.EntryId)
 
 	select {
 	case res := <-cn:
@@ -61,29 +58,15 @@ func (e *SysJob) StartJob(c *dto.GeneralGetDto) error {
 		return err
 	}
 
-	if data.JobType == 1 {
-		var j = &jobs.HttpJob{}
-		j.InvokeTarget = data.InvokeTarget
-		j.CronExpression = data.CronExpression
-		j.JobId = data.JobId
-		j.Name = data.JobName
-		data.EntryId, err = jobs.AddJob(e.Cron, j)
-		if err != nil {
-			e.Log.Errorf("jobs AddJob[HttpJob] error: %s", err)
-		}
-	} else {
-		var j = &jobs.ExecJob{}
-		j.InvokeTarget = data.InvokeTarget
-		j.CronExpression = data.CronExpression
-		j.JobId = data.JobId
-		j.Name = data.JobName
-		j.Args = data.Args
-		data.EntryId, err = jobs.AddJob(e.Cron, j)
-		if err != nil {
-			e.Log.Errorf("jobs AddJob[ExecJob] error: %s", err)
-		}
-	}
+	var j = &jobs.JobCore{}
+	j.InvokeTarget = data.InvokeTarget
+	j.CronExpression = data.CronExpression
+	j.JobId = data.JobId
+	j.Name = data.JobName
+	j.Args = data.Args
+	data.EntryId, err = jobs.AddJob(j)
 	if err != nil {
+		e.Log.Errorf("jobs AddJob[ExecJob] error: %s", err)
 		return err
 	}
 

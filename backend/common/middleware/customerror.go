@@ -1,8 +1,8 @@
 package middleware
 
 import (
-	"backend/core/logger"
-	"backend/core/sdk/api"
+	"backend/core/api"
+	"backend/core/log"
 	"fmt"
 	"net/http"
 	"runtime/debug"
@@ -14,7 +14,7 @@ import (
 func WriteError(c *gin.Context, err interface{}) {
 	defer func() {
 		if err := recover(); err != nil {
-			logger.Error(err)
+			log.Error(err)
 		}
 	}()
 
@@ -33,7 +33,7 @@ func WriteError(c *gin.Context, err interface{}) {
 		lines := strings.Split(callStack, "\n")
 		content := fmt.Sprintf("%s\n%s", err, strings.Join(lines[7:], "\n"))
 		c.JSON(http.StatusInternalServerError, gin.H{"code": -1, "msg": content})
-		logger.Error(content)
+		log.Error(content)
 	}
 }
 

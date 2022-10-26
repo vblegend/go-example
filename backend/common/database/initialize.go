@@ -4,18 +4,16 @@ import (
 	"fmt"
 	"time"
 
-	log "backend/core/logger"
+	"backend/core/console"
+	"backend/core/log"
 	"backend/core/sdk"
 	"backend/core/sdk/config"
-	toolsConfig "backend/core/sdk/config"
-	"backend/core/sdk/console"
 	"backend/core/sdk/pkg"
-	toolsDB "backend/core/tools/database"
 
 	"github.com/go-redis/redis/v7"
 	"gorm.io/gorm"
-	"gorm.io/gorm/logger"
 	"gorm.io/gorm/schema"
+	"gorm.io/plugin/dbresolver"
 
 	"gorm.io/driver/mysql"
 	"gorm.io/driver/sqlite"
@@ -27,8 +25,8 @@ const (
 )
 
 const (
-	SQLite = "*"
-	MySQL  = "mysql"
+	Default = "Default"
+	Standby = "Standby"
 )
 
 var opens = map[string]func(string) gorm.Dialector{
@@ -37,7 +35,7 @@ var opens = map[string]func(string) gorm.Dialector{
 }
 
 func CleanDBConnect(key string) {
-	db := sdk.Runtime.GetDbByKey(key)
+	db := sdk.Runtime.GetDb(key)
 	if db != nil {
 		d, e := db.DB()
 		if e == nil {
@@ -47,19 +45,22 @@ func CleanDBConnect(key string) {
 }
 
 // Setup 配置数据库
-func InitSQLiteDB() {
-	CleanDBConnect("*")
-	db, err := NewDBConnection(toolsConfig.DatabaseConfig)
-	if err != nil {
-		log.Error(console.Red("SQLite connect fail..."))
-		return
+func InitDatabase() {
+	configmap := config.DatabaseConfig
+	for key, cfg := range configmap {
+		CleanDBConnect(key)
+		db, err := NewDBConnection(cfg)
+		if err != nil {
+			log.Error(console.Red(fmt.Sprintf("Database %s connect fail...", key)))
+			return
+		}
+		sdk.Runtime.SetDb(Default, db)
+		log.Info(console.Green(fmt.Sprintf("Database %s connect sucess...", key)))
 	}
-	sdk.Runtime.SetDb(SQLite, db)
-	log.Info(console.Green("SQLite connect sucess..."))
 }
 
 func Development() {
-	db := sdk.Runtime.GetDbByKey(SQLite)
+	db := sdk.Runtime.GetDb(Default)
 	if db != nil {
 		visible := 0
 		if config.ApplicationConfig.Mode == pkg.Production {
@@ -67,21 +68,6 @@ func Development() {
 		} // 开发模式下显示菜单配置页面
 		db.Exec("UPDATE sys_menu SET visible = ? WHERE menu_id = 51", visible)
 	}
-}
-
-// 初始化mysql连接
-func InitMysqlDB() {
-	fmtstr := fmt.Sprintf("%s:%s@tcp(%s:%d)/siteweb?charset=utf8&parseTime=True&loc=Local&timeout=1000ms", config.MysqlConfig.User, config.MysqlConfig.Password, config.MysqlConfig.Host, config.MysqlConfig.Port)
-	mysqlcfg := config.Database{Driver: "mysql", Source: fmtstr}
-	db, err := NewDBConnection(&mysqlcfg)
-	if err != nil {
-		log.Error(console.Red("Mysql connect fail..."))
-		return
-	}
-	CleanDBConnect(MySQL)
-	db.Set("gorm:table_options", "ENGINE=InnoDB CHARSET=utf8mb4")
-	sdk.Runtime.SetDb(MySQL, db)
-	log.Info(console.Green("Mysql connect sucess..."))
 }
 
 // 初始化redis连接
@@ -104,27 +90,40 @@ func InitRedisDB() {
 	log.Info(console.Green("Redis connect sucess..."))
 }
 
-func NewDBConnection(c *toolsConfig.Database) (*gorm.DB, error) {
-	registers := make([]toolsDB.ResolverConfigure, len(c.Registers))
-	for i := range c.Registers {
-		registers[i] = toolsDB.NewResolverConfigure(
-			c.Registers[i].Sources,
-			c.Registers[i].Replicas,
-			c.Registers[i].Policy,
-			c.Registers[i].Tables)
-	}
-	resolverConfig := toolsDB.NewConfigure(c.Source, c.MaxIdleConns, c.MaxOpenConns, c.ConnMaxIdleTime, c.ConnMaxLifeTime, registers)
-	return resolverConfig.Init(&gorm.Config{
+func NewDBConnection(c *config.Database) (*gorm.DB, error) {
+	config := gorm.Config{
 		NamingStrategy: schema.NamingStrategy{
 			SingularTable: true,
 		},
-		Logger: log.New(
-			logger.Config{
-				SlowThreshold: time.Second,
-				Colorful:      true,
-				LogLevel: logger.LogLevel(
-					log.DefaultLogger.Options().Level.LevelForGorm()),
-			},
-		),
-	}, opens[c.Driver])
+		Logger: log.NewGORMLogger(log.GetLogger()),
+	}
+
+	db, err := gorm.Open(opens[c.Driver](c.Source), &config)
+	if err != nil {
+		return nil, err
+	}
+	if c.Driver == "mysql" {
+		db.Set("gorm:table_options", "ENGINE=InnoDB CHARSET=utf8mb4")
+	}
+	var register *dbresolver.DBResolver
+	if register == nil {
+		register = dbresolver.Register(dbresolver.Config{})
+	}
+	if c.ConnMaxIdleTime > 0 {
+		register = register.SetConnMaxIdleTime(time.Duration(c.ConnMaxIdleTime) * time.Second)
+	}
+	if c.ConnMaxLifeTime > 0 {
+		register = register.SetConnMaxLifetime(time.Duration(c.ConnMaxLifeTime) * time.Second)
+	}
+	if c.MaxOpenConns > 0 {
+		register = register.SetMaxOpenConns(c.MaxOpenConns)
+	}
+	if c.MaxIdleConns > 0 {
+		register = register.SetMaxIdleConns(c.MaxIdleConns)
+	}
+	if register != nil {
+		err = db.Use(register)
+	}
+	return db, err
+
 }

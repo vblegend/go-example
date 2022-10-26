@@ -1,0 +1,43 @@
+[0;0;33m █████╗ ██████╗ ██████╗    ███████╗██╗██████╗ ███████╗  ██████╗ █████╗ ██████╗ 
+██╔══██╗██╔══██╗██╔══██╗   ██╔════╝██║██╔══██╗██╔════╝ ██╔════╝██╔══██╗██╔══██╗
+███████║██████╔╝██████╔╝   ███████╗██║██║  ██║█████╗   ██║     ███████║██████╔╝
+██╔══██║██╔═══╝ ██╔═══╝    ╚════██║██║██║  ██║██╔══╝   ██║     ██╔══██║██╔══██╗
+██║  ██║██║     ██║        ███████║██║██████╔╝███████╗ ╚██████╗██║  ██║██║  ██║
+╚═╝  ╚═╝╚═╝     ╚═╝        ╚══════╝╚═╝╚═════╝ ╚══════╝  ╚═════╝╚═╝  ╚═╝╚═╝  ╚═╝[0m [0;0;32mdev[0m [0;0;31mV2.0.11[0m (1970-01-01 00:00:00)
+2022-10-26 17:33:43 [[0;0;32mINFO[0m] [0;0;32mDatabase Default connect sucess...[0m
+2022-10-26 17:33:43 [[0;0;32mINFO[0m] [0;0;32mDatabase Standby connect sucess...[0m
+2022-10-26 17:33:43 [[0;0;32mINFO[0m] [0;0;32mStart Patch Upgrade...[0m
+2022-10-26 17:33:43 [[0;0;32mTRACE[0m] ┏[0;0;32m[3.397ms][0m	/root/workspace/pkg/mod/gorm.io/driver/mysql@v1.4.3/migrator.go:255
+2022-10-26 17:33:43 [[0;0;32mTRACE[0m] ┗[0;0;33m[rows:-1][0m	[0;0;32mSELECT DATABASE()[0m
+2022-10-26 17:33:43 [[0;0;32mTRACE[0m] ┏[0;0;32m[4.666ms][0m	/root/workspace/pkg/mod/gorm.io/driver/mysql@v1.4.3/migrator.go:258
+2022-10-26 17:33:43 [[0;0;32mTRACE[0m] ┗[0;0;33m[rows:1][0m	[0;0;32mSELECT SCHEMA_NAME from Information_schema.SCHEMATA where SCHEMA_NAME LIKE 'test%' ORDER BY SCHEMA_NAME='test' DESC,SCHEMA_NAME limit 1[0m
+2022-10-26 17:33:43 [[0;0;32mTRACE[0m] ┏[0;0;32m[6.002ms][0m	/root/workspace/package.builder/backend/migration/migrate.go:26
+2022-10-26 17:33:43 [[0;0;32mTRACE[0m] ┗[0;0;33m[rows:-1][0m	[0;0;32mSELECT count(*) FROM information_schema.tables WHERE table_schema = 'test' AND table_name = 'sys_migration' AND table_type = 'BASE TABLE'[0m
+2022-10-26 17:33:43 [[0;0;32mTRACE[0m] ┏[0;0;32m[2.283ms][0m	/root/workspace/pkg/mod/gorm.io/driver/mysql@v1.4.3/migrator.go:255
+2022-10-26 17:33:43 [[0;0;32mTRACE[0m] ┗[0;0;33m[rows:-1][0m	[0;0;32mSELECT DATABASE()[0m
+2022-10-26 17:33:43 [[0;0;32mTRACE[0m] ┏[0;0;32m[5.763ms][0m	/root/workspace/pkg/mod/gorm.io/driver/mysql@v1.4.3/migrator.go:258
+2022-10-26 17:33:43 [[0;0;32mTRACE[0m] ┗[0;0;33m[rows:1][0m	[0;0;32mSELECT SCHEMA_NAME from Information_schema.SCHEMATA where SCHEMA_NAME LIKE 'test%' ORDER BY SCHEMA_NAME='test' DESC,SCHEMA_NAME limit 1[0m
+2022-10-26 17:33:43 [[0;0;32mTRACE[0m] ┏[0;0;32m[2.328ms][0m	/root/workspace/pkg/mod/gorm.io/driver/mysql@v1.4.3/migrator.go:168
+2022-10-26 17:33:43 [[0;0;32mTRACE[0m] ┗[0;0;33m[rows:-1][0m	[0;0;32mSELECT * FROM `sys_migration` LIMIT 1[0m
+2022-10-26 17:33:43 [[0;0;32mTRACE[0m] ┏[0;0;32m[6.591ms][0m	/root/workspace/pkg/mod/gorm.io/driver/mysql@v1.4.3/migrator.go:186
+2022-10-26 17:33:43 [[0;0;32mTRACE[0m] ┗[0;0;33m[rows:-1][0m	[0;0;32mSELECT column_name, column_default, is_nullable = 'YES', data_type, character_maximum_length, column_type, column_key, extra, column_comment, numeric_precision, numeric_scale , datetime_precision FROM information_schema.columns WHERE table_schema = 'test' AND table_name = 'sys_migration' ORDER BY ORDINAL_POSITION[0m
+2022-10-26 17:33:43 [[0;0;32mTRACE[0m] ┏[0;0;32m[4.204ms][0m	/root/workspace/package.builder/backend/migration/migrate.go:40
+2022-10-26 17:33:43 [[0;0;32mTRACE[0m] ┗[0;0;33m[rows:1][0m	[0;0;32mSELECT count(*) FROM `sys_migration` WHERE version = '2022-01-01'[0m
+2022-10-26 17:33:43 [[0;0;32mINFO[0m] [0;0;32mEnd of patching ...[0m
+2022-10-26 17:33:43 [[0;0;32mTRACE[0m] ┏[0;0;32m[5.239ms][0m	/root/workspace/package.builder/backend/common/database/initialize.go:69
+2022-10-26 17:33:43 [[0;0;32mTRACE[0m] ┗[0;0;33m[rows:0][0m	[0;0;32mUPDATE sys_menu SET visible = 0 WHERE menu_id = 51[0m
+2022-10-26 17:33:43 [[0;0;32mINFO[0m] [0;0;32mRedis connect sucess...[0m
+2022-10-26 17:33:43 [[0;0;32mINFO[0m] JobCore Starting...
+2022-10-26 17:33:43 [[0;0;32mTRACE[0m] ┏[0;0;32m[6.493ms][0m	/root/workspace/package.builder/backend/app/jobs/models/sys_job.go:40
+2022-10-26 17:33:43 [[0;0;32mTRACE[0m] ┗[0;0;33m[rows:0][0m	[0;0;32mSELECT * FROM `sys_job` WHERE status = 2 AND `sys_job`.`deleted_at` IS NULL[0m
+2022-10-26 17:33:43 [[0;0;32mINFO[0m] JobCore total:0
+2022-10-26 17:33:43 [[0;0;32mTRACE[0m] ┏[0;0;36m[26.235ms][0m	/root/workspace/package.builder/backend/app/jobs/models/sys_job.go:49
+2022-10-26 17:33:43 [[0;0;32mTRACE[0m] ┗[0;0;33m[rows:0][0m	[0;0;32mUPDATE `sys_job` SET `entry_id`=0 WHERE entry_id > 0[0m
+2022-10-26 17:33:43 [[0;0;32mINFO[0m] JobCore start success.
+2022-10-26 17:33:43 [[0;0;32mINFO[0m] starting api server...
+2022-10-26 17:33:44 [[0;0;32mINFO[0m] [0;0;32mServer run at:[0m
+2022-10-26 17:33:44 [[0;0;32mINFO[0m] - http://10.0.2.15:8000/
+2022-10-26 17:33:44 [[0;0;32mINFO[0m] - http://10.169.42.139:8000/
+2022-10-26 17:33:44 [[0;0;32mINFO[0m] - http://172.22.0.1:8000/
+2022-10-26 17:33:44 [[0;0;32mINFO[0m] - http://172.17.0.1:8000/
+2022-10-26 17:33:44 [[0;0;32mINFO[0m] Enter Control + C Shutdown Server

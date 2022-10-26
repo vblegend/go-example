@@ -12,11 +12,11 @@ import (
 )
 
 const (
-	pprof_User     = "siteweb"
+	pprof_User     = "admin"
 	pprof_Password = "123456"
 )
 
-func InitPPROF(r *gin.Engine) {
+func InitPPROF(r gin.IRouter) {
 	//性能调优监视 TODO Gin自主隐藏，待优化
 	authStr := fmt.Sprintf("Basic %s", base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s:%s", pprof_User, pprof_Password))))
 	pprofGroup := r.Group("/debug", func(c *gin.Context) {

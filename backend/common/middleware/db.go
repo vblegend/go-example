@@ -8,6 +8,6 @@ import (
 )
 
 func WithContextDb(c *gin.Context) {
-	c.Set("db", sdk.Runtime.GetDbByKey(database.SQLite).WithContext(c))
+	c.Set("db", sdk.Runtime.GetDb(database.Default))
 	c.Next()
 }

@@ -1,7 +1,8 @@
 package commands
 
 import (
-	"backend/core/sdk/pkg"
+	"backend/common/global"
+	"backend/core/sdk/config"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -14,11 +15,10 @@ var (
 	lastLine int = 9999999
 	LogsCmd      = &cobra.Command{
 		Use:     "logs",
-		Short:   "view siteweb-manager logs",
-		Example: "siteweb-manager service logs -l20",
+		Short:   fmt.Sprintf("view %s service logs", global.AppFileName),
+		Example: fmt.Sprintf("%s service logs -l20", global.AppFileName),
 		Run: func(cmd *cobra.Command, args []string) {
-			// systemctl status siteweb-manager.service
-			servicelog := filepath.Join(pkg.AssemblyDir(), "logs.log")
+			servicelog := filepath.Join(config.LoggerConfig.Path, fmt.Sprintf("%s.%s", config.LoggerConfig.FileName, config.LoggerConfig.FileSuffix))
 			data, err := os.ReadFile(servicelog)
 			if err != nil {
 				fmt.Println(err)

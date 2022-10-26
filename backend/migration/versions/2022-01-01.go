@@ -23,24 +23,9 @@ type v20220101 struct {
 
 // 初始化需要迁移的表对象
 func (v *v20220101) Init() {
-	v.Apply(new(m20220101.SysConfig))
-	v.Apply(new(m20220101.SysTables))
-	v.Apply(new(m20220101.SysColumns))
 	v.Apply(new(m20220101.SysMenu))
-	v.Apply(new(m20220101.SysLoginLog))
-	v.Apply(new(m20220101.SysRoleDept))
 	v.Apply(new(m20220101.SysUser))
-	v.Apply(new(m20220101.SysRole))
-	v.Apply(new(m20220101.DictData))
-	v.Apply(new(m20220101.DictType))
 	v.Apply(new(m20220101.SysJob))
-	v.Apply(new(m20220101.SysConfig))
-	v.Apply(new(m20220101.SysApi))
-	v.Apply(new(m20220101.Host))
-	v.Apply(new(m20220101.SoftWare))
-	v.Apply(new(m20220101.SoftWareTemplate))
-	v.Apply(new(m20220101.SysDataBackup))
-	v.Apply(new(m20220101.SysBackupRecord))
 }
 
 // 执行初始化脚本 或 gorm 的update/insert/delete等操作

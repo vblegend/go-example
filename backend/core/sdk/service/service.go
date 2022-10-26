@@ -1,9 +1,8 @@
 package service
 
 import (
+	"backend/core/log"
 	"fmt"
-
-	"backend/core/logger"
 
 	"gorm.io/gorm"
 )
@@ -12,7 +11,7 @@ type Service struct {
 	Orm       *gorm.DB
 	Msg       string
 	MsgID     string
-	Log       *logger.Helper
+	Log       *log.Helper
 	Error     error
 	RequestId string
 }

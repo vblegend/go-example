@@ -1,11 +1,10 @@
 package cmd
 
 import (
-	"backend/cmd/api"
-	"backend/cmd/config"
+	"backend/cmd/server"
 	"backend/cmd/service"
 	"backend/common/global"
-	"backend/core/sdk/console"
+	"backend/core/console"
 	"fmt"
 	"os"
 
@@ -15,10 +14,10 @@ import (
 var showVersion bool = false
 
 var rootCmd = &cobra.Command{
-	Use:               "siteweb-manager",
+	Use:               global.AppFileName,
 	Short:             "服务器管理台",
 	SilenceUsage:      true,
-	Long:              `siteweb-manager`,
+	Long:              global.AppFileName,
 	PersistentPreRunE: func(*cobra.Command, []string) error { return nil },
 	PreRun: func(cmd *cobra.Command, args []string) {
 		if showVersion {
@@ -33,9 +32,8 @@ var rootCmd = &cobra.Command{
 
 func init() {
 	rootCmd.PersistentFlags().BoolVarP(&showVersion, "version", "v", false, "show the current version of the application")
-	rootCmd.AddCommand(api.StartCmd)       // 启动主API服务
+	rootCmd.AddCommand(server.StartCmd)    // 启动主API服务
 	rootCmd.AddCommand(service.ServiceCmd) // 服务控制CIL
-	rootCmd.AddCommand(config.ConfigCmd)   // 配置相关CIL
 }
 
 //Execute : apply commands

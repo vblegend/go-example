@@ -2,11 +2,10 @@ package database
 
 import (
 	"backend/common/models"
-	"backend/core/logger"
-	"backend/core/sdk/console"
+	"backend/core/console"
+	"backend/core/log"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"strings"
 
 	"gorm.io/gorm"
@@ -72,7 +71,7 @@ func (dm *DataMigrator) Migrate(db *gorm.DB) error {
 				log.Println(console.Red(fmt.Sprintf("%v", errStr)))
 				log.Print(console.Green("=================================================== PATCH-ERROR ==================================================="))
 			}
-			logger.Errorf("Update failed, data rolled back...")
+			log.Errorf("Update failed, data rolled back...")
 		}
 	}()
 

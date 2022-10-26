@@ -6,8 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin/binding"
 
-	"backend/core/sdk/api"
-	"backend/core/sdk/pkg/jwtauth/user"
+	"backend/core/api"
 	_ "backend/core/sdk/pkg/response"
 
 	"github.com/gin-gonic/gin"
@@ -109,8 +108,6 @@ func (e SysUser) Insert(c *gin.Context) {
 		e.Error(500, err, err.Error())
 		return
 	}
-	// 设置创建人
-	req.SetCreateBy(user.GetUserId(c))
 	err = s.Insert(&req)
 	if err != nil {
 		e.Logger.Error(err)
@@ -144,9 +141,6 @@ func (e SysUser) Update(c *gin.Context) {
 		e.Error(500, err, err.Error())
 		return
 	}
-
-	req.SetUpdateBy(user.GetUserId(c))
-
 	err = s.Update(&req)
 	if err != nil {
 		e.Logger.Error(err)
@@ -176,9 +170,6 @@ func (e SysUser) Delete(c *gin.Context) {
 		e.Error(500, err, err.Error())
 		return
 	}
-
-	// 设置编辑人
-	req.SetUpdateBy(user.GetUserId(c))
 
 	err = s.Remove(&req)
 	if err != nil {
@@ -258,7 +249,6 @@ func (e SysUser) UpdateStatus(c *gin.Context) {
 		return
 	}
 
-	req.SetUpdateBy(user.GetUserId(c))
 	err = s.UpdateStatus(&req)
 	if err != nil {
 		e.Logger.Error(err)
@@ -291,7 +281,6 @@ func (e SysUser) ResetPwd(c *gin.Context) {
 		return
 	}
 
-	req.SetUpdateBy(user.GetUserId(c))
 	err = s.ResetPwd(&req)
 	if err != nil {
 		e.Logger.Error(err)
@@ -323,7 +312,7 @@ func (e SysUser) UpdatePwd(c *gin.Context) {
 		e.Error(500, err, err.Error())
 		return
 	}
-	err = s.UpdatePwd(user.GetUserId(c), req.OldPassword, req.NewPassword)
+	err = s.UpdatePwd(1, req.OldPassword, req.NewPassword)
 	if err != nil {
 		e.Logger.Error(err)
 		e.Error(http.StatusForbidden, err, "密码修改失败")
@@ -352,7 +341,7 @@ func (e SysUser) GetProfile(c *gin.Context) {
 		return
 	}
 
-	req.Id = user.GetUserId(c)
+	req.Id = 1
 
 	sysUser := models.SysUser{}
 	// roles := make([]models.SysRole, 0)
@@ -387,19 +376,14 @@ func (e SysUser) GetInfo(c *gin.Context) {
 		e.Error(500, err, err.Error())
 		return
 	}
-	var roles = make([]string, 1)
-	roles[0] = user.GetRoleName(c)
-	var permissions = make([]string, 1)
-	permissions[0] = "*:*:*"
 	var buttons = make([]string, 1)
 	buttons[0] = "*:*:*"
 
 	var mp = make(map[string]interface{})
-	mp["roles"] = roles
-	mp["permissions"] = permissions
+
 	mp["buttons"] = buttons
 	sysUser := models.SysUser{}
-	req.Id = user.GetUserId(c)
+	req.Id = 1
 	err = s.Get(&req, &sysUser)
 	if err != nil {
 		e.Error(http.StatusUnauthorized, err, "登录失败")
@@ -412,7 +396,6 @@ func (e SysUser) GetInfo(c *gin.Context) {
 	}
 	mp["userName"] = sysUser.NickName
 	mp["userId"] = sysUser.UserId
-	mp["deptId"] = sysUser.DeptId
 	mp["name"] = sysUser.NickName
 	mp["code"] = 200
 	e.OK(mp, "")
