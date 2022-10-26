@@ -16,7 +16,7 @@
 
 
 
-APP_FILENAME	:= package-builder
+APP_FILENAME	:= go-example
 BUILD_VERSION   := 1.1.1
 BUILD_TIME      := $(shell date "+%Y-%m-%d %H:%M:%S")
 COMMIT_ID		:= $(shell git rev-parse --short HEAD)
@@ -68,10 +68,6 @@ define tidy
 	@cd backend; go mod tidy
 endef
 
-define pull 
-	@echo "正在更新代码..."
-	@git pull origin develop
-endef
 
 define publish
 	@echo "正在发布文件..."
@@ -91,7 +87,6 @@ endef
 release:
 	@echo "正在准备发布..."
 	@$(clean)
-# @$(pull)
 	@$(depend)
 	@$(buildWeb)
 	@$(buildLinux)
@@ -102,10 +97,6 @@ release:
 	@echo "====================================================="
 
 
-
-#拉取最新GIT代码
-pull:	
-	@$(pull)
 
 #仅编译linux版本服务
 linux:

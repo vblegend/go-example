@@ -20,7 +20,6 @@ Launch Go 调试运行
             "env": {
                 "GIN_MODE": "release",
                 "RUN_MODE" : "dev",
-                "DOCKER_ENV": "http://10.163.100.128:2375"
             }
         }
     ]
@@ -30,5 +29,5 @@ Launch Go 调试运行
 ## ✨ 性能分析调试 pprof
 页面地址 `http://localhost:8000/debug`
 在生产环境下访问该页面需要输入以下账号密码
-账号 `gogogo`
+账号 `admin`
 密码 `123456`

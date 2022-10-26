@@ -1,6 +1,7 @@
 package pkg
 
 import (
+	"backend/common/global"
 	"bytes"
 	"errors"
 	"fmt"
@@ -10,7 +11,7 @@ import (
 	"strings"
 )
 
-const tempFile = "/tmp/siteweb-manager.pid"
+var tempFile = fmt.Sprintf("/tmp/%s.pid", global.AppFileName)
 
 func RemovePidFile() {
 	os.Remove(tempFile)
@@ -32,8 +33,7 @@ func GetProcessByCommand(cmd string) []string {
 
 func SelfProcessExist(pid int) bool {
 	pwd, _ := os.Getwd()
-	// fmt.Println(fmt.Sprintf("ps -ef | grep \"./siteweb-manager server\" | grep \" %d \"", pid))
-	exe := exec.Command("/bin/bash", "-c", fmt.Sprintf("ps -ef | grep -v \"grep\" | grep \"./siteweb-manager server\" | grep \" %d \"", pid))
+	exe := exec.Command("/bin/bash", "-c", fmt.Sprintf("ps -ef | grep -v \"grep\" | grep \"./%s server\" | grep \" %d \"", global.AppFileName, pid))
 	exe.Dir = pwd
 	var out bytes.Buffer
 	exe.Stdout = &out

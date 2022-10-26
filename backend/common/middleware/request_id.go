@@ -1,8 +1,6 @@
 package middleware
 
 import (
-	"backend/core/logger"
-	"backend/core/sdk/pkg"
 	"net/http"
 	"strings"
 
@@ -26,11 +24,6 @@ func RequestId(trafficKey string) gin.HandlerFunc {
 		}
 		c.Request.Header.Set(trafficKey, requestId)
 		c.Set(trafficKey, requestId)
-		c.Set(pkg.LoggerKey,
-			logger.NewHelper(logger.DefaultLogger).
-				WithFields(map[string]interface{}{
-					trafficKey: requestId,
-				}))
 		c.Next()
 	}
 }

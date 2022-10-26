@@ -10,19 +10,33 @@ package logger
 type Option func(*options)
 
 type options struct {
-	path     string
-	level    string
-	stdout   string
-	cap      uint
-	location bool
+	path       string
+	fileName   string
+	fileSuffix string
+	level      string
+	enabled    bool
+	cap        uint
+	location   bool
 }
 
 func setDefault() options {
 	return options{
-		path:     "temp/logs",
-		level:    "warn",
-		stdout:   "default",
-		location: false,
+		path:       "temp/logs",
+		level:      "warn",
+		enabled:    true,
+		fileName:   "logfile",
+		fileSuffix: "log",
+		location:   false,
+	}
+}
+func WithFileName(s string) Option {
+	return func(o *options) {
+		o.fileName = s
+	}
+}
+func WithFileSuffix(s string) Option {
+	return func(o *options) {
+		o.fileSuffix = s
 	}
 }
 
@@ -38,9 +52,9 @@ func WithLevel(s string) Option {
 	}
 }
 
-func WithStdout(s string) Option {
+func WithEnabled(s bool) Option {
 	return func(o *options) {
-		o.stdout = s
+		o.enabled = s
 	}
 }
 

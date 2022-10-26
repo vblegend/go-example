@@ -1,7 +1,8 @@
 package commands
 
 import (
-	"backend/core/sdk/console"
+	"backend/common/global"
+	"backend/core/console"
 	"backend/core/sdk/pkg"
 	"fmt"
 	"os"
@@ -12,8 +13,8 @@ import (
 var (
 	StopCmd = &cobra.Command{
 		Use:     "stop",
-		Short:   "stop siteweb-manager service",
-		Example: "siteweb-manager service stop",
+		Short:   fmt.Sprintf("stop %s service", global.AppFileName),
+		Example: fmt.Sprintf("%s service stop", global.AppFileName),
 		Run: func(cmd *cobra.Command, args []string) {
 			pid := 0
 			if !pkg.IsRuning(&pid) {

@@ -3,9 +3,8 @@ package actions
 import (
 	"net/http"
 
-	"backend/core/sdk/api"
+	"backend/core/api"
 	"backend/core/sdk/pkg"
-	"backend/core/sdk/pkg/jwtauth/user"
 	"backend/core/sdk/pkg/response"
 
 	"github.com/gin-gonic/gin"
@@ -37,7 +36,6 @@ func CreateAction(control dto.Control) gin.HandlerFunc {
 			response.Error(c, 500, err, "模型生成失败")
 			return
 		}
-		object.SetCreateBy(user.GetUserId(c))
 		err = db.WithContext(c).Create(object).Error
 		if err != nil {
 			log.Errorf("Create error: %s", err)

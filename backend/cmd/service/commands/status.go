@@ -1,7 +1,8 @@
 package commands
 
 import (
-	"backend/core/sdk/console"
+	"backend/common/global"
+	"backend/core/console"
 	"backend/core/sdk/pkg"
 	"fmt"
 	"os"
@@ -12,8 +13,8 @@ import (
 var (
 	StatusCmd = &cobra.Command{
 		Use:     "status",
-		Short:   "get siteweb-manager service status",
-		Example: "siteweb-manager service status",
+		Short:   fmt.Sprintf("get %s service status", global.AppFileName),
+		Example: fmt.Sprintf("%s service status", global.AppFileName),
 		Run: func(cmd *cobra.Command, args []string) {
 			pid := 0
 			if pkg.IsRuning(&pid) {

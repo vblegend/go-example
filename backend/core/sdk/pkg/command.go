@@ -1,8 +1,8 @@
 package pkg
 
 import (
-	"backend/core/logger"
-	"backend/core/sdk/console"
+	"backend/core/console"
+	"backend/core/log"
 	"bytes"
 	"fmt"
 	"os"
@@ -11,7 +11,7 @@ import (
 )
 
 func ExeCommand(name string, args ...string) error {
-	logger.Info(fmt.Sprintf("[%s]=>%s %v", console.Green("run"), console.Yellow(name), console.Cyan(strings.Join(args, " "))))
+	log.Info(fmt.Sprintf("[%s]=>%s %v", console.Green("run"), console.Yellow(name), console.Cyan(strings.Join(args, " "))))
 	pwd, _ := os.Getwd()
 	exe := exec.Command(name, args...)
 	exe.Dir = pwd
@@ -21,11 +21,11 @@ func ExeCommand(name string, args ...string) error {
 	exe.Stderr = &stderr
 	err := exe.Run()
 	if out.Len() > 0 {
-		logger.Infof("[%s]=>%s", console.Magenta("out"), out.String())
+		log.Infof("[%s]=>%s", console.Magenta("out"), out.String())
 	}
 	if err != nil {
-		logger.Errorf("[%s]=>", console.Red("err"), err.Error())
-		logger.Errorf("[%s]=>", console.Red("err"), stderr.String())
+		log.Errorf("[%s]=>", console.Red("err"), err.Error())
+		log.Errorf("[%s]=>", console.Red("err"), stderr.String())
 		return err
 	}
 	return nil

@@ -5,7 +5,7 @@ import (
 	"backend/app/admin/service/dto"
 	"errors"
 
-	log "backend/core/logger"
+	"backend/core/log"
 	"backend/core/sdk/pkg"
 	"backend/core/sdk/service"
 

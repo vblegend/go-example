@@ -9,7 +9,6 @@ import (
 	"backend/app/admin/models"
 	"backend/app/admin/service/dto"
 	cDto "backend/common/dto"
-	cModels "backend/common/models"
 
 	"backend/core/sdk/service"
 )
@@ -74,11 +73,6 @@ func (e *SysMenu) Get(d *dto.SysMenuGetReq, model *models.SysMenu) *SysMenu {
 		_ = e.AddError(err)
 		return e
 	}
-	apis := make([]int, 0)
-	for _, v := range model.SysApi {
-		apis = append(apis, v.Id)
-	}
-	model.Apis = apis
 	return e
 }
 
@@ -125,18 +119,18 @@ func (e *SysMenu) Update(c *dto.SysMenuUpdateReq) *SysMenu {
 			tx.Commit()
 		}
 	}()
-	var alist = make([]models.SysApi, 0)
+	// var alist = make([]models.SysApi, 0)
 	var model = models.SysMenu{}
-	tx.Preload("SysApi").First(&model, c.GetId())
-	tx.Where("id in ?", c.Apis).Find(&alist)
-	err = tx.Model(&model).Association("SysApi").Delete(model.SysApi)
-	if err != nil {
-		e.Log.Errorf("delete policy error:%s", err)
-		_ = e.AddError(err)
-		return e
-	}
+	// tx.Preload("SysApi").First(&model, c.GetId())
+	// tx.Where("id in ?", c.Apis).Find(&alist)
+	// err = tx.Model(&model).Association("SysApi").Delete(model.SysApi)
+	// if err != nil {
+	// 	e.Log.Errorf("delete policy error:%s", err)
+	// 	_ = e.AddError(err)
+	// 	return e
+	// }
 	c.Generate(&model)
-	model.SysApi = alist
+	// model.SysApi = alist
 	db := tx.Model(&model).Session(&gorm.Session{FullSaveAssociations: true}).Debug().Save(&model)
 	if db.Error != nil {
 		e.Log.Errorf("db error:%s", err)
@@ -263,7 +257,6 @@ func menuCall(menuList *[]models.SysMenu, menu models.SysMenu) models.SysMenu {
 		mi.Path = list[j].Path
 		mi.MenuType = list[j].MenuType
 		mi.Action = list[j].Action
-		mi.Permission = list[j].Permission
 		mi.ParentId = list[j].ParentId
 		mi.NoCache = list[j].NoCache
 		mi.Breadcrumb = list[j].Breadcrumb
@@ -271,15 +264,12 @@ func menuCall(menuList *[]models.SysMenu, menu models.SysMenu) models.SysMenu {
 		mi.Sort = list[j].Sort
 		mi.Visible = list[j].Visible
 		mi.CreatedAt = list[j].CreatedAt
-		mi.SysApi = list[j].SysApi
+		// mi.SysApi = list[j].SysApi
 		mi.Children = []models.SysMenu{}
 
-		if mi.MenuType != cModels.Button {
-			ms := menuCall(menuList, mi)
-			min = append(min, ms)
-		} else {
-			min = append(min, mi)
-		}
+		ms := menuCall(menuList, mi)
+		min = append(min, ms)
+
 	}
 	menu.Children = min
 	return menu

@@ -3,9 +3,9 @@ package migration
 import (
 	"backend/common/database"
 	"backend/common/models"
-	"backend/core/logger"
+	"backend/core/console"
+	"backend/core/log"
 	"backend/core/sdk"
-	"backend/core/sdk/console"
 	"fmt"
 	"path/filepath"
 	"sort"
@@ -21,14 +21,12 @@ var (
 )
 
 func DataBaseMigrate() {
-	logger.Info(console.Green("Start Patch Upgrade..."))
-	db = sdk.Runtime.GetDbByKey(database.SQLite)
+	log.Info(console.Green("Start Patch Upgrade..."))
+	db = sdk.Runtime.GetDb(database.Default)
 	err := db.Debug().AutoMigrate(&models.Migration{})
 	if err != nil {
 		return
 	}
-	// 兼容旧版本的 版本号 1599190683659 重置为 2022-01-01
-	db.Model(models.Migration{}).Where("version = ?", "1599190683659").Updates(models.Migration{Version: "2022-01-01"})
 	versions := make([]string, 0)
 	for k := range version {
 		versions = append(versions, k)
@@ -41,20 +39,20 @@ func DataBaseMigrate() {
 		migrator := version[v]
 		err = db.Table("sys_migration").Where("version = ?", v).Count(&count).Error
 		if err != nil {
-			logger.Errorf("Init Error %s\n", console.Red(err.Error()))
+			log.Errorf("Init Error %s\n", console.Red(err.Error()))
 			break
 		}
 		if count > 0 {
 			continue
 		}
-		logger.Info(console.Green(fmt.Sprintf("Apply Patch %s", v)))
+		log.Info(console.Green(fmt.Sprintf("Apply Patch %s", v)))
 		err = migrator.Migrate(db)
 		if err != nil {
-			logger.Errorf("Data Migrate Error %s\n", console.Red(err.Error()))
+			log.Errorf("Data Migrate Error %s\n", console.Red(err.Error()))
 			break
 		}
 	}
-	logger.Info(console.Green("End of patching ..."))
+	log.Info(console.Green("End of patching ..."))
 }
 
 func GetFilename(s string) string {

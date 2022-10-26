@@ -8,7 +8,7 @@ import (
 
 	"backend/core/config"
 	"backend/core/config/source/file"
-	"backend/core/sdk/console"
+	"backend/core/console"
 	"backend/core/sdk/pkg"
 
 	"github.com/ghodss/yaml"
@@ -46,16 +46,13 @@ func (e *Settings) init() {
 
 // Config 配置集合
 type Config struct {
-	Application *Application `yaml:"application"`
-	Ssl         *Ssl         `yaml:"ssl"`
-	Logger      *Logger      `yaml:"logger"`
-	Jwt         *Jwt         `yaml:"jwt"`
-	Database    *Database    `yaml:"database"`
-	Mysql       *Mysql       `yaml:"mysql"`
-	Redis       *Redis       `yaml:"redis"`
-	Gen         *Gen         `yaml:"gen"`
-	Queue       *Queue       `yaml:"queue"`
-	DataMock    *DataMock    `yaml:"dataMock"`
+	Application *Application         `yaml:"application"`
+	Ssl         *Ssl                 `yaml:"ssl"`
+	Logger      *Logger              `yaml:"logger"`
+	Jwt         *Jwt                 `yaml:"jwt"`
+	Database    map[string]*Database `yaml:"database"`
+	Redis       *Redis               `yaml:"redis"`
+	Queue       *Queue               `yaml:"queue"`
 }
 
 var ConfigYamlPath string
@@ -71,11 +68,8 @@ func Setup(configYml string, fs ...func()) {
 			Logger:      LoggerConfig,
 			Jwt:         JwtConfig,
 			Database:    DatabaseConfig,
-			Mysql:       MysqlConfig,
 			Redis:       RedisConfig,
-			Gen:         GenConfig,
 			Queue:       QueueConfig,
-			DataMock:    DataMockConfig,
 		},
 		callbacks: fs,
 	}

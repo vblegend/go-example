@@ -1,7 +1,7 @@
 package ws
 
 import (
-	"backend/core/logger"
+	"backend/core/log"
 	"context"
 	"net/http"
 	"sync"
@@ -60,9 +60,9 @@ type BroadCastMessageData struct {
 func (c *Client) Read(ctx context.Context) {
 	defer func(ctx context.Context) {
 		WebsocketManager.UnRegister <- c
-		logger.Infof("client [%s] disconnect", c.Id)
+		log.Infof("client [%s] disconnect", c.Id)
 		if err := c.Socket.Close(); err != nil {
-			logger.Errorf("client [%s] disconnect err: %s", c.Id, err)
+			log.Errorf("client [%s] disconnect err: %s", c.Id, err)
 		}
 	}(ctx)
 
@@ -79,7 +79,7 @@ func (c *Client) Read(ctx context.Context) {
 			if err != nil || messageType == websocket.CloseMessage {
 				return
 			}
-			logger.Infof("client [%s] receive message: %s", c.Id, string(message))
+			log.Infof("client [%s] receive message: %s", c.Id, string(message))
 			c.Message <- message
 		}
 
@@ -90,9 +90,9 @@ func (c *Client) Read(ctx context.Context) {
 func (c *Client) Write(ctx context.Context) {
 	defer func(ctx context.Context) {
 		_ = recover()
-		logger.Infof("client [%s] disconnect", c.Id)
+		log.Infof("client [%s] disconnect", c.Id)
 		if err := c.Socket.Close(); err != nil {
-			logger.Infof("client [%s] disconnect err: %s", c.Id, err)
+			log.Infof("client [%s] disconnect err: %s", c.Id, err)
 		}
 	}(ctx)
 
@@ -109,7 +109,7 @@ func (c *Client) Write(ctx context.Context) {
 			// log.Printf("client [%s] write message: %s", c.Id, string(message))
 			err := c.Socket.WriteMessage(websocket.TextMessage, message)
 			if err != nil {
-				logger.Errorf("client [%s] writemessage err: %s", c.Id, err)
+				log.Errorf("client [%s] writemessage err: %s", c.Id, err)
 			}
 		}
 	}
@@ -117,13 +117,13 @@ func (c *Client) Write(ctx context.Context) {
 
 // 启动 websocket 管理器
 func (manager *Manager) Start() {
-	logger.Info("websocket manage start")
+	log.Info("websocket manage start")
 	for {
 		select {
 		// 注册
 		case client := <-manager.Register:
-			logger.Infof("client [%s] connect", client.Id)
-			logger.Infof("register client [%s] to group [%s]", client.Id, client.Group)
+			log.Infof("client [%s] connect", client.Id)
+			log.Infof("register client [%s] to group [%s]", client.Id, client.Group)
 
 			manager.Lock.Lock()
 			for i := 0; i < len(manager.EventListeners); i++ {
@@ -139,7 +139,7 @@ func (manager *Manager) Start() {
 
 		// 注销
 		case client := <-manager.UnRegister:
-			logger.Infof("unregister client [%s] from group [%s]", client.Id, client.Group)
+			log.Infof("unregister client [%s] from group [%s]", client.Id, client.Group)
 			manager.Lock.Lock()
 			if mGroup, ok := manager.Group[client.Group]; ok {
 				if mClient, ok := mGroup[client.Id]; ok {
@@ -307,12 +307,12 @@ func (manager *Manager) WsClient(c *gin.Context) {
 
 	conn, err := upGrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
-		logger.Errorf("websocket connect error: %s", c.Param("channel"))
+		log.Errorf("websocket connect error: %s", c.Param("channel"))
 		cancel()
 		return
 	}
 
-	logger.Infof("token:%s", c.Query("token"))
+	log.Infof("token:%s", c.Query("token"))
 
 	client := &Client{
 		Id:         c.Param("id"),
@@ -333,7 +333,7 @@ func (manager *Manager) WsClient(c *gin.Context) {
 
 func SendOne(ctx context.Context, id string, group string, msg string) {
 	WebsocketManager.Send(ctx, id, group, []byte("{\"code\":200,\"data\":"+msg+"}"))
-	logger.Info(WebsocketManager.Info())
+	log.Info(WebsocketManager.Info())
 }
 
 func (manager *Manager) UnWsClient(c *gin.Context) {
@@ -370,15 +370,15 @@ func (manager *Manager) RemoveEventListen(listener WebSocketEventListener) {
 
 func SendGroup(groupName string, msg []byte) {
 	WebsocketManager.SendGroup(groupName, msg)
-	logger.Info(WebsocketManager.Info())
+	log.Info(WebsocketManager.Info())
 }
 
 func SendAll(msg []byte) {
 	WebsocketManager.SendAll(msg)
-	logger.Info(WebsocketManager.Info())
+	log.Info(WebsocketManager.Info())
 }
 
 func WsLogout(id string, group string) {
 	WebsocketManager.UnRegisterClient(&Client{Id: id, Group: group})
-	logger.Info(WebsocketManager.Info())
+	log.Info(WebsocketManager.Info())
 }

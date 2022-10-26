@@ -1,30 +1,32 @@
 package commands
 
 import (
-	"backend/core/sdk/console"
+	"backend/common/global"
+	"backend/core/console"
 	"backend/core/sdk/pkg"
+	"bytes"
 	"fmt"
+	"html/template"
 	"os"
-	"strings"
 	"time"
 
 	"github.com/spf13/cobra"
 )
 
 const (
-	ubuntuPath = "/etc/init.d/siteweb-manager"
-	centosPath = "/etc/systemd/system/siteweb-manager.service"
+	ubuntuPath = "/etc/init.d/%s"
+	centosPath = "/etc/systemd/system/%s.service"
 )
 
 const ubuntuBash = `#!/bin/bash
 ### BEGIN INIT INFO
-# Provides:          Siteweb-Manager
+# Provides:          {{.AppName}}
 # Required-Start:    $local_fs $network $remote_fs
 # Required-Stop:     $local_fs $network $remote_fs
 # Default-Start:     2 3 4 5
 # Default-Stop:      0 1 6
-# Short-Description: Start Siteweb-Manager daemon at boot time
-# Description:       Start Siteweb-Manager daemon at boot time
+# Short-Description: Start {{.AppName}} daemon at boot time
+# Description:       Start {{.AppName}} daemon at boot time
 ### END INIT INFO
 
 usage() {
@@ -32,19 +34,19 @@ usage() {
 }
 
 start() {
-	siteweb-manager service start
+	{{.AppName}} service start
 }
 
 stop() {
-	siteweb-manager service stop
+	{{.AppName}} service stop
 }
 
 status() {
-    siteweb-manager service status
+    {{.AppName}} service status
 }
 
 restart() {
-	siteweb-manager service restart
+	{{.AppName}} service restart
 }
 
 #main function
@@ -70,20 +72,20 @@ exit 0
 
 const centosBash = `
 [Unit]
-Description=siteweb-manager
+Description={{.AppName}}
 After=network.target
 
 [Service]
 Type=forking
 
 #启动脚本路径
-ExecStart=$(__ASSEMBLY) service start
+ExecStart={{.AppPath}} service start
 
 #重启脚本路径
-ExecReload=$(__ASSEMBLY) service restart
+ExecReload={{.AppPath}} service restart
 
 #停止脚本路径
-ExecStop=$(__ASSEMBLY) service top
+ExecStop={{.AppPath}} service top
 
 # 停止超时时间，如果不能在指定时间内停止，将通过SIGKILL强制终止
 KillSignal=SIGQUIT
@@ -102,32 +104,45 @@ PrivateTmp=true
 WantedBy=multi-user.target
 `
 
+func parseScriptTemplate(stemplate string) string {
+	t, err := template.New("").Parse(stemplate)
+	if err != nil {
+		panic("error")
+	}
+	buf := bytes.Buffer{}
+	t.Execute(&buf, map[string]interface{}{
+		"AppName": global.AppFileName,
+		"AppPath": pkg.AssemblyFile(),
+	})
+	return buf.String()
+}
+
 var (
 	InstallCmd = &cobra.Command{
 		Use:     "install",
-		Short:   "install siteweb-manager service",
-		Example: "siteweb-manager service install",
+		Short:   "install app service",
+		Example: fmt.Sprintf("%s service install", global.AppFileName),
 		Run: func(cmd *cobra.Command, args []string) {
 			script := ""
 			bashFile := ""
 			if pkg.IsUbuntu() {
-				script = ubuntuBash
-				bashFile = ubuntuPath
+				script = parseScriptTemplate(ubuntuBash)
+				bashFile = fmt.Sprintf(ubuntuPath, global.AppFileName)
 			} else if pkg.IsCentOS() {
-				script = strings.Replace(centosBash, "$(__ASSEMBLY)", pkg.AssemblyFile(), -1)
-				bashFile = centosPath
+				script = parseScriptTemplate(centosBash)
+				bashFile = fmt.Sprintf(centosPath, global.AppFileName)
 			}
 			if pkg.FileExist(bashFile) {
 				fmt.Printf("服务[%s]...\n", console.Red("已部署"))
 				os.Exit(0)
 			}
-			pkg.ExeCommand("ln", "-s", "-f", pkg.AssemblyFile(), "/usr/bin/siteweb-manager") // 创建全局命令
-			os.WriteFile(bashFile, []byte(script), 0777)                                     //写入服务配置文件
-			pkg.ExeCommand("chmod", "777", bashFile)                                         // 给777权限，其实上一步已经给了
+			pkg.ExeCommand("ln", "-s", "-f", pkg.AssemblyFile(), "/usr/bin/"+global.AppFileName) // 创建全局命令
+			os.WriteFile(bashFile, []byte(script), 0777)                                         //写入服务配置文件
+			pkg.ExeCommand("chmod", "777", bashFile)                                             // 给777权限，其实上一步已经给了
 			time.Sleep(time.Second)
 			pkg.ExeCommand("systemctl", "daemon-reload") //重新加载配置
 			time.Sleep(time.Second)
-			pkg.ExeCommand("systemctl", "enable", "siteweb-manager") //设置开机启动
+			pkg.ExeCommand("systemctl", "enable", global.AppFileName) //设置开机启动
 			fmt.Printf("服务[%s]...\n", console.Green("已部署"))
 			os.Exit(0)
 		},

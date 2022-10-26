@@ -4,34 +4,40 @@ import (
 	//"backend/models/tools"
 	//"os"
 
-	"backend/core/sdk/console/std"
+	"backend/core/console"
 	"backend/core/sdk/pkg"
 	"fmt"
-	"os"
 	"reflect"
+	"regexp"
 	"testing"
 	//"text/template"
 )
 
+// 0x1b[0;0;32m   0x1b[0m    \x1b[0;0;31mAA\x1b[0m
 func TestXxx(t *testing.T) {
-
+	raw := []byte(fmt.Sprintf("{ v1: %s ,v2: %s ,v3: %s }", console.Red("AA"), console.Green("BB"), console.Blue("CC")))
+	re := regexp.MustCompile(`/\x1b\[*/\x1b\[0m`)
+	if re.Match(raw) {
+		fmt.Println("111")
+	}
+	fmt.Println("222")
 	exist := pkg.ProcessExist("sleep")
 	fmt.Println(exist)
 }
 
 func TestConsole(t *testing.T) {
 
-	std.Builder().WithStdout(os.Stdout).
-		Appendln().
-		Append("Test", std.BRed, std.FYellow, std.Italics).
-		Append("[", std.BGreen, std.FMagenta, std.Bold).
-		Append(1234.65565677145, std.BRed, std.FBlue, std.Bold).
-		Append("]", std.BGreen, std.FMagenta, std.Bold).
-		Appendln().
-		Append("[", std.BWhite, std.FBlack, std.Bold).
-		Append(1234.65565677145, std.BWhite, std.FBlack, std.Bold).
-		Append("]", std.BWhite, std.FBlack, std.Bold).
-		Println()
+	// std.Builder().WithStdout(os.Stdout).
+	// 	Appendln().
+	// 	Append("Test", std.BRed, std.FYellow, std.Italics).
+	// 	Append("[", std.BGreen, std.FMagenta, std.Bold).
+	// 	Append(1234.65565677145, std.BRed, std.FBlue, std.Bold).
+	// 	Append("]", std.BGreen, std.FMagenta, std.Bold).
+	// 	Appendln().
+	// 	Append("[", std.BWhite, std.FBlack, std.Bold).
+	// 	Append(1234.65565677145, std.BWhite, std.FBlack, std.Bold).
+	// 	Append("]", std.BWhite, std.FBlack, std.Bold).
+	// 	Println()
 
 }
 

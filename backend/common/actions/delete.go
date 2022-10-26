@@ -3,9 +3,8 @@ package actions
 import (
 	"net/http"
 
-	log "backend/core/logger"
+	"backend/core/log"
 	"backend/core/sdk/pkg"
-	"backend/core/sdk/pkg/jwtauth/user"
 	"backend/core/sdk/pkg/response"
 
 	"github.com/gin-gonic/gin"
@@ -38,9 +37,6 @@ func DeleteAction(control dto.Control) gin.HandlerFunc {
 			response.Error(c, 500, err, "模型生成失败")
 			return
 		}
-
-		object.SetUpdateBy(user.GetUserId(c))
-
 		//数据权限检查
 		db = db.WithContext(c).Where(req.GetId()).Delete(object)
 		if db.Error != nil {

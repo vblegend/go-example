@@ -5,7 +5,7 @@ import (
 	"errors"
 	"net/http"
 
-	log "backend/core/logger"
+	"backend/core/log"
 	"backend/core/sdk/pkg"
 
 	"github.com/gin-gonic/gin"
