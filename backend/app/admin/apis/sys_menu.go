@@ -2,7 +2,7 @@ package apis
 
 import (
 	"backend/app/admin/models"
-	"backend/core/api"
+	"backend/core/restful"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
@@ -12,7 +12,7 @@ import (
 )
 
 type SysMenu struct {
-	api.Api
+	restful.Api
 }
 
 // GetPage Menu列表数据

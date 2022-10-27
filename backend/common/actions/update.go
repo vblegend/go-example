@@ -4,8 +4,8 @@ import (
 	"net/http"
 
 	"backend/core/log"
+	"backend/core/restful"
 	"backend/core/sdk/pkg"
-	"backend/core/sdk/pkg/response"
 
 	"github.com/gin-gonic/gin"
 
@@ -27,27 +27,27 @@ func UpdateAction(control dto.Control) gin.HandlerFunc {
 		//更新操作
 		err = req.Bind(c)
 		if err != nil {
-			response.Error(c, http.StatusUnprocessableEntity, err, "参数验证失败")
+			restful.Error(c, http.StatusUnprocessableEntity, err, "参数验证失败")
 			return
 		}
 		var object models.ActiveRecord
 		object, err = req.GenerateM()
 		if err != nil {
-			response.Error(c, 500, err, "模型生成失败")
+			restful.Error(c, 500, err, "模型生成失败")
 			return
 		}
 		//数据权限检查
 		db = db.WithContext(c).Where(req.GetId()).Updates(object)
 		if db.Error != nil {
 			log.Errorf("MsgID[%s] Update error: %s", msgID, err)
-			response.Error(c, 500, err, "更新失败")
+			restful.Error(c, 500, err, "更新失败")
 			return
 		}
 		if db.RowsAffected == 0 {
-			response.Error(c, http.StatusForbidden, nil, "无权更新该数据")
+			restful.Error(c, http.StatusForbidden, nil, "无权更新该数据")
 			return
 		}
-		response.OK(c, object.GetId(), "更新成功")
+		restful.OK(c, object.GetId(), "更新成功")
 		c.Next()
 	}
 }

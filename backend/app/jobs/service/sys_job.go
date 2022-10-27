@@ -1,78 +1,22 @@
 package service
 
 import (
-	"time"
-
-	"github.com/pkg/errors"
-
 	"backend/core/sdk/service"
-
-	"backend/app/jobs"
-	"backend/app/jobs/models"
-	"backend/common/dto"
 )
 
-type SysJob struct {
+type SysJobService struct {
 	service.Service
 }
 
-// RemoveJob 删除job
-func (e *SysJob) RemoveJob(c *dto.GeneralDelDto) error {
-	var err error
-	var data models.SysJob
-	err = e.Orm.Table(data.TableName()).First(&data, c.Id).Error
-	if err != nil {
-		e.Log.Errorf("db error: %s", err)
-		return err
-	}
-	cn := jobs.Remove(data.EntryId)
+// func (e *SysJobService) GetList(tx *gorm.DB, list []models.SysJob) (err error) {
 
-	select {
-	case res := <-cn:
-		if res {
-			err = e.Orm.Table(data.TableName()).Where("entry_id = ?", data.EntryId).Update("entry_id", 0).Error
-			if err != nil {
-				e.Log.Errorf("db error: %s", err)
-			}
-			return err
-		}
-	case <-time.After(time.Second * 1):
-		e.Msg = "操作超时！"
-		return nil
-	}
-	return nil
-}
+// 	return e.Orm.Table(e.TableName()).Where("enabled = ?", true).Find(list).Error
+// }
 
-// StartJob 启动任务
-func (e *SysJob) StartJob(c *dto.GeneralGetDto) error {
-	var data models.SysJob
-	var err error
-	err = e.Orm.Table(data.TableName()).First(&data, c.Id).Error
-	if err != nil {
-		e.Log.Errorf("db error: %s", err)
-		return err
-	}
+// func (e *SysJobService) Create(tx *gorm.DB, id models.SysJob) (err error) {
+// 	return e.Orm.Table(e.TableName()).Where(id).Updates(&e).Error
+// }
 
-	if data.Status == 1 {
-		err = errors.New("当前Job是关闭状态不能被启动，请先启用。")
-		return err
-	}
-
-	var j = &jobs.JobCore{}
-	j.InvokeTarget = data.InvokeTarget
-	j.CronExpression = data.CronExpression
-	j.JobId = data.JobId
-	j.Name = data.JobName
-	j.Args = data.Args
-	data.EntryId, err = jobs.AddJob(j)
-	if err != nil {
-		e.Log.Errorf("jobs AddJob[ExecJob] error: %s", err)
-		return err
-	}
-
-	err = e.Orm.Table(data.TableName()).Where(c.Id).Updates(&data).Error
-	if err != nil {
-		e.Log.Errorf("db error: %s", err)
-	}
-	return err
-}
+// func (e *SysJobService) Update(tx *gorm.DB, id models.SysJob) (err error) {
+// 	return e.Orm.Table(e.TableName()).Where(id).Updates(&e).Error
+// }

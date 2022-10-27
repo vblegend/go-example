@@ -1,8 +1,8 @@
 package middleware
 
 import (
-	"backend/core/api"
 	"backend/core/log"
+	"backend/core/restful"
 	"fmt"
 	"net/http"
 	"runtime/debug"
@@ -22,7 +22,7 @@ func WriteError(c *gin.Context, err interface{}) {
 		c.Status(200)
 	}
 	switch errStr := err.(type) {
-	case api.AssertInterrupter:
+	case restful.AssertInterrupter:
 		c.JSON(http.StatusOK, gin.H{
 			"code": errStr.Code,
 			"msg":  errStr.Messsage,

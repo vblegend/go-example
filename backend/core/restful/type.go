@@ -5,7 +5,7 @@
  * @Last Modified time: 2021/6/8 5:51 下午
  */
 
-package response
+package restful
 
 type Responses interface {
 	SetCode(int32)

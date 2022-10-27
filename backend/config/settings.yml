@@ -8,10 +8,10 @@ Settings:
     Default:
       ConnMaxIdleTime: 0
       ConnMaxLifeTime: 0
-      Driver: mysql
+      Driver: sqlite3
       MaxIdleConns: 0
       MaxOpenConns: 0
-      Source: root:root@tcp(127.0.0.1:3306)/test?charset=utf8&parseTime=True&loc=Local&timeout=1000ms
+      Source: ./sqlite.db
     Standby:
       ConnMaxIdleTime: 0
       ConnMaxLifeTime: 0

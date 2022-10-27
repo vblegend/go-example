@@ -1,4 +1,4 @@
-package api
+package restful
 
 import (
 	"errors"
@@ -7,7 +7,7 @@ import (
 
 	"backend/core/log"
 	"backend/core/sdk/pkg"
-	"backend/core/sdk/pkg/response"
+
 	"backend/core/sdk/pkg/utils"
 	"backend/core/sdk/service"
 	"net/http"
@@ -135,12 +135,12 @@ func (e *Api) MakeService(c *service.Service) *Api {
 
 // Error 通常错误数据处理
 func (e Api) Error(code int, err error, msg string) {
-	response.Error(e.Context, code, err, msg)
+	Error(e.Context, code, err, msg)
 }
 
 // OK 通常成功数据处理
 func (e Api) OK(data interface{}, msg string) {
-	response.OK(e.Context, data, msg)
+	OK(e.Context, data, msg)
 }
 
 // HasError 错误断言
@@ -163,12 +163,12 @@ func (e Api) GetRequestId() string {
 
 // PageOK 分页数据处理
 func (e Api) PageOK(result interface{}, count int, pageIndex int, pageSize int, msg string) {
-	response.PageOK(e.Context, result, count, pageIndex, pageSize, msg)
+	PageOK(e.Context, result, count, pageIndex, pageSize, msg)
 }
 
 // Custom 兼容函数
 func (e Api) Custom(data gin.H) {
-	response.Custum(e.Context, data)
+	Custum(e.Context, data)
 }
 
 func (e Api) Translate(form, to interface{}) {

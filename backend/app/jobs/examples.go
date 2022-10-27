@@ -3,7 +3,7 @@ package jobs
 import "fmt"
 
 func init() {
-	RegisterClass(ExamplesOne{})
+	RegisterClass("测试任务", ExamplesOne{})
 }
 
 // 新job必须实现JobsExec接口

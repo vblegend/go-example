@@ -6,8 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin/binding"
 
-	"backend/core/api"
-	_ "backend/core/sdk/pkg/response"
+	"backend/core/restful"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -17,7 +16,7 @@ import (
 )
 
 type SysUser struct {
-	api.Api
+	restful.Api
 }
 
 // GetPage
