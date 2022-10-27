@@ -1,4 +1,4 @@
-package response
+package restful
 
 type Response struct {
 	// 数据集

@@ -1,11 +1,10 @@
 package dto
 
 import (
+	"backend/core/restful"
 	"net/http"
 
 	vd "github.com/bytedance/go-tagexpr/v2/validator"
-
-	"backend/core/api"
 
 	"github.com/gin-gonic/gin"
 )
@@ -17,7 +16,7 @@ type ObjectById struct {
 
 func (s *ObjectById) Bind(ctx *gin.Context) error {
 	var err error
-	log := api.GetRequestLogger(ctx)
+	log := restful.GetRequestLogger(ctx)
 	err = ctx.ShouldBindUri(s)
 	if err != nil {
 		log.Warnf("ShouldBindUri error: %s", err.Error())
@@ -60,7 +59,7 @@ type ObjectGetReq struct {
 
 func (s *ObjectGetReq) Bind(ctx *gin.Context) error {
 	var err error
-	log := api.GetRequestLogger(ctx)
+	log := restful.GetRequestLogger(ctx)
 	err = ctx.ShouldBindUri(s)
 	if err != nil {
 		log.Warnf("ShouldBindUri error: %s", err.Error())
@@ -83,7 +82,7 @@ type ObjectDeleteReq struct {
 
 func (s *ObjectDeleteReq) Bind(ctx *gin.Context) error {
 	var err error
-	log := api.GetRequestLogger(ctx)
+	log := restful.GetRequestLogger(ctx)
 	err = ctx.ShouldBind(&s)
 	if err != nil {
 		log.Warnf("ShouldBind error: %s", err.Error())

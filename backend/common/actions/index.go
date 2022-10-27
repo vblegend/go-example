@@ -5,8 +5,8 @@ import (
 	"net/http"
 
 	"backend/core/log"
+	"backend/core/restful"
 	"backend/core/sdk/pkg"
-	"backend/core/sdk/pkg/response"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -33,7 +33,7 @@ func IndexAction(m models.ActiveRecord, d dto.Index, f func() interface{}) gin.H
 		//查询列表
 		err = req.Bind(c)
 		if err != nil {
-			response.Error(c, http.StatusUnprocessableEntity, err, "参数验证失败")
+			restful.Error(c, http.StatusUnprocessableEntity, err, "参数验证失败")
 			return
 		}
 
@@ -47,10 +47,10 @@ func IndexAction(m models.ActiveRecord, d dto.Index, f func() interface{}) gin.H
 			Count(&count).Error
 		if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 			log.Errorf("MsgID[%s] Index error: %s", msgID, err)
-			response.Error(c, 500, err, "查询失败")
+			restful.Error(c, 500, err, "查询失败")
 			return
 		}
-		response.PageOK(c, list, int(count), req.GetPageIndex(), req.GetPageSize(), "查询成功")
+		restful.PageOK(c, list, int(count), req.GetPageIndex(), req.GetPageSize(), "查询成功")
 		c.Next()
 	}
 }

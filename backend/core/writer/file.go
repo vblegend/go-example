@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"strings"
 )
 
 // timeFormat 时间格式
@@ -67,22 +68,17 @@ func (p *FileWriter) open() error {
 
 }
 
-// 0x1b[0;0;32m   0x1b[0m
-func ReplaceEnvVars(raw []byte) ([]byte, error) {
-	re := regexp.MustCompile(`\0x1B\[([0-9]{1,2}+\;*)+m\S*0x1B\[0m\}`) //`\$\{([A-Za-z0-9_]+)\}`)
-	if re.Match(raw) {
-		dataS := string(raw)
-		res := re.ReplaceAllStringFunc(dataS, replaceEnvVars)
-		return []byte(res), nil
-	} else {
-		return raw, nil
+func (p *FileWriter) rmEchoColor(data []byte) []byte {
+	re := regexp.MustCompile(`\x1b\[.[\s\S]*?\x1b\[0m`) //
+	if re.Match(data) {
+		val := re.ReplaceAllStringFunc(string(data), func(element string) string {
+			index := strings.Index(element, "m")
+			v := element[index+1 : len(element)-4]
+			return v
+		})
+		return []byte(val)
 	}
-}
-
-func replaceEnvVars(element string) string {
-	v := element[2 : len(element)-1]
-	el := os.Getenv(v)
-	return el
+	return data
 }
 
 func (p *FileWriter) checkFile() {
@@ -105,13 +101,14 @@ func (p *FileWriter) Write(data []byte) (n int, err error) {
 	if p == nil {
 		return 0, errors.New("logFileWriter is nil")
 	}
-	n, err = p.file.Write(data)
+	data2 := p.rmEchoColor(data)
+	n, err = p.file.Write(data2)
 	if err != nil {
 		log.Printf("write file failed, %s\n", err.Error())
 		return n, err
 	}
 	p.checkFile()
-	return n, nil
+	return len(data), nil
 }
 
 func (p *FileWriter) getFilename() string {

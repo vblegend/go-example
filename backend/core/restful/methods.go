@@ -1,4 +1,4 @@
-package response
+package restful
 
 import (
 	"net/http"

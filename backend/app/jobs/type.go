@@ -1,6 +1,16 @@
 package jobs
 
-import "github.com/robfig/cron/v3"
+import (
+	"reflect"
+
+	"github.com/robfig/cron/v3"
+)
+
+type JobTyped struct {
+	Name      string       `json:"name"`
+	ClassName string       `json:"className"`
+	ClassType reflect.Type `json:"-"`
+}
 
 type Job interface {
 	Run()
@@ -11,6 +21,22 @@ type JobsExec interface {
 	Exec(arg string) error
 }
 
-func CallExec(e JobsExec, arg string) error {
-	return e.Exec(arg)
+var customJobTypedList map[string]*JobTyped = make(map[string]*JobTyped)
+
+func RegisterClass(name string, obejct JobsExec) {
+	classType := reflect.TypeOf(obejct)
+	className := classType.Name()
+	customJobTypedList[className] = &JobTyped{
+		Name:      name,
+		ClassName: className,
+		ClassType: classType,
+	}
+}
+
+func GetClassTypeFromClassName(className string) reflect.Type {
+	typed := customJobTypedList[className]
+	if typed != nil {
+		return typed.ClassType
+	}
+	return nil
 }
