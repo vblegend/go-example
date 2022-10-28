@@ -31,6 +31,7 @@ func GetRootRouter() g.Routers {
 		g.Router{ // 公共根路由
 			Url: "",
 			Use: g.Use(
+				middleware.RequestLogger,             // 请求日志
 				middleware.CustomError,               // 自定义异常处理
 				middleware.RequestId(pkg.TrafficKey), // 请求ID
 				restful.SetRequestLogger,             // 请求日志
