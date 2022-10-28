@@ -6,6 +6,7 @@ import (
 	"backend/core/sdk/pkg"
 	"fmt"
 	"os"
+	"os/exec"
 
 	"github.com/spf13/cobra"
 )
@@ -21,8 +22,9 @@ var (
 				fmt.Printf("服务[%s]...\n", console.Red("已运行"))
 				os.Exit(0)
 			}
-			bash := fmt.Sprintf("cd %s ; nohup ./%s server", pkg.AssemblyDir(), global.AppFileName)
-			pkg.ExeCommand("/bin/bash", "-c", bash)
+			exe := exec.Command("siteweb-manager", "server")
+			exe.Dir = pkg.AssemblyDir()
+			exe.Start()
 			fmt.Printf("服务[%s]...\n", console.Green("已启动"))
 			os.Exit(0)
 		},

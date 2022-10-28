@@ -122,15 +122,9 @@ func GetApiRouter(authMiddleware *jwtauth.GinJWTMiddleware) g.Routers {
 					Handle: func(r gin.IRoutes) {
 						r.GET("", model.PageHander(&model.Pagination{}, &models.SysJob{}))
 						r.GET("/:id", model.IndexHander(&model.IdentityInt{}, &models.SysJob{}))
-						r.POST("", model.CreateHander(&models.SysJob{}, func(model interface{}) {
-							jobs.ConfigJob(model.(models.SysJob))
-						}))
-						r.PUT("", model.UpdateHander(&models.SysJob{}, func(model interface{}) {
-							jobs.ConfigJob(model.(models.SysJob))
-						}))
-						r.DELETE("", model.DeleteHander(&model.IdentityInt{}, &models.SysJob{}, func(id interface{}) {
-							jobs.StopJob(id.(int))
-						}))
+						r.POST("", model.CreateHander(&models.SysJob{}, func(model interface{}) { jobs.ConfigJob(model.(models.SysJob)) }))
+						r.PUT("", model.UpdateHander(&models.SysJob{}, func(model interface{}) { jobs.ConfigJob(model.(models.SysJob)) }))
+						r.DELETE("", model.DeleteHander(&model.IdentityInt{}, &models.SysJob{}, func(id interface{}) { jobs.StopJob(id.(int)) }))
 					},
 				},
 				g.Router{ // 定时任务操作

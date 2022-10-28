@@ -98,7 +98,7 @@ KillMode=mixed
 Restart=on-failure
 
 # 表示给服务分配独立的临时空间
-PrivateTmp=true
+PrivateTmp=false
 
 [Install]
 WantedBy=multi-user.target
