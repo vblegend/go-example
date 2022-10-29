@@ -6,13 +6,8 @@ import (
 	"gorm.io/gorm"
 )
 
-type ControlBy struct {
-	CreateBy int `json:"createBy" gorm:"index;comment:创建者"`
-	UpdateBy int `json:"updateBy" gorm:"index;comment:更新者"`
-}
-
-type Model struct {
-	Id int `json:"id" gorm:"primaryKey;autoIncrement;comment:主键编码"`
+type ModelIndex struct {
+	Id int `uri:"id" json:"id" gorm:"primaryKey;autoIncrement"`
 }
 
 type ModelTime struct {
