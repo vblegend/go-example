@@ -83,6 +83,17 @@ define publish
 	@${PUBLISH_DIR}/${APP_FILENAME} config reset
 endef
 
+
+#server.pfx
+define makePem
+	openssl pkcs12 -in server.pfx -nocerts -out key.pem -nodes
+	openssl pkcs12 -in server.pfx -nokeys -out server.pem
+	openssl rsa -in key.pem -out server.key
+endef
+
+
+
+
 #发布文件一条龙服务
 release:
 	@echo "正在准备发布..."

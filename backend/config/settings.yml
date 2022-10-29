@@ -2,8 +2,12 @@ Settings:
   Application:
     Host: 0.0.0.0
     Mode: dev
-    Name: AppSidecar
+    Name: Go-Example
     Port: 8000
+    Https: false
+    CertFile: ./config/server.pem
+    KeyFile: ./config/server.key
+    Domain: localhost
   Database:
     Default:
       ConnMaxIdleTime: 0

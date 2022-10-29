@@ -23,7 +23,6 @@ import (
 	"backend/app/jobs"
 	"backend/common/database"
 	"backend/common/global"
-	"backend/common/middleware/handler"
 	"backend/common/storage"
 )
 
@@ -51,6 +50,7 @@ func init() {
 
 func printLogo() {
 	log.Print(console.Yellow(strings.Join(global.LogoContent, "\n")) + fmt.Sprintf(" %s %s (%s)\n", console.Green(config.ApplicationConfig.Mode), console.Red("V"+global.Version), global.BuildTime))
+
 }
 
 func setup() {
@@ -74,39 +74,36 @@ func setup() {
 		database.InitRedisDB,
 		// 时序数据库、队列、缓存 初始化
 		storage.Setup,
+		// 任务自动化
+		jobs.Setup,
 	)
+
+}
+
+func run() error {
+	engine := gin.New()
 	if config.ApplicationConfig.Mode == pkg.Production {
 		gin.SetMode(gin.ReleaseMode)
 	} else {
 		gin.SetMode(gin.DebugMode)
 	}
-}
-
-func run() error {
-	engine := gin.New()
-	// 注册中间件
-	// common.InitMiddleware(engine)
-	// 注册 pprof
-	handler.InitPPROF(engine)
-	// 注册加载路由
+	// 注册路由
 	g.Register(engine, GetRootRouter())
 
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 	srv := &http.Server{
 		Addr:    fmt.Sprintf("%s:%d", config.ApplicationConfig.Host, config.ApplicationConfig.Port),
 		Handler: engine,
 	}
-	// 设置容器
-	jobs.Setup()
-	// 监控数据初始化
-	log.Info(`starting api server...`)
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
+	log.Info(console.Green("Server run at:"))
+	for _, ip := range pkg.GetIpAddress() {
+		log.Infof("- %s://%s:%d/", config.ApplicationConfig.GetHttpProtocol(), ip, config.ApplicationConfig.Port)
+	}
 	go func() {
 		// 服务连接
-		if config.SslConfig.Enable {
-			engine.Use(handler.TlsHandler())
-			if err := srv.ListenAndServeTLS(config.SslConfig.Pem, config.SslConfig.Key); err != nil && err != http.ErrServerClosed {
+		if config.ApplicationConfig.Https {
+			if err := srv.ListenAndServeTLS(config.ApplicationConfig.CertFile, config.ApplicationConfig.KeyFile); err != nil && err != http.ErrServerClosed {
 				log.Fatal("listen: ", err)
 			}
 		} else {
@@ -116,10 +113,6 @@ func run() error {
 		}
 	}()
 
-	log.Info(console.Green("Server run at:"))
-	for _, ip := range pkg.GetIpAddress() {
-		log.Infof("- http://%s:%d/", ip, config.ApplicationConfig.Port)
-	}
 	log.Info("Enter Control + C Shutdown Server")
 	// 等待中断信号以优雅地关闭服务器（设置 5 秒的超时时间）
 	system.WaitQuitSignal()

@@ -24,30 +24,21 @@ type Settings struct {
 	callbacks []func()
 }
 
-func (e *Settings) runCallback() {
+func (e *Settings) OnChange() {
+	e.Init()
+	log.Println(console.Green("[INFO] Application Configure File Changed ..."))
+}
+
+func (e *Settings) Init() {
+	e.Settings.Logger.Setup()
 	for i := range e.callbacks {
 		e.callbacks[i]()
 	}
 }
 
-func (e *Settings) OnChange() {
-	e.init()
-	log.Println(console.Green("[INFO] Application Configure File Changed ..."))
-}
-
-func (e *Settings) Init() {
-	e.init()
-}
-
-func (e *Settings) init() {
-	e.Settings.Logger.Setup()
-	e.runCallback()
-}
-
 // Config 配置集合
 type Config struct {
 	Application *Application         `yaml:"application"`
-	Ssl         *Ssl                 `yaml:"ssl"`
 	Logger      *Logger              `yaml:"logger"`
 	Jwt         *Jwt                 `yaml:"jwt"`
 	Database    map[string]*Database `yaml:"database"`
@@ -64,7 +55,6 @@ func Setup(configYml string, fs ...func()) {
 	_cfg = &Settings{
 		Settings: Config{
 			Application: ApplicationConfig,
-			Ssl:         SslConfig,
 			Logger:      LoggerConfig,
 			Jwt:         JwtConfig,
 			Database:    DatabaseConfig,
@@ -73,6 +63,7 @@ func Setup(configYml string, fs ...func()) {
 		},
 		callbacks: fs,
 	}
+
 	var err error
 	config.DefaultConfig, err = config.NewConfig(
 		config.WithSource(fo),

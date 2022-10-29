@@ -49,12 +49,13 @@ func InitDatabase() {
 	configmap := config.DatabaseConfig
 	for key, cfg := range configmap {
 		CleanDBConnect(key)
+		log.Info(console.Green(fmt.Sprintf("Connecting to database %s ...", key)))
 		db, err := NewDBConnection(cfg)
 		if err != nil {
 			log.Error(console.Red(fmt.Sprintf("Database %s connect fail...", key)))
-			return
+			continue
 		}
-		sdk.Runtime.SetDb(Default, db)
+		sdk.Runtime.SetDb(key, db)
 		log.Info(console.Green(fmt.Sprintf("Database %s connect sucess...", key)))
 	}
 }

@@ -8,12 +8,14 @@ import (
 	"backend/core/jwtauth"
 	"backend/core/log"
 	"backend/core/restful"
+	"backend/core/sdk/config"
 	"backend/core/sdk/pkg"
 	"backend/core/sdk/pkg/ws"
 
 	"backend/core/model"
 	"net/http"
 
+	"github.com/gin-contrib/pprof"
 	"github.com/gin-gonic/gin"
 )
 
@@ -31,6 +33,7 @@ func GetRootRouter() g.Routers {
 		g.Router{ // 公共根路由
 			Url: "",
 			Use: g.Use(
+				restful.NewHttpsHandler(config.ApplicationConfig.Https),
 				middleware.RequestLogOut(log.GetLogger(), log.TraceLevel), // 请求日志
 				middleware.CustomError,               // 自定义异常处理
 				middleware.RequestId(pkg.TrafficKey), // 请求ID
@@ -47,6 +50,13 @@ func GetRootRouter() g.Routers {
 
 func GetApiRouter(authMiddleware *jwtauth.GinJWTMiddleware) g.Routers {
 	return g.Routers{
+		g.Router{ // websocket 连接
+			Url: "debug",
+			Use: g.Use(restful.NewWWWAuthenticator("admin", "admin")),
+			Handle: func(r gin.IRoutes) {
+				pprof.RouteRegister(r.(*gin.RouterGroup), "/")
+			},
+		},
 		g.Router{ // websocket 连接
 			Url: "/ws/:id/:channel",
 			Handle: func(r gin.IRoutes) {
@@ -147,9 +157,6 @@ func GetApiRouter(authMiddleware *jwtauth.GinJWTMiddleware) g.Routers {
 				r.GET("/", func(c *gin.Context) {
 					c.Redirect(http.StatusMovedPermanently, "/login")
 				})
-
-				r.GET("test", restful.AuthWithWWW("123", "123", func(c *gin.Context) { restful.OK(c, "DATA", "OK") }))
-
 				index := func(c *gin.Context) { c.File("./static/www/index.html") }
 				r.GET("/401", index)
 				r.GET("/404", index)

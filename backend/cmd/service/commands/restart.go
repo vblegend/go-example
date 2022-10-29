@@ -23,7 +23,7 @@ var (
 				pkg.ExeCommand("/bin/bash", "-c", bash)
 				fmt.Printf("服务[%s]...\n", console.Green("已停止"))
 			}
-			exe := exec.Command("siteweb-manager", "server")
+			exe := exec.Command(global.AppFileName, "server")
 			exe.Dir = pkg.AssemblyDir()
 			exe.Start()
 			fmt.Printf("服务[%s]...\n", console.Green("已启动"))
