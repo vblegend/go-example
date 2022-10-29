@@ -14,10 +14,8 @@ type SysJob struct {
 	Args           string `json:"args" gorm:"size:255;"`                 // 目标参数
 	MisfirePolicy  int    `json:"misfirePolicy" gorm:"size:255;"`        // 执行策略
 	Concurrent     int    `json:"concurrent" gorm:"size:1;"`             // 是否并发
-	Status         int    `json:"status" gorm:"size:1;"`                 // 状态
-	EntryId        int    `json:"entry_id" gorm:"size:11;"`              // job启动时返回的id
+	Enabled        bool   `json:"enabled" gorm:"size:1;"`                // 状态开关
 	common.ModelTime
-	common.ControlBy
 }
 
 func (SysJob) TableName() string {

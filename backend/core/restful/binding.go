@@ -5,6 +5,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 )
 
@@ -19,12 +20,42 @@ const (
 
 var constructor = &bindConstructor{}
 
+func AutoBind(c *gin.Context, d interface{}) error {
+	bindings := constructor.GetBindingForGin(d)
+	var err error
+	for i := range bindings {
+		if bindings[i] == nil {
+			err = c.ShouldBindUri(d)
+		} else {
+			err = c.ShouldBindWith(d, bindings[i])
+		}
+		if err != nil && err.Error() == "EOF" {
+			err = nil
+			continue
+		}
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 type bindConstructor struct {
 	cache map[string][]uint8
 	mux   sync.Mutex
 }
 
 func (e *bindConstructor) GetBindingForGin(d interface{}) []binding.Binding {
+	// valueOf := reflect.Indirect(reflect.ValueOf(d))
+	// for valueOf.Kind() == reflect.Interface {
+	// 	valueOf = valueOf.Elem()
+	// }
+	// typed := valueOf.Type()
+	// for typed.Kind() == reflect.Pointer {
+	// 	typed = typed.Elem()
+	// }
+	// typeName := typed.String()
+	// bs := e.getBinding(typeName)
 	bs := e.getBinding(reflect.TypeOf(d).String())
 	if bs == nil {
 		//重新构建
@@ -57,6 +88,16 @@ func (e *bindConstructor) GetBindingForGin(d interface{}) []binding.Binding {
 func (e *bindConstructor) resolve(d interface{}) []uint8 {
 	bs := make([]uint8, 0)
 	qType := reflect.TypeOf(d).Elem()
+
+	// valueOf := reflect.Indirect(reflect.ValueOf(d))
+	// for valueOf.Kind() == reflect.Interface {
+	// 	valueOf = valueOf.Elem()
+	// }
+	// qType := valueOf.Type()
+	// for qType.Kind() == reflect.Pointer {
+	// 	qType = qType.Elem()
+	// }
+
 	var tag reflect.StructTag
 	var ok bool
 	for i := 0; i < qType.NumField(); i++ {

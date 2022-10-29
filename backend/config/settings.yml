@@ -18,7 +18,7 @@ Settings:
       Driver: mysql
       MaxIdleConns: 0
       MaxOpenConns: 0
-      Source: root:root@tcp(127.0.0.1:3306)/test?charset=utf8&parseTime=True&loc=Local&timeout=1000ms
+      Source: root:123456@tcp(127.0.0.1:3306)/test?charset=utf8&parseTime=True&loc=Local&timeout=1000ms
   Jwt:
     Secret: App-Sidecar
     Timeout: 3600
