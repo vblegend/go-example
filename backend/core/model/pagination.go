@@ -8,11 +8,11 @@ type IPagination interface {
 type IIdentity interface {
 	GetId() interface{}
 }
-type IdentityInt struct {
-	Id int `form:"id"`
+type UriIdentityInt struct {
+	Id int `uri:"id"`
 }
 
-func (m *IdentityInt) GetId() interface{} {
+func (m *UriIdentityInt) GetId() interface{} {
 	return m.Id
 }
 

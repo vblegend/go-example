@@ -2,18 +2,20 @@ package server
 
 import (
 	adminapi "backend/app/admin/apis"
-	"backend/app/jobs"
-	"backend/app/jobs/models"
+	jobModels "backend/app/jobs/models"
 	"backend/common/middleware"
 	g "backend/core/groute"
 	"backend/core/jwtauth"
+	"backend/core/log"
 	"backend/core/restful"
+	"backend/core/sdk/config"
 	"backend/core/sdk/pkg"
 	"backend/core/sdk/pkg/ws"
 
 	"backend/core/model"
 	"net/http"
 
+	"github.com/gin-contrib/pprof"
 	"github.com/gin-gonic/gin"
 )
 
@@ -31,7 +33,8 @@ func GetRootRouter() g.Routers {
 		g.Router{ // 公共根路由
 			Url: "",
 			Use: g.Use(
-				middleware.RequestLogger,             // 请求日志
+				restful.NewHttpsHandler(config.ApplicationConfig.Https),
+				middleware.RequestLogOut(log.GetLogger(), log.TraceLevel), // 请求日志
 				middleware.CustomError,               // 自定义异常处理
 				middleware.RequestId(pkg.TrafficKey), // 请求ID
 				restful.SetRequestLogger,             // 请求日志
@@ -47,6 +50,13 @@ func GetRootRouter() g.Routers {
 
 func GetApiRouter(authMiddleware *jwtauth.GinJWTMiddleware) g.Routers {
 	return g.Routers{
+		g.Router{ // websocket 连接
+			Url: "debug",
+			Use: g.Use(restful.NewWWWAuthenticator("admin", "admin")),
+			Handle: func(r gin.IRoutes) {
+				pprof.RouteRegister(r.(*gin.RouterGroup), "/")
+			},
+		},
 		g.Router{ // websocket 连接
 			Url: "/ws/:id/:channel",
 			Handle: func(r gin.IRoutes) {
@@ -118,23 +128,23 @@ func GetApiRouter(authMiddleware *jwtauth.GinJWTMiddleware) g.Routers {
 				},
 				g.Router{ // 定时任务相关
 					Url: "/job",
-					Use: g.Use(authMiddleware.MiddlewareFunc()),
+					// Use: g.Use(authMiddleware.MiddlewareFunc()),
 					Handle: func(r gin.IRoutes) {
-						r.GET("", model.PageHander(&model.Pagination{}, &models.SysJob{}))
-						r.GET("/:id", model.IndexHander(&model.IdentityInt{}, &models.SysJob{}))
-						r.POST("", model.CreateHander(&models.SysJob{}, func(model interface{}) { jobs.ConfigJob(model.(models.SysJob)) }))
-						r.PUT("", model.UpdateHander(&models.SysJob{}, func(model interface{}) { jobs.ConfigJob(model.(models.SysJob)) }))
-						r.DELETE("", model.DeleteHander(&model.IdentityInt{}, &models.SysJob{}, func(id interface{}) { jobs.StopJob(id.(int)) }))
+						r.GET("", restful.WherePageHander(&jobModels.SysJob{}, &model.Pagination{}, &jobModels.SysJob{}))
+						r.GET("/:JobId", restful.WhereFirstHander(&jobModels.SysJobIndex{}, &jobModels.SysJob{}))
+						r.POST("", restful.CreateHander(&jobModels.SysJob{}, func(model interface{}) {}))
+						r.PUT("", restful.UpdateHander(&jobModels.SysJob{}, func(model interface{}) {}))
+						r.DELETE("/:JobId", restful.DeleteHander(&jobModels.SysJobIndex{}, &jobModels.SysJob{}, func(id interface{}) {}))
 					},
 				},
 				g.Router{ // 定时任务操作
 					Url: "/task",
-					Use: g.Use(authMiddleware.MiddlewareFunc()),
+					// Use: g.Use(authMiddleware.MiddlewareFunc()),
 					Handle: func(r gin.IRoutes) {
-						r.GET("/stop/:id", model.IdHander(&model.IdentityInt{}, func(object interface{}) {
+						r.GET("/stop/:JobId", restful.ActionHander(&jobModels.SysJobIndex{}, func(object interface{}) {
 							// 停止任务
 						}))
-						r.GET("/start/:id", model.IdHander(&model.IdentityInt{}, func(object interface{}) {
+						r.GET("/start/:JobId", restful.ActionHander(&jobModels.SysJobIndex{}, func(object interface{}) {
 							// 开始任务
 						}))
 					},

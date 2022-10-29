@@ -12,9 +12,7 @@ require (
 	github.com/google/uuid v1.3.0 // uuid
 	github.com/imdario/mergo v0.3.13 // json 合并库
 	github.com/json-iterator/go v1.1.12 // indirect
-	github.com/mssola/user_agent v0.5.3 // 浏览器 user_agent 分析工具
 	github.com/opentracing/opentracing-go v1.2.0 // API链路追踪库
-	github.com/pkg/errors v0.9.1 // golang errors 辅助库
 	github.com/robfig/cron/v3 v3.0.1 // cron 任务调度引擎
 	github.com/spf13/cast v1.5.0 // 数据转换 格式化库
 	github.com/spf13/cobra v1.6.0 // CIL命令行框架

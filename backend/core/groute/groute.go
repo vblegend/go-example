@@ -1,6 +1,9 @@
 package groute
 
 import (
+	"backend/core/console"
+	"backend/core/log"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -18,6 +21,11 @@ func Use(m ...gin.HandlerFunc) []gin.HandlerFunc {
 }
 
 func Register(root gin.IRouter, routers Routers) {
+
+	gin.DebugPrintRouteFunc = func(httpMethod, absolutePath, handlerName string, nuHandlers int) {
+		log.Tracef("[Register Router] [%v] [%v] [%v] [%v]", console.Yellow(httpMethod), console.Green(absolutePath), handlerName, nuHandlers)
+	}
+
 	for _, router := range routers {
 		node := root.Group(router.Url)
 		if len(router.Use) > 0 {
