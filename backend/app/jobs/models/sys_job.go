@@ -10,7 +10,6 @@ type SysJobIndex struct {
 
 type SysJob struct {
 	SysJobIndex
-	// JobId          int    `json:"jobId" gorm:"primaryKey;autoIncrement"` // 编码
 	JobName        string `json:"jobName" gorm:"size:255;"`                  // 名称
 	JobGroup       string `form:"jobGroup" json:"jobGroup" gorm:"size:255;"` // 任务分组
 	JobType        int    `json:"jobType" gorm:"size:1;"`                    // 任务类型

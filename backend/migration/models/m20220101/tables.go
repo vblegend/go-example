@@ -38,7 +38,6 @@ type SysMenu struct {
 	Sort       int    `json:"sort" gorm:"size:4;"`
 	Visible    string `json:"visible" gorm:"size:1;"`
 	IsFrame    string `json:"isFrame" gorm:"size:1;DEFAULT:0;"`
-	common.ControlBy
 	common.ModelTime
 }
 
@@ -58,7 +57,6 @@ type SysUser struct {
 	Email    string `json:"email" gorm:"type:varchar(128);comment:邮箱"`
 	Remark   string `json:"remark" gorm:"type:varchar(255);comment:备注"`
 	Status   string `json:"status" gorm:"type:varchar(4);comment:状态"`
-	common.ControlBy
 	common.ModelTime
 }
 
