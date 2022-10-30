@@ -8,3 +8,4 @@ backend/static/www
 # vendor/
 backend/__debug_bin
 backend/sqlite.db
+backend/go-example
