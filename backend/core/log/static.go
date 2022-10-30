@@ -76,10 +76,8 @@ func Errorf(template string, args ...interface{}) {
 
 func Fatal(args ...interface{}) {
 	loger.Log(FatalLevel, args...)
-	// os.Exit(1)
 }
 
 func Fatalf(template string, args ...interface{}) {
 	loger.Logf(FatalLevel, template, args...)
-	// os.Exit(1)
 }

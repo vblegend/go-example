@@ -75,54 +75,30 @@ func GetApiRouter(authMiddleware *jwtauth.GinJWTMiddleware) g.Routers {
 				r.POST("login", authMiddleware.LoginHandler)
 				// 刷新Token
 				r.GET("/refresh_token", authMiddleware.RefreshHandler)
+				// 注销登出
+				r.POST("logout", jwtauth.LogOut)
 			},
 			Children: g.Routers{
-				g.Router{ //左侧菜单 登出
+				g.Router{ //左侧菜单
 					Url: "",
 					Use: g.Use(authMiddleware.MiddlewareFunc()),
 					Handle: func(r gin.IRoutes) {
 						// api := adminapi.SysMenu{}
-						// r.GET("/roleMenuTreeselect/:roleId", api.GetMenuTreeSelect)
-						// r.POST("/logout", jwtauth.LogOut)
 						// user := adminapi.SysUser{}
+						// r.GET("/menutree", api.GetMenuTreeSelect)
 						// r.GET("/getinfo", user.GetInfo)
 					},
 				},
-				g.Router{ // 系统API
-					Url: "/sys-api",
+				g.Router{ //菜单管理
+					Url: "/menu",
 					Use: g.Use(authMiddleware.MiddlewareFunc()),
 					Handle: func(r gin.IRoutes) {
-					},
-					Children: g.Routers{
-						g.Router{ //菜单管理
-							Url: "/menu",
-							Handle: func(r gin.IRoutes) {
-								// api := adminapi.SysMenu{}
-								// r.GET("", api.GetPage)
-								// r.GET("/:id", api.Get)
-								// r.POST("", api.Insert)
-								// r.PUT("/:id", api.Update)
-								// r.DELETE("", api.Delete)
-							},
-						},
-						g.Router{ //左侧菜单
-							Url: "/menurole",
-							Handle: func(r gin.IRoutes) {
-								// api := adminapi.SysMenu{}
-								// r.GET("", api.GetMenuRole)
-							},
-						},
-						g.Router{ // 用户管理
-							Url: "/user",
-							Handle: func(r gin.IRoutes) {
-								// api := adminapi.SysUser{}
-								// r.GET("/profile", api.GetProfile)
-								// r.POST("/avatar", api.InsetAvatar)
-								// r.PUT("/pwd/set", api.UpdatePwd)
-								// r.PUT("/pwd/reset", api.ResetPwd)
-								// r.PUT("/status", api.UpdateStatus)
-							},
-						},
+						// api := adminapi.SysMenu{}
+						// r.GET("", api.GetPage)
+						// r.GET("/:id", api.Get)
+						// r.POST("", api.Insert)
+						// r.PUT("/:id", api.Update)
+						// r.DELETE("", api.Delete)
 					},
 				},
 				g.Router{ // 定时任务相关
