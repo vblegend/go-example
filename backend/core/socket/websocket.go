@@ -10,6 +10,7 @@ import (
 	"github.com/gorilla/websocket"
 )
 
+// https://learnku.com/articles/23560/using-golang-to-achieve-million-level-websocket-services
 type WebSocketEventListener interface {
 	// websocket  连接建立
 	WsOpen(client *Client)
@@ -304,6 +305,7 @@ func (manager *Manager) WsClient(c *gin.Context) {
 		// 处理 Sec-WebSocket-Protocol Header
 		Subprotocols: []string{c.GetHeader("Sec-WebSocket-Protocol")},
 	}
+	upGrader.CheckOrigin = func(r *http.Request) bool { return true }
 
 	conn, err := upGrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {

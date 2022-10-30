@@ -1,7 +1,6 @@
 package log
 
 import (
-	"context"
 	"io"
 )
 
@@ -14,8 +13,6 @@ type Options struct {
 	Out io.Writer
 	// Caller skip frame count for file:line info
 	CallerSkipCount int
-	// Alternative options
-	Context context.Context
 
 	Location bool
 }
@@ -45,14 +42,5 @@ func WithLocation(loc bool) Option {
 func WithCallerSkipCount(c int) Option {
 	return func(args *Options) {
 		args.CallerSkipCount = c
-	}
-}
-
-func SetOption(k, v interface{}) Option {
-	return func(o *Options) {
-		if o.Context == nil {
-			o.Context = context.Background()
-		}
-		o.Context = context.WithValue(o.Context, k, v)
 	}
 }
