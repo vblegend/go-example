@@ -13,6 +13,15 @@ import (
 	//"text/template"
 )
 
+func Testddddd(t *testing.T) {
+	// poller.Start(conn, netpoll.EventRead, func() {
+	// 	// We spawn goroutine here to prevent poller wait loop
+	// 	// to become locked during receiving packet from ch.
+	// 	go Receive(ch)
+	// })
+
+}
+
 func TestXxxddd(t *testing.T) {
 
 	a := flowtest.NewAddNode("", "")
