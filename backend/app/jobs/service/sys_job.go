@@ -1,7 +1,7 @@
 package service
 
 import (
-	"backend/core/sdk/service"
+	"backend/core/service"
 )
 
 type SysJobService struct {

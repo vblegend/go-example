@@ -3,7 +3,7 @@ Settings:
     Host: 0.0.0.0
     Mode: dev
     Name: Go-Example
-    Port: 8000
+    Port: 8080
     Https: false
     CertFile: ./config/server.pem
     KeyFile: ./config/server.key
@@ -35,15 +35,14 @@ Settings:
     Path: ./logs
     Enabled: true
   Queue:
-    Memory:
-      PoolSize: 100
+    PoolSize: 100
   Redis:
     db: 0
     host: 127.0.0.1
     password: 123456
     port: 6379
   Ssl:
-    Domain: localhost:8000
+    Domain: localhost:8080
     Enable: false
     Key: ./temp/domain.key
     Pem: ./temp/domain.crt

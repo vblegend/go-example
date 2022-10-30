@@ -2,10 +2,9 @@ package jobs
 
 import (
 	"backend/app/jobs/models"
-	"backend/common/database"
 	"backend/core/log"
 	"backend/core/sdk"
-	"backend/core/sdk/pkg/cronjob"
+	"backend/core/utils"
 	"sync"
 
 	"github.com/robfig/cron/v3"
@@ -18,9 +17,14 @@ var crontab *cron.Cron
 // 初始化
 func Setup() {
 	log.Info("JobCore Starting...")
-	db := sdk.Runtime.GetDb(database.Default)
-	sdk.Runtime.SetCrontab("*", cronjob.NewWithSeconds())
+	db := sdk.Runtime.GetDb("default")
 	crontab = sdk.Runtime.GetCrontab("*")
+	if crontab != nil {
+		crontab.Stop().Done()
+		crontab = nil
+	}
+	crontab = utils.NewCronEngine()
+	sdk.Runtime.SetCrontab("*", crontab)
 	sysJob := models.SysJob{}
 	jobList := make([]models.SysJob, 0)
 	err := db.Table(sysJob.TableName()).Find(&jobList).Error

@@ -1,9 +1,11 @@
 package commands
 
 import (
-	"backend/common/global"
-	"backend/core/console"
-	"backend/core/sdk/pkg"
+	"backend/common/assembly"
+	"backend/core/echo"
+	"backend/core/env"
+	"backend/core/futils"
+	"backend/core/shell"
 	"fmt"
 	"os"
 
@@ -14,26 +16,26 @@ var (
 	UnInstallCmd = &cobra.Command{
 		Use:     "uninstall",
 		Short:   "uninstall app service",
-		Example: fmt.Sprintf("%s service uninstall", global.AppFileName),
+		Example: fmt.Sprintf("%s service uninstall", assembly.AppFileName),
 		Run: func(cmd *cobra.Command, args []string) {
 
 			bashFile := ""
-			if pkg.IsUbuntu() {
-				bashFile = fmt.Sprintf(ubuntuPath, global.AppFileName)
-			} else if pkg.IsCentOS() {
-				bashFile = fmt.Sprintf(centosPath, global.AppFileName)
+			if env.System() == env.Linux_Ubuntu {
+				bashFile = fmt.Sprintf(ubuntuPath, assembly.AppFileName)
+			} else if env.System() == env.Linux_CentOS {
+				bashFile = fmt.Sprintf(centosPath, assembly.AppFileName)
 			}
-			if !pkg.FileExist(bashFile) {
-				fmt.Printf("服务[%s]...\n", console.Red("未部署"))
+			if !futils.FileExist(bashFile) {
+				fmt.Printf("服务[%s]...\n", echo.Red("未部署"))
 				os.Exit(0)
 			}
-			pkg.ExeCommand("systemctl", "stop", global.AppFileName)    // 停止服务
-			pkg.ExeCommand("systemctl", "disable", global.AppFileName) // 取消自启动
-			os.Remove(bashFile)                                        // 删除服务配置
-			os.Remove(fmt.Sprintf("/etc/systemd/system/multi-user.target.wants/%s.service", global.AppFileName))
-			os.Remove(fmt.Sprintf("/etc/systemd/system/%s.service", global.AppFileName))
-			pkg.ExeCommand("systemctl", "daemon-reload") // 重新加载服务配置
-			fmt.Printf("服务[%s]...\n", console.Green("已卸载"))
+			shell.ExeCommand("systemctl", "stop", assembly.AppFileName)    // 停止服务
+			shell.ExeCommand("systemctl", "disable", assembly.AppFileName) // 取消自启动
+			os.Remove(bashFile)                                            // 删除服务配置
+			os.Remove(fmt.Sprintf("/etc/systemd/system/multi-user.target.wants/%s.service", assembly.AppFileName))
+			os.Remove(fmt.Sprintf("/etc/systemd/system/%s.service", assembly.AppFileName))
+			shell.ExeCommand("systemctl", "daemon-reload") // 重新加载服务配置
+			fmt.Printf("服务[%s]...\n", echo.Green("已卸载"))
 			os.Exit(0)
 		},
 	}

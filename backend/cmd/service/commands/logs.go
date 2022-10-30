@@ -1,9 +1,9 @@
 package commands
 
 import (
-	"backend/common/global"
-	"backend/core/sdk/config"
-	"backend/core/sdk/pkg"
+	"backend/common/assembly"
+	"backend/common/config"
+	"backend/core/env"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -16,8 +16,8 @@ var (
 	lastLine int = 9999999
 	LogsCmd      = &cobra.Command{
 		Use:     "logs",
-		Short:   fmt.Sprintf("view %s service logs", global.AppFileName),
-		Example: fmt.Sprintf("%s service logs -l20", global.AppFileName),
+		Short:   fmt.Sprintf("view %s service logs", assembly.AppFileName),
+		Example: fmt.Sprintf("%s service logs -l20", assembly.AppFileName),
 		Run: func(cmd *cobra.Command, args []string) {
 			// servicelog := filepath.Join(config.LoggerConfig.Path, fmt.Sprintf("%s.%s", config.LoggerConfig.FileName, config.LoggerConfig.FileSuffix))
 			// data, err := os.ReadFile(servicelog)
@@ -25,15 +25,15 @@ var (
 			// 	fmt.Println(err)
 			// 	os.Exit(0)
 			// }
-			ymal := filepath.Join(pkg.AssemblyDir(), "/config/settings.yml")
+			ymal := filepath.Join(env.AssemblyDir, "/config/settings.yml")
 			config.Setup(ymal)
-			Rpath := filepath.Join(pkg.AssemblyDir(), config.LoggerConfig.Path, "*-*-*.log")
+			Rpath := filepath.Join(env.AssemblyDir, config.Logger.Path, "*-*-*.log")
 			files, err := filepath.Glob(Rpath)
 			if err != nil {
 				fmt.Println(err)
 				os.Exit(0)
 			}
-			filename := filepath.Join(pkg.AssemblyDir(), "logs.log")
+			filename := filepath.Join(env.AssemblyDir, "logs.log")
 			if len(files) > 0 {
 				filename = files[len(files)-1]
 			}

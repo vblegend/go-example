@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"path"
 
+	"backend/core/futils"
 	"backend/core/log"
-	"backend/core/sdk/pkg"
+	"backend/core/plugs"
 
-	"backend/core/sdk/pkg/utils"
-	"backend/core/sdk/service"
+	"backend/core/service"
 	"net/http"
 
 	vd "github.com/bytedance/go-tagexpr/v2/validator"
@@ -28,7 +28,6 @@ type AssertInterrupter struct {
 
 type Api struct {
 	Context *gin.Context
-	Logger  *log.Helper
 	Orm     *gorm.DB
 	Errors  error
 }
@@ -37,7 +36,7 @@ func (e *Api) AddError(err error) {
 	if e.Errors == nil {
 		e.Errors = err
 	} else if err != nil {
-		e.Logger.Error(err)
+		log.Error(err)
 		e.Errors = fmt.Errorf("%v; %w", e.Errors, err)
 	}
 }
@@ -45,13 +44,7 @@ func (e *Api) AddError(err error) {
 // MakeContext 设置http上下文
 func (e *Api) MakeContext(c *gin.Context) *Api {
 	e.Context = c
-	e.Logger = GetRequestLogger(c)
 	return e
-}
-
-// GetLogger 获取上下文提供的日志
-func (e Api) GetLogger() *log.Helper {
-	return GetRequestLogger(e.Context)
 }
 
 func (e *Api) BindUris(c ...interface{}) error {
@@ -77,7 +70,7 @@ func (e *Api) Bind(d interface{}, bindings ...binding.Binding) *Api {
 			err = e.Context.ShouldBindWith(d, bindings[i])
 		}
 		if err != nil && err.Error() == "EOF" {
-			e.Logger.Warn("request body is not present anymore. ")
+			log.Warn("request body is not present anymore. ")
 			err = nil
 			continue
 		}
@@ -97,12 +90,15 @@ func (e *Api) Bind(d interface{}, bindings ...binding.Binding) *Api {
 
 // GetOrm 获取Orm DB
 func (e Api) GetOrm() (*gorm.DB, error) {
-	db, err := pkg.GetOrm(e.Context)
-	if err != nil {
-		e.Logger.Error(http.StatusInternalServerError, err, "数据库连接获取失败")
-		return nil, err
+	var err error
+	db, ok := e.Context.Get("db")
+	if !ok {
+		err = errors.New("数据库连接获取失败")
+		log.Error(http.StatusInternalServerError, err, "")
+		e.AddError(err)
 	}
-	return db, nil
+	e.Orm = db.(*gorm.DB)
+	return e.Orm, err
 }
 
 func (e *Api) Make(c *gin.Context, s *service.Service) *Api {
@@ -111,25 +107,22 @@ func (e *Api) Make(c *gin.Context, s *service.Service) *Api {
 
 // MakeOrm 设置Orm DB
 func (e *Api) MakeOrm() *Api {
-	var err error
-	if e.Logger == nil {
-		err = errors.New("at MakeOrm logger is nil")
-		e.AddError(err)
-		return e
-	}
-	db, err := pkg.GetOrm(e.Context)
-	if err != nil {
-		e.Logger.Error(http.StatusInternalServerError, err, "数据库连接获取失败")
+	db, err := e.Context.Get("db")
+	if !err {
+		err := errors.New("数据库连接获取失败")
+		log.Error(http.StatusInternalServerError, err, "")
 		e.AddError(err)
 	}
-	e.Orm = db
+	e.Orm = db.(*gorm.DB)
 	return e
 }
 
 func (e *Api) MakeService(c *service.Service) *Api {
-	c.Log = e.Logger
 	c.Orm = e.Orm
-	c.RequestId = e.GetRequestId()
+	val, ok := e.Context.Get(plugs.TraceIdKey)
+	if ok {
+		c.RequestId = val.(string)
+	}
 	return e
 }
 
@@ -157,10 +150,6 @@ func (e Api) AssertError(err error, code int, message ...string) {
 	}
 }
 
-func (e Api) GetRequestId() string {
-	return e.Context.GetHeader(pkg.TrafficKey)
-}
-
 // PageOK 分页数据处理
 func (e Api) PageOK(result interface{}, count int, pageIndex int, pageSize int, msg string) {
 	PageOK(e.Context, result, count, pageIndex, pageSize, msg)
@@ -171,10 +160,6 @@ func (e Api) Custom(data gin.H) {
 	Custum(e.Context, data)
 }
 
-func (e Api) Translate(form, to interface{}) {
-	pkg.Translate(form, to)
-}
-
 //
 func (e *Api) SaveFileAs(filePath string) error {
 	files, err := e.Context.FormFile("file")
@@ -183,7 +168,7 @@ func (e *Api) SaveFileAs(filePath string) error {
 	}
 	// 上传文件至指定目录
 	dir := path.Dir(filePath)
-	err = utils.IsNotExistMkDir(dir)
+	err = futils.MkDirIfNotExist(dir)
 	if err != nil {
 		return err
 	}

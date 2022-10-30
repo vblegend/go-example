@@ -3,8 +3,8 @@ package jwtauth
 import (
 	"backend/app/admin/models"
 	"backend/core/log"
-	"backend/core/sdk/pkg"
 
+	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
 
@@ -21,7 +21,7 @@ func (u *LoginModel) Verify(tx *gorm.DB) (MapClaims, error) {
 		log.Errorf("get user error, %s", err.Error())
 		return nil, err
 	}
-	_, err = pkg.CompareHashAndPassword(user.Password, u.Password)
+	_, err = u.CompareHashAndPassword(user.Password, u.Password)
 	if err != nil {
 		log.Errorf("user login error, %s", err.Error())
 		return nil, err
@@ -30,4 +30,12 @@ func (u *LoginModel) Verify(tx *gorm.DB) (MapClaims, error) {
 		IdentityKey: user.UserId,
 		NiceKey:     user.NickName,
 	}, nil
+}
+
+func (u *LoginModel) CompareHashAndPassword(e string, p string) (bool, error) {
+	err := bcrypt.CompareHashAndPassword([]byte(e), []byte(p))
+	if err != nil {
+		return false, err
+	}
+	return true, nil
 }

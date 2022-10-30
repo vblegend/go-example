@@ -50,7 +50,7 @@ define buildLinux
 	@echo "当前版本：${BUILD_VERSION}"
 	@echo "构建时间：${BUILD_TIME}"
 	@echo "提交记录：${COMMIT_ID}"
-	@cd backend; CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build -ldflags "-X 'backend/common/global.Version=${BUILD_VERSION}' -X 'backend/common/global.BuildTime=${BUILD_TIME}' -X 'backend/common/global.CommitID=${COMMIT_ID}'" -o ./${APP_FILENAME} ./main.go
+	@cd backend; CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build -ldflags "-X 'backend/common/assembly.Version=${BUILD_VERSION}' -X 'backend/common/assembly.BuildTime=${BUILD_TIME}' -X 'backend/common/assembly.CommitID=${COMMIT_ID}'" -o ./${APP_FILENAME} ./main.go
 	@echo "编译完毕..."
 endef
 

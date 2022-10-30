@@ -28,12 +28,3 @@ type SysMenu struct {
 func (SysMenu) TableName() string {
 	return "sys_menu"
 }
-
-func (e *SysMenu) Generate() models.ActiveRecord {
-	o := *e
-	return &o
-}
-
-func (e *SysMenu) GetId() interface{} {
-	return e.MenuId
-}

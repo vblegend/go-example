@@ -3,8 +3,8 @@ package cmd
 import (
 	"backend/cmd/server"
 	"backend/cmd/service"
-	"backend/common/global"
-	"backend/core/console"
+	"backend/common/assembly"
+	"backend/core/echo"
 	"fmt"
 	"os"
 
@@ -14,19 +14,19 @@ import (
 var showVersion bool = false
 
 var rootCmd = &cobra.Command{
-	Use:               global.AppFileName,
+	Use:               assembly.AppFileName,
 	Short:             "服务器管理台",
 	SilenceUsage:      true,
-	Long:              global.AppFileName,
+	Long:              assembly.AppFileName,
 	PersistentPreRunE: func(*cobra.Command, []string) error { return nil },
 	PreRun: func(cmd *cobra.Command, args []string) {
 		if showVersion {
-			fmt.Printf("%s version %s build %s commit %s\n", console.Green(global.AppName), console.Green(global.Version), console.Green(global.BuildTime), console.Green(global.CommitID))
+			fmt.Printf("%s version %s build %s commit %s\n", echo.Green(assembly.AppFileName), echo.Green(assembly.Version), echo.Green(assembly.BuildTime), echo.Green(assembly.CommitID))
 			os.Exit(0)
 		}
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		global.PrintCobraHelp()
+		assembly.PrintCobraHelp()
 	},
 }
 
