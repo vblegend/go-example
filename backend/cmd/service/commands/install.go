@@ -1,9 +1,11 @@
 package commands
 
 import (
-	"backend/common/global"
-	"backend/core/console"
-	"backend/core/sdk/pkg"
+	"backend/common/assembly"
+	"backend/core/echo"
+	"backend/core/env"
+	"backend/core/futils"
+	"backend/core/shell"
 	"bytes"
 	"fmt"
 	"html/template"
@@ -111,8 +113,8 @@ func parseScriptTemplate(stemplate string) string {
 	}
 	buf := bytes.Buffer{}
 	t.Execute(&buf, map[string]interface{}{
-		"AppName": global.AppFileName,
-		"AppPath": pkg.AssemblyFile(),
+		"AppName": assembly.AppFileName,
+		"AppPath": env.AssemblyFile,
 	})
 	return buf.String()
 }
@@ -121,29 +123,29 @@ var (
 	InstallCmd = &cobra.Command{
 		Use:     "install",
 		Short:   "install app service",
-		Example: fmt.Sprintf("%s service install", global.AppFileName),
+		Example: fmt.Sprintf("%s service install", assembly.AppFileName),
 		Run: func(cmd *cobra.Command, args []string) {
 			script := ""
 			bashFile := ""
-			if pkg.IsUbuntu() {
+			if env.System() == env.Linux_Ubuntu {
 				script = parseScriptTemplate(ubuntuBash)
-				bashFile = fmt.Sprintf(ubuntuPath, global.AppFileName)
-			} else if pkg.IsCentOS() {
+				bashFile = fmt.Sprintf(ubuntuPath, assembly.AppFileName)
+			} else if env.System() == env.Linux_CentOS {
 				script = parseScriptTemplate(centosBash)
-				bashFile = fmt.Sprintf(centosPath, global.AppFileName)
+				bashFile = fmt.Sprintf(centosPath, assembly.AppFileName)
 			}
-			if pkg.FileExist(bashFile) {
-				fmt.Printf("服务[%s]...\n", console.Red("已部署"))
+			if futils.FileExist(bashFile) {
+				fmt.Printf("服务[%s]...\n", echo.Red("已部署"))
 				os.Exit(0)
 			}
-			pkg.ExeCommand("ln", "-s", "-f", pkg.AssemblyFile(), "/usr/bin/"+global.AppFileName) // 创建全局命令
-			os.WriteFile(bashFile, []byte(script), 0777)                                         //写入服务配置文件
-			pkg.ExeCommand("chmod", "777", bashFile)                                             // 给777权限，其实上一步已经给了
+			shell.ExeCommand("ln", "-s", "-f", env.AssemblyFile, "/usr/bin/"+assembly.AppFileName) // 创建全局命令
+			os.WriteFile(bashFile, []byte(script), 0777)                                           //写入服务配置文件
+			shell.ExeCommand("chmod", "777", bashFile)                                             // 给777权限，其实上一步已经给了
 			time.Sleep(time.Second)
-			pkg.ExeCommand("systemctl", "daemon-reload") //重新加载配置
+			shell.ExeCommand("systemctl", "daemon-reload") //重新加载配置
 			time.Sleep(time.Second)
-			pkg.ExeCommand("systemctl", "enable", global.AppFileName) //设置开机启动
-			fmt.Printf("服务[%s]...\n", console.Green("已部署"))
+			shell.ExeCommand("systemctl", "enable", assembly.AppFileName) //设置开机启动
+			fmt.Printf("服务[%s]...\n", echo.Green("已部署"))
 			os.Exit(0)
 		},
 	}

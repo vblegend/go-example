@@ -1,7 +1,7 @@
 package log
 
 import (
-	"backend/core/console"
+	"backend/core/echo"
 	"context"
 	"fmt"
 	"log"
@@ -97,12 +97,12 @@ func (l *defaultLogger) logf(level Level, format string, v ...interface{}) {
 		return
 	}
 	now := time.Now().Format("2006-01-02 15:04:05")
-	colord := console.Green
+	colord := echo.Green
 	if WarnLevel.Enabled(level) {
-		colord = console.Yellow
+		colord = echo.Yellow
 	}
 	if ErrorLevel.Enabled(level) {
-		colord = console.Red
+		colord = echo.Red
 	}
 	if l.opts.Location {
 		atFile := ""

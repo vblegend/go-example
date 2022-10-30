@@ -1,10 +1,10 @@
 package jwtauth
 
 import (
-	"backend/core/sdk/pkg"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 type Standard struct {
@@ -18,11 +18,11 @@ func (h *Standard) Authenticator(c *gin.Context) (interface{}, error) {
 	if err := c.ShouldBind(&login); err != nil {
 		return nil, ErrMissingLoginValues
 	}
-	db, err := pkg.GetOrm(c)
-	if err != nil {
+	db, ok := c.Get("db")
+	if !ok {
 		return nil, ErrFailedAuthentication
 	}
-	claims, err := login.Verify(db)
+	claims, err := login.Verify(db.(*gorm.DB))
 	if err != nil {
 		return nil, ErrFailedAuthentication
 	}

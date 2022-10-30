@@ -1,26 +1,26 @@
 package server
 
 import (
-	adminapi "backend/app/admin/apis"
 	jobModels "backend/app/jobs/models"
+	"backend/common/config"
 	"backend/common/middleware"
 	g "backend/core/groute"
 	"backend/core/jwtauth"
 	"backend/core/log"
+	"backend/core/plugs"
 	"backend/core/restful"
-	"backend/core/sdk/config"
-	"backend/core/sdk/pkg"
-	"backend/core/sdk/pkg/ws"
+	"backend/core/socket"
 
 	"backend/core/model"
 	"net/http"
 
 	"github.com/gin-contrib/pprof"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 func createAuthMiddleware() *jwtauth.GinJWTMiddleware {
-	mid, err := jwtauth.NewJWT(&jwtauth.Standard{})
+	mid, err := jwtauth.NewJWT(&jwtauth.Standard{}, config.Jwt.Timeout, config.Jwt.Secret)
 	if err != nil {
 		panic("初始化身份认证中间件失败。")
 	}
@@ -33,15 +33,14 @@ func GetRootRouter() g.Routers {
 		g.Router{ // 公共根路由
 			Url: "",
 			Use: g.Use(
-				restful.NewHttpsHandler(config.ApplicationConfig.Https),
-				middleware.RequestLogOut(log.GetLogger(), log.TraceLevel), // 请求日志
-				middleware.CustomError,               // 自定义异常处理
-				middleware.RequestId(pkg.TrafficKey), // 请求ID
-				restful.SetRequestLogger,             // 请求日志
-				middleware.WithContextDb,             // 数据连接
-				middleware.NoCache,                   // 禁用缓存
-				middleware.Options,                   // 跨域请求
-				middleware.Secure,                    // https相关
+				middleware.CustomError, // 自定义异常处理
+				plugs.NewHttpsHandler(config.Application.Https, config.Application.Domain, uint(config.Application.Port)),
+				plugs.RequestLogOut(log.GetLogger(), log.TraceLevel), // 请求日志
+				plugs.TraceId("requestId", uuid.NewString),           // 请求UUID
+				plugs.WithContextDB("default"),                       // 数据连接
+				plugs.NoCache,                                        // 禁用缓存
+				plugs.Options,                                        // 跨域请求
+				plugs.Secure,                                         // https相关
 			),
 			Children: GetApiRouter(authMiddleware),
 		},
@@ -52,7 +51,7 @@ func GetApiRouter(authMiddleware *jwtauth.GinJWTMiddleware) g.Routers {
 	return g.Routers{
 		g.Router{ // websocket 连接
 			Url: "debug",
-			Use: g.Use(restful.NewWWWAuthenticator("admin", "admin")),
+			Use: g.Use(plugs.WWWAuthenticator("admin", "admin")),
 			Handle: func(r gin.IRoutes) {
 				pprof.RouteRegister(r.(*gin.RouterGroup), "/")
 			},
@@ -60,13 +59,13 @@ func GetApiRouter(authMiddleware *jwtauth.GinJWTMiddleware) g.Routers {
 		g.Router{ // websocket 连接
 			Url: "/ws/:id/:channel",
 			Handle: func(r gin.IRoutes) {
-				r.GET("", ws.WebsocketManager.WsClient)
+				r.GET("", socket.WebsocketManager.WsClient)
 			},
 		},
 		g.Router{ // websocket 注销
 			Url: "/wslogout/:id/:channel",
 			Handle: func(r gin.IRoutes) {
-				r.GET("", ws.WebsocketManager.UnWsClient)
+				r.GET("", socket.WebsocketManager.UnWsClient)
 			},
 		},
 		g.Router{
@@ -82,11 +81,11 @@ func GetApiRouter(authMiddleware *jwtauth.GinJWTMiddleware) g.Routers {
 					Url: "",
 					Use: g.Use(authMiddleware.MiddlewareFunc()),
 					Handle: func(r gin.IRoutes) {
-						api := adminapi.SysMenu{}
-						r.GET("/roleMenuTreeselect/:roleId", api.GetMenuTreeSelect)
-						r.POST("/logout", jwtauth.LogOut)
-						user := adminapi.SysUser{}
-						r.GET("/getinfo", user.GetInfo)
+						// api := adminapi.SysMenu{}
+						// r.GET("/roleMenuTreeselect/:roleId", api.GetMenuTreeSelect)
+						// r.POST("/logout", jwtauth.LogOut)
+						// user := adminapi.SysUser{}
+						// r.GET("/getinfo", user.GetInfo)
 					},
 				},
 				g.Router{ // 系统API
@@ -98,30 +97,30 @@ func GetApiRouter(authMiddleware *jwtauth.GinJWTMiddleware) g.Routers {
 						g.Router{ //菜单管理
 							Url: "/menu",
 							Handle: func(r gin.IRoutes) {
-								api := adminapi.SysMenu{}
-								r.GET("", api.GetPage)
-								r.GET("/:id", api.Get)
-								r.POST("", api.Insert)
-								r.PUT("/:id", api.Update)
-								r.DELETE("", api.Delete)
+								// api := adminapi.SysMenu{}
+								// r.GET("", api.GetPage)
+								// r.GET("/:id", api.Get)
+								// r.POST("", api.Insert)
+								// r.PUT("/:id", api.Update)
+								// r.DELETE("", api.Delete)
 							},
 						},
 						g.Router{ //左侧菜单
 							Url: "/menurole",
 							Handle: func(r gin.IRoutes) {
-								api := adminapi.SysMenu{}
-								r.GET("", api.GetMenuRole)
+								// api := adminapi.SysMenu{}
+								// r.GET("", api.GetMenuRole)
 							},
 						},
 						g.Router{ // 用户管理
 							Url: "/user",
 							Handle: func(r gin.IRoutes) {
-								api := adminapi.SysUser{}
-								r.GET("/profile", api.GetProfile)
-								r.POST("/avatar", api.InsetAvatar)
-								r.PUT("/pwd/set", api.UpdatePwd)
-								r.PUT("/pwd/reset", api.ResetPwd)
-								r.PUT("/status", api.UpdateStatus)
+								// api := adminapi.SysUser{}
+								// r.GET("/profile", api.GetProfile)
+								// r.POST("/avatar", api.InsetAvatar)
+								// r.PUT("/pwd/set", api.UpdatePwd)
+								// r.PUT("/pwd/reset", api.ResetPwd)
+								// r.PUT("/status", api.UpdateStatus)
 							},
 						},
 					},

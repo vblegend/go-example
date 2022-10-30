@@ -2,7 +2,7 @@ package service
 
 import (
 	"backend/cmd/service/commands"
-	"backend/common/global"
+	"backend/common/assembly"
 	"backend/core/log"
 	"fmt"
 	"os"
@@ -15,8 +15,8 @@ var (
 	ServiceCmd = &cobra.Command{
 		Use:               "service",
 		SilenceUsage:      true,
-		Short:             fmt.Sprintf("%s control service", global.AppFileName),
-		Example:           fmt.Sprintf("%s service start/stop/restart/install/uninstall/status", global.AppFileName),
+		Short:             fmt.Sprintf("%s control service", assembly.AppFileName),
+		Example:           fmt.Sprintf("%s service start/stop/restart/install/uninstall/status", assembly.AppFileName),
 		PersistentPreRunE: func(*cobra.Command, []string) error { return nil },
 		Args: func(cmd *cobra.Command, args []string) error {
 			if runtime.GOOS != "linux" {
@@ -24,7 +24,7 @@ var (
 				os.Exit(1)
 			}
 			if len(args) < 1 {
-				global.PrintCobraHelp()
+				assembly.PrintCobraHelp()
 				os.Exit(1)
 			}
 			cmds := cmd.Commands()
@@ -33,7 +33,7 @@ var (
 					return nil
 				}
 			}
-			global.PrintCobraHelp()
+			assembly.PrintCobraHelp()
 			os.Exit(1)
 			return nil
 		},

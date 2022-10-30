@@ -4,26 +4,24 @@ import (
 	"context"
 	"fmt"
 
-	"backend/core/console"
+	"backend/common/assembly"
+	"backend/common/config"
+	"backend/core/echo"
+	"backend/core/env"
 	g "backend/core/groute"
 	"backend/core/log"
-	"backend/core/sdk/config"
-	"backend/core/sdk/pkg"
+	"backend/core/network"
 	"backend/core/system"
-	"backend/migration"
 	_ "backend/migration/versions" // 这个是数据迁移的 不能删
 	"net/http"
 	"os"
-	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/cobra"
 
 	"backend/app/jobs"
-	"backend/common/database"
-	"backend/common/global"
-	"backend/common/storage"
+	"backend/common/initialize"
 )
 
 var (
@@ -48,32 +46,35 @@ func init() {
 	StartCmd.PersistentFlags().BoolVarP(&apiCheck, "api", "a", false, "Start server with check api data")
 }
 
-func printLogo() {
-	log.Print(console.Yellow(strings.Join(global.LogoContent, "\n")) + fmt.Sprintf(" %s %s (%s)\n", console.Green(config.ApplicationConfig.Mode), console.Red("V"+global.Version), global.BuildTime))
-
-}
-
 func setup() {
-	err := pkg.RunOfOnec()
+
+	err := assembly.RunOfOnec()
 	if err != nil {
-		log.Print(console.Red("service instance is running..."))
-		log.Print(console.Red("service exit, code = 100"))
+		log.Print(echo.Red("service instance is running..."))
+		log.Print(echo.Red("service exit, code = 100"))
 		os.Exit(100)
 	}
 	//1. 读取配置
 	config.Setup(
 		configYml,
-		printLogo,
+		// 初始化运行模式
+		initialize.InitRunMode,
+		// 初始化日志
+		initialize.InitLogger,
+		// 打印logo
+		initialize.PrintLogo,
 		// 1.初始化SQLite连接
-		database.InitDatabase,
+		initialize.InitSQLDB,
+		// 1.初始化SQLite连接
+		initialize.InitRedisDB,
 		// 2.执行数据升级&迁移
-		migration.DataBaseMigrate,
+		initialize.InitMigration,
 		// 开发模式显示菜单
-		database.Development,
+		initialize.InitDevelopmentMenu,
 		// 初始化 redis
-		database.InitRedisDB,
+		initialize.InitRedisDB,
 		// 时序数据库、队列、缓存 初始化
-		storage.Setup,
+		initialize.InitCache,
 		// 任务自动化
 		jobs.Setup,
 	)
@@ -82,7 +83,7 @@ func setup() {
 
 func run() error {
 	engine := gin.New()
-	if config.ApplicationConfig.Mode == pkg.Production {
+	if env.ModeIs(env.Production) {
 		gin.SetMode(gin.ReleaseMode)
 	} else {
 		gin.SetMode(gin.DebugMode)
@@ -93,17 +94,17 @@ func run() error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	srv := &http.Server{
-		Addr:    fmt.Sprintf("%s:%d", config.ApplicationConfig.Host, config.ApplicationConfig.Port),
+		Addr:    fmt.Sprintf("%s:%d", config.Application.Host, config.Application.Port),
 		Handler: engine,
 	}
-	log.Info(console.Green("Server run at:"))
-	for _, ip := range pkg.GetIpAddress() {
-		log.Infof("- %s://%s:%d/", config.ApplicationConfig.GetHttpProtocol(), ip, config.ApplicationConfig.Port)
+	log.Info(echo.Green("Server run at:"))
+	for _, ip := range network.LocalIpAddres() {
+		log.Infof("- %s://%s:%d/", config.Application.GetHttpProtocol(), ip, config.Application.Port)
 	}
 	go func() {
 		// 服务连接
-		if config.ApplicationConfig.Https {
-			if err := srv.ListenAndServeTLS(config.ApplicationConfig.CertFile, config.ApplicationConfig.KeyFile); err != nil && err != http.ErrServerClosed {
+		if config.Application.Https {
+			if err := srv.ListenAndServeTLS(config.Application.CertFile, config.Application.KeyFile); err != nil && err != http.ErrServerClosed {
 				log.Fatal("listen: ", err)
 			}
 		} else {
@@ -116,7 +117,7 @@ func run() error {
 	log.Info("Enter Control + C Shutdown Server")
 	// 等待中断信号以优雅地关闭服务器（设置 5 秒的超时时间）
 	system.WaitQuitSignal()
-	log.Info(console.Yellow("The server is shut down .... "))
+	log.Info(echo.Yellow("The server is shut down .... "))
 	if err := srv.Shutdown(ctx); err != nil {
 		log.Fatal("Server Shutdown:", err)
 	}

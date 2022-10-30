@@ -1,9 +1,8 @@
 package jwtauth
 
 import (
-	"backend/core/sdk/pkg"
+	"backend/core/env"
 
-	"backend/core/sdk/config"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -24,18 +23,18 @@ type IJWTAuth interface {
 }
 
 // AuthInit jwt验证new
-func NewJWT(jwtAuth IJWTAuth) (*GinJWTMiddleware, error) {
+func NewJWT(jwtAuth IJWTAuth, _timeout int64, secret string) (*GinJWTMiddleware, error) {
 	timeout := time.Hour
-	if config.ApplicationConfig.Mode == pkg.Develop {
+	if env.ModeIs(env.Develop) {
 		timeout = time.Duration(876010) * time.Hour
 	} else {
-		if config.JwtConfig.Timeout != 0 {
-			timeout = time.Duration(config.JwtConfig.Timeout) * time.Second
+		if _timeout != 0 {
+			timeout = time.Duration(_timeout) * time.Second
 		}
 	}
 	middleware := GinJWTMiddleware{
 		Realm:           "test zone",
-		Key:             []byte(config.JwtConfig.Secret),
+		Key:             []byte(secret),
 		Timeout:         timeout,
 		MaxRefresh:      time.Hour,
 		PayloadFunc:     jwtAuth.PayloadFunc,

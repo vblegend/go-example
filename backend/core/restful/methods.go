@@ -1,11 +1,10 @@
 package restful
 
 import (
+	"backend/core/plugs"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-
-	"backend/core/sdk/pkg"
 )
 
 var Default = &response{}
@@ -19,7 +18,7 @@ func Error(c *gin.Context, code int, err error, msg string) {
 	if msg != "" {
 		res.SetMsg(msg)
 	}
-	res.SetTraceID(pkg.GenerateMsgIDFromContext(c))
+	res.SetTraceID(GetTraceId(c))
 	res.SetCode(int32(code))
 	res.SetSuccess(false)
 	c.Set("result", res)
@@ -35,7 +34,7 @@ func OK(c *gin.Context, data interface{}, msg string) {
 	if msg != "" {
 		res.SetMsg(msg)
 	}
-	res.SetTraceID(pkg.GenerateMsgIDFromContext(c))
+	res.SetTraceID(GetTraceId(c))
 	res.SetCode(http.StatusOK)
 	c.Set("result", res)
 	c.Set("status", http.StatusOK)
@@ -54,7 +53,11 @@ func PageOK(c *gin.Context, result interface{}, count int, pageIndex int, pageSi
 
 // Custum 兼容函数
 func Custum(c *gin.Context, data gin.H) {
-	data["requestId"] = pkg.GenerateMsgIDFromContext(c)
+	data["traceId"] = GetTraceId(c)
 	c.Set("result", data)
 	c.AbortWithStatusJSON(http.StatusOK, data)
+}
+
+func GetTraceId(c *gin.Context) string {
+	return c.MustGet(plugs.TraceIdKey).(string)
 }
