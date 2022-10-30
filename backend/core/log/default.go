@@ -90,7 +90,7 @@ func (l *defaultLogger) logf(level Level, format string, v ...interface{}) {
 		message = fmt.Sprintf(format, v...)
 	}
 	if level == PrintLevel {
-		_, err := l.opts.Out.Write([]byte(message))
+		_, err := l.opts.Out.Write(append([]byte(message), '\n'))
 		if err != nil {
 			log.Printf("log [Logf] write error: %s \n", err.Error())
 		}
