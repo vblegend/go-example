@@ -29,11 +29,6 @@ func Print(args ...interface{}) {
 	loger.Log(PrintLevel, args...)
 }
 
-func Println(args ...interface{}) {
-	loger.Log(PrintLevel, append(args, '\n')...)
-
-}
-
 // 无条件必定输出 且不遵守日志格式
 func Printf(template string, args ...interface{}) {
 	loger.Logf(PrintLevel, template, args...)

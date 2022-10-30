@@ -18,9 +18,10 @@ var (
 func DataBaseMigrate() {
 	log.Info(echo.Green("Start Patch Upgrade..."))
 	db := sdk.Runtime.GetDb("default")
-	err := db.Debug().AutoMigrate(&models.Migration{})
+	err := db.AutoMigrate(&models.Migration{})
 	if err != nil {
-		return
+		log.Errorf("Table Migration Migrate Fail.. %s\n", echo.Red(err.Error()))
+		panic(0)
 	}
 	versions := make([]string, 0)
 	for k := range version {

@@ -13,7 +13,6 @@ import (
 )
 
 type gormLogger struct {
-	// logger.Config
 	logger Logger
 }
 
