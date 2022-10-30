@@ -6,3 +6,5 @@ backend/logs
 backend/static/www
 # Dependency directories (remove the comment below to include it)
 # vendor/
+backend/__debug_bin
+backend/sqlite.db
