@@ -18,7 +18,7 @@ require (
 	gorm.io/driver/mysql v1.4.3 // mysql 连接库
 	gorm.io/driver/sqlite v1.4.3 // sqlite 连接库
 	gorm.io/gorm v1.24.0 // go orm框架
-	gorm.io/plugin/dbresolver v1.3.0 // orm 多数据库支持
+	gorm.io/plugin/dbresolver v1.3.0 // orm 数据库设置
 
 )
 
@@ -29,14 +29,19 @@ require (
 )
 
 require (
+	// golang.org/x/net v0.0.0-20220615171555-694bf12d69de // indirect
 	golang.org/x/net v0.1.0
 	golang.org/x/sys v0.1.0 // indirect
 )
 
-require gopkg.in/yaml.v2 v2.4.0
+require (
+	github.com/jolestar/go-commons-pool v2.0.0+incompatible
+	gopkg.in/yaml.v2 v2.4.0
+)
 
 require (
 	github.com/andeya/goutil v0.0.0-20220704075712-42f2ec55fe8d // indirect
+	github.com/fortytw2/leaktest v1.3.0 // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect
 	github.com/go-sql-driver/mysql v1.6.0 // indirect
 	github.com/goccy/go-json v0.9.11 // indirect
