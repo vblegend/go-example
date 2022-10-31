@@ -2,6 +2,7 @@ package ws
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -101,6 +102,12 @@ func (ws *WSManager) readLoop(channel *WSChannel, client *WSClient) {
 			if err != nil || messageType == websocket.CloseMessage {
 				return
 			}
+			msg, err := MallocMessage()
+
+			json.Unmarshal(message, msg)
+
+			ws.datarecv(client, msg)
+
 			channel.lock.Lock()
 			for i := 0; i < len(channel.eventListeners); i++ {
 				channel.eventListeners[i].OnMessage(client, MessageType(messageType), message)
@@ -108,4 +115,8 @@ func (ws *WSManager) readLoop(channel *WSChannel, client *WSClient) {
 			channel.lock.Unlock()
 		}
 	}
+}
+
+func (ws *WSManager) datarecv(client *WSClient, msg *RequestMessage) {
+
 }

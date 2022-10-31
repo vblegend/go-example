@@ -37,8 +37,10 @@ const (
 	JoinChannel = RequestAction(-127)
 	// 离开频道
 	LevelChannel = RequestAction(127)
-	// 传输数据
-	TransferData = RequestAction(0)
+	// 传输数据 仅发送 不需要考虑响应
+	TransferPost = RequestAction(64)
+	// 传输数据 发送后需要回应
+	TransferSend = RequestAction(-64)
 )
 
 type RequestMessage struct {
