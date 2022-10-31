@@ -1,5 +1,12 @@
 package ws
 
+import (
+	"encoding/json"
+	"errors"
+)
+
+var ErrorJsonUnmarshalFail = errors.New("invalid json string")
+
 type MessageType int
 
 const (
@@ -37,8 +44,10 @@ const (
 	JoinChannel = RequestAction(-127)
 	// 离开频道
 	LevelChannel = RequestAction(127)
-	// 传输数据
-	TransferData = RequestAction(0)
+	// 传输数据 仅发送 不需要考虑响应
+	TransferPost = RequestAction(64)
+	// 传输数据 发送后需要回应
+	TransferSend = RequestAction(-64)
 )
 
 type RequestMessage struct {
@@ -50,6 +59,23 @@ type RequestMessage struct {
 	TraceId string `json:"traceId"`
 	// 数据负载
 	Payload []byte `json:"payload"`
+}
+
+func (r *RequestMessage) Unmarshal(data []byte) error {
+	if err := json.Unmarshal(data, r); err != nil {
+		return err
+	}
+	// Name不能为空
+	if r.Action == 0 {
+		return ErrorJsonUnmarshalFail
+	}
+	if r.Channel == "" {
+		return ErrorJsonUnmarshalFail
+	}
+	if r.TraceId == "" {
+		return ErrorJsonUnmarshalFail
+	}
+	return nil
 }
 
 type ResponseMessage struct {

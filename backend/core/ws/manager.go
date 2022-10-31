@@ -37,6 +37,10 @@ func (ws *WSManager) GetChannel(channel string) *WSChannel {
 	return ws.channels[channel]
 }
 
+func (ws *WSManager) RegisterChannel(channel *WSChannel) error {
+	return nil
+}
+
 func (ws *WSManager) parseParams(c *gin.Context) url.Values {
 	params := c.Request.URL.Query()
 	if _, ok := c.GetQuery("clientId"); !ok {
@@ -77,18 +81,19 @@ func (ws *WSManager) AcceptHandler(c *gin.Context) {
 		cancel()
 		return
 	}
-	client := &WSClient{conn, ctx, cancel, clientId, channelName, params}
+	client := NewWSClient(conn, ctx, cancel, clientId)
 	go channel.register(client)
-	go ws.readLoop(channel, client)
+	go ws.readLoop(client)
 }
 
-func (ws *WSManager) readLoop(channel *WSChannel, client *WSClient) {
+func (ws *WSManager) readLoop(client *WSClient) {
 	defer func() {
-		channel.unRegister(client)
-		if channel.CanDestroy() {
-			delete(ws.channels, channel.Name)
+		// 下线 退出所有频道
+		for _, channel := range client.channels {
+			channel.unRegister(client)
 		}
 	}()
+
 	for {
 		select {
 		case <-client.Context.Done():
@@ -101,11 +106,82 @@ func (ws *WSManager) readLoop(channel *WSChannel, client *WSClient) {
 			if err != nil || messageType == websocket.CloseMessage {
 				return
 			}
+			if msg, err := MallocRequestMessage(); err == nil {
+				if err = msg.Unmarshal(message); err == nil {
+					ws.datarecv(client, msg)
+				}
+				FreeRequestMessage(msg)
+			}
+		}
+	}
+}
+
+var InvalidChannelName = []byte("无效的频道号")
+var CannotJoinChannelRepeated = []byte("不能重复加入频道")
+var NotInChannel = []byte("未在此频道内")
+
+func (ws *WSManager) datarecv(client *WSClient, msg *RequestMessage) {
+	defer func() {
+		_ = recover()
+	}()
+	channel := ws.channels[msg.Channel]
+
+	switch msg.Action {
+	case JoinChannel:
+		{
+			if channel == nil {
+				client.Write(nil, Failure, msg.TraceId, InvalidChannelName)
+				return
+			}
+			if client.HasChannel(msg.Channel) {
+				client.Write(nil, Failure, msg.TraceId, CannotJoinChannelRepeated)
+			}
+			channel.register(client)
+		}
+	case LevelChannel:
+		{
+			if channel == nil {
+				client.Write(nil, Failure, msg.TraceId, InvalidChannelName)
+				return
+			}
+			if !client.HasChannel(msg.Channel) {
+				client.Write(nil, Failure, msg.TraceId, NotInChannel)
+			}
+			channel.unRegister(client)
+		}
+	case TransferPost:
+		{
+			if channel == nil {
+				client.Write(nil, Failure, msg.TraceId, InvalidChannelName)
+				return
+			}
 			channel.lock.Lock()
 			for i := 0; i < len(channel.eventListeners); i++ {
-				channel.eventListeners[i].OnMessage(client, MessageType(messageType), message)
+				channel.eventListeners[i].OnMessage(client, msg)
 			}
 			channel.lock.Unlock()
 		}
+	case TransferSend:
+		{
+			if channel == nil {
+				client.Write(nil, Failure, msg.TraceId, InvalidChannelName)
+				return
+			}
+
+		}
+	default:
+		{
+
+		}
 	}
+	// 业务对象 声明一个 Channel  注册进Manager
+	// Client直接加入至Channel
+
+	// defer func() {
+	// 	channel.unRegister(client)
+	// 	if channel.CanDestroy() {
+	// 		delete(ws.channels, channel.Name)
+	// 	}
+	// }()
+
 }

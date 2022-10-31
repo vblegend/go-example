@@ -19,7 +19,7 @@ func Test_WebSocket(t *testing.T) {
 	go func() {
 		for i := 0; i < 10000; i++ {
 			for cancel := 0; cancel < 100; cancel++ {
-				channel.BroadcastTextMessage(fmt.Sprintf("这是第%d条消息", cancel))
+				channel.BroadcastTextMessage(Success, "", fmt.Sprintf("这是第%d条消息", cancel))
 			}
 			time.Sleep(time.Second)
 		}
@@ -42,8 +42,8 @@ func (wd *wsDemo) OnLeave(client *WSClient) {
 }
 
 // websocket  连接断开
-func (wd *wsDemo) OnMessage(client *WSClient, msgType MessageType, message []byte) {
+func (wd *wsDemo) OnMessage(client *WSClient, msg *RequestMessage) {
 
-	fmt.Printf("收到消息：id:%s, content:%s\n", client.ConnectId, string(message))
-	client.SendJsonMessage(wd)
+	fmt.Printf("收到消息：id:%s, content:%s\n", client.ConnectId, string(msg.Payload))
+	client.Write(nil, Success, msg.TraceId, []byte(""))
 }
