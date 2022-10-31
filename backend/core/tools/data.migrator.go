@@ -57,19 +57,19 @@ func (dm *DataMigrator) Migrate(db *gorm.DB) error {
 		if err != nil {
 			switch errStr := err.(type) {
 			case PatchException:
-				log.Print(echo.Green("=================================================== PATCH-ERROR ==================================================="))
-				log.Println(echo.Yellow(errStr.script))
-				log.Print(echo.Green("↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓"))
-				log.Println(echo.Red(errStr.excption.Error()))
-				log.Print(echo.Green("=================================================== PATCH-ERROR ==================================================="))
+				log.Error(echo.Green("=================================================== PATCH-ERROR ==================================================="))
+				log.Error(echo.Yellow(errStr.script))
+				log.Error(echo.Green("↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓"))
+				log.Error(echo.Red(errStr.excption.Error()))
+				log.Error(echo.Green("=================================================== PATCH-ERROR ==================================================="))
 			case error:
-				log.Print(echo.Green("=================================================== PATCH-ERROR ==================================================="))
-				log.Println(echo.Red(errStr.Error()))
-				log.Print(echo.Green("=================================================== PATCH-ERROR ==================================================="))
+				log.Error(echo.Green("=================================================== PATCH-ERROR ==================================================="))
+				log.Error(echo.Red(errStr.Error()))
+				log.Error(echo.Green("=================================================== PATCH-ERROR ==================================================="))
 			default:
-				log.Print(echo.Green("=================================================== PATCH-ERROR ==================================================="))
-				log.Println(echo.Red(fmt.Sprintf("%v", errStr)))
-				log.Print(echo.Green("=================================================== PATCH-ERROR ==================================================="))
+				log.Error(echo.Green("=================================================== PATCH-ERROR ==================================================="))
+				log.Error(echo.Red(fmt.Sprintf("%v", errStr)))
+				log.Error(echo.Green("=================================================== PATCH-ERROR ==================================================="))
 			}
 			log.Errorf("Update failed, data rolled back...")
 		}
@@ -90,11 +90,11 @@ func (dm *DataMigrator) Migrate(db *gorm.DB) error {
 // 执行一段MYSQL脚本，如果执行失败则会返回error
 func (dm *DataMigrator) ExecSql(db *gorm.DB, script string) error {
 	if err := db.Exec(script).Error; err != nil {
-		log.Print(echo.Green("=================================================== PATCH-ERROR ==================================================="))
-		log.Println(echo.Yellow(script))
-		log.Print(echo.Green("↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓"))
-		log.Println(echo.Red(err.Error()))
-		log.Print(echo.Green("=================================================== PATCH-ERROR ==================================================="))
+		log.Error(echo.Green("=================================================== PATCH-ERROR ==================================================="))
+		log.Error(echo.Yellow(script))
+		log.Error(echo.Green("↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓"))
+		log.Error(echo.Red(err.Error()))
+		log.Error(echo.Green("=================================================== PATCH-ERROR ==================================================="))
 		if !strings.Contains(err.Error(), "Query was empty") {
 			return err
 		}
@@ -123,11 +123,11 @@ func (dm *DataMigrator) ExecSqlFile(db *gorm.DB, filePath string) error {
 			continue
 		}
 		if err = db.Exec(sql).Error; err != nil {
-			log.Print(echo.Green("=================================================== PATCH-ERROR ==================================================="))
-			log.Println(echo.Yellow(sql))
-			log.Print(echo.Green("↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓"))
-			log.Println(echo.Red(err.Error()))
-			log.Print(echo.Green("=================================================== PATCH-ERROR ==================================================="))
+			log.Error(echo.Green("=================================================== PATCH-ERROR ==================================================="))
+			log.Error(echo.Yellow(sql))
+			log.Error(echo.Green("↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓"))
+			log.Error(echo.Red(err.Error()))
+			log.Error(echo.Green("=================================================== PATCH-ERROR ==================================================="))
 			if !strings.Contains(err.Error(), "Query was empty") {
 				return err
 			}

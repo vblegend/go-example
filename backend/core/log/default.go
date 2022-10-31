@@ -2,21 +2,16 @@ package log
 
 import (
 	"backend/core/echo"
-	"context"
 	"fmt"
 	"log"
 	"os"
 	"runtime"
 	"strings"
-	"sync"
 	"time"
 )
 
 type defaultLogger struct {
-	sync.RWMutex
 	opts Options
-	// fields to always be logged
-	fields map[string]interface{}
 }
 
 // Init (opts...) should only overwrite provided options
@@ -29,21 +24,6 @@ func (l *defaultLogger) Init(opts ...Option) error {
 
 func (l *defaultLogger) String() string {
 	return "default"
-}
-
-func (l *defaultLogger) Fields(fields map[string]interface{}) Logger {
-	l.Lock()
-	l.fields = copyFields(fields)
-	l.Unlock()
-	return l
-}
-
-func copyFields(src map[string]interface{}) map[string]interface{} {
-	dst := make(map[string]interface{}, len(src))
-	for k, v := range src {
-		dst[k] = v
-	}
-	return dst
 }
 
 // logCallerfilePath returns a package/file:line description of the caller,
@@ -90,7 +70,7 @@ func (l *defaultLogger) logf(level Level, format string, v ...interface{}) {
 		message = fmt.Sprintf(format, v...)
 	}
 	if level == PrintLevel {
-		_, err := l.opts.Out.Write([]byte(message))
+		_, err := l.opts.Out.Write(append([]byte(message), '\n'))
 		if err != nil {
 			log.Printf("log [Logf] write error: %s \n", err.Error())
 		}
@@ -116,14 +96,11 @@ func (l *defaultLogger) logf(level Level, format string, v ...interface{}) {
 	if err != nil {
 		log.Printf("log [Logf] write error: %s \n", err.Error())
 	}
-
 }
 
 func (l *defaultLogger) Options() Options {
 	// not guard against options Context values
-	l.RLock()
 	opts := l.opts
-	l.RUnlock()
 	return opts
 }
 
@@ -134,9 +111,8 @@ func NewLogger(opts ...Option) Logger {
 		Level:           InfoLevel,
 		Out:             os.Stderr,
 		CallerSkipCount: 3,
-		Context:         context.Background(),
 	}
-	l := &defaultLogger{opts: options, fields: make(map[string]interface{})}
+	l := &defaultLogger{opts: options}
 	if err := l.Init(opts...); err != nil {
 		l.Log(FatalLevel, err)
 	}

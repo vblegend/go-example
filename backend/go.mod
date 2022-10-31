@@ -34,10 +34,14 @@ require (
 	golang.org/x/sys v0.1.0 // indirect
 )
 
-require gopkg.in/yaml.v2 v2.4.0
+require (
+	github.com/jolestar/go-commons-pool v2.0.0+incompatible
+	gopkg.in/yaml.v2 v2.4.0
+)
 
 require (
 	github.com/andeya/goutil v0.0.0-20220704075712-42f2ec55fe8d // indirect
+	github.com/fortytw2/leaktest v1.3.0 // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect
 	github.com/go-sql-driver/mysql v1.6.0 // indirect
 	github.com/goccy/go-json v0.9.11 // indirect
@@ -47,7 +51,6 @@ require (
 	github.com/inconshreveable/mousetrap v1.0.1 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
-	github.com/jolestar/go-commons-pool v2.0.0+incompatible // indirect
 	github.com/leodido/go-urn v1.2.1 // indirect
 	github.com/magiconair/properties v1.8.6 // indirect
 	github.com/mattn/go-isatty v0.0.16 // indirect
