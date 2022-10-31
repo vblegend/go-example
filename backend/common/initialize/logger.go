@@ -24,7 +24,7 @@ func InitLogger() {
 
 	var output io.Writer = os.Stdout
 	if config.Logger.Enabled {
-		fileout, err := writer.NewFileWriter(
+		fileout, err := writer.NewShardFileWriter(
 			writer.WithPath(logPath),
 			writer.WithFileName(config.Logger.FileName),
 			writer.WithSuffix(config.Logger.FileSuffix),

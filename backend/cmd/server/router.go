@@ -9,7 +9,7 @@ import (
 	"backend/core/log"
 	"backend/core/plugs"
 	"backend/core/restful"
-	"backend/core/socket"
+	"backend/core/ws"
 
 	"backend/core/model"
 	"net/http"
@@ -57,15 +57,9 @@ func GetApiRouter(authMiddleware *jwtauth.GinJWTMiddleware) g.Routers {
 			},
 		},
 		g.Router{ // websocket 连接
-			Url: "/ws/:id/:channel",
+			Url: "/ws",
 			Handle: func(r gin.IRoutes) {
-				r.GET("", socket.WebsocketManager.WsClient)
-			},
-		},
-		g.Router{ // websocket 注销
-			Url: "/wslogout/:id/:channel",
-			Handle: func(r gin.IRoutes) {
-				r.GET("", socket.WebsocketManager.UnWsClient)
+				r.GET("", ws.Default.AcceptHandler)
 			},
 		},
 		g.Router{

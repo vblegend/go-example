@@ -2,9 +2,11 @@ package jobs
 
 import (
 	"backend/app/jobs/models"
+	"backend/app/jobs/socket"
 	"backend/core/log"
 	"backend/core/sdk"
 	"backend/core/utils"
+	"backend/core/ws"
 	"sync"
 
 	"github.com/robfig/cron/v3"
@@ -13,6 +15,7 @@ import (
 var tasks = make(map[int]*JobCore)
 var mux sync.RWMutex
 var crontab *cron.Cron
+var WebSocket *socket.JobSocketService
 
 // 初始化
 func Setup() {
@@ -40,6 +43,10 @@ func Setup() {
 			}
 		}
 	}
+	// 初始化 Job websocket
+	channel := ws.Default.GetChannel("jobs")
+	WebSocket = &socket.JobSocketService{Channel: channel}
+	channel.AddEventListen(WebSocket)
 
 	// 其中任务
 	crontab.Start()

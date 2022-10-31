@@ -6,12 +6,54 @@ import (
 
 	"backend/core/dataflow/flowtest"
 	"backend/core/echo"
+	"backend/core/mpool"
+	"fmt"
 	"os"
 	"reflect"
 	"regexp"
 	"testing"
+	"time"
 	//"text/template"
 )
+
+type StructT struct {
+	Id   int
+	Name string
+}
+
+func TestPool(t *testing.T) {
+	options := &mpool.Options{
+		Capacity: 100,
+		MaxIdle:  90,
+		New: func() interface{} {
+			return &StructT{}
+		},
+		MinIdleTime: time.Hour,
+	}
+	pool := mpool.NewObjectPool(options)
+
+	arry := make([]*StructT, 0)
+
+	for i := 0; i < 1000; i++ {
+		v, e := pool.Malloc()
+		if v != nil {
+			s := v.(*StructT)
+			s.Id = i + 1
+			arry = append(arry, s)
+		}
+		fmt.Println(i, v, e)
+	}
+	fmt.Println("==========================================")
+	for _, v := range arry {
+		pool.Free(v)
+	}
+	fmt.Println("==========================================")
+	for i := 0; i < 100; i++ {
+		v, e := pool.Malloc()
+		fmt.Println(i, v, e)
+	}
+
+}
 
 func TestXxxddd(t *testing.T) {
 

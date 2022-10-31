@@ -9,3 +9,4 @@ backend/static/www
 backend/__debug_bin
 backend/sqlite.db
 backend/go-example
+backend/logs/*

@@ -47,7 +47,6 @@ func init() {
 }
 
 func setup() {
-
 	err := assembly.RunOfOnec()
 	if err != nil {
 		log.Print(echo.Red("service instance is running..."))
