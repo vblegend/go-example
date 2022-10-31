@@ -7,5 +7,11 @@ type WSEventListener interface {
 	OnLeave(client *WSClient)
 
 	// websocket  连接断开
-	OnMessage(client *WSClient, msgType MessageType, message []byte)
+	OnMessage(client *WSClient, msg *RequestMessage)
+}
+
+type IChannelCollection interface {
+	JoinChannel(channel *WSChannel)
+	LeaveChannel(channel *WSChannel)
+	HasChannel(channelName string) bool
 }

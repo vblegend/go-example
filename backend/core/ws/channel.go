@@ -1,12 +1,10 @@
 package ws
 
 import (
-	"encoding/json"
 	"fmt"
 	"sync"
 
 	"github.com/gin-gonic/gin"
-	"github.com/gorilla/websocket"
 )
 
 type WSChannel struct {
@@ -49,6 +47,7 @@ func (wc *WSChannel) register(client *WSClient) {
 		return
 	}
 	wc.clients[client.ConnectId] = client
+	client.JoinChannel(wc)
 	wc.lock.Lock()
 	for i := 0; i < len(wc.eventListeners); i++ {
 		wc.eventListeners[i].OnJoin(client)
@@ -60,6 +59,7 @@ func (wc *WSChannel) unRegister(client *WSClient) {
 	has := wc.clients[client.ConnectId]
 	// 区分相同ID的不同客户端连接
 	if has != nil && has == client {
+		client.LeaveChannel(wc)
 		wc.lock.Lock()
 		for i := 0; i < len(wc.eventListeners); i++ {
 			wc.eventListeners[i].OnLeave(client)
@@ -78,21 +78,10 @@ func (wc *WSChannel) CanDestroy() bool {
 	return len(wc.clients) == 0 && len(wc.eventListeners) == 0
 }
 
-func (wc *WSChannel) BroadcastTextMessage(data string) {
+func (wc *WSChannel) BroadcastTextMessage(code ResponseCode, traceId string, data string) {
 	for _, client := range wc.clients {
-		client.SendMessage(websocket.TextMessage, []byte(data))
+		client.Write(wc, code, traceId, []byte(data))
 	}
-}
-
-func (wc *WSChannel) BroadcastJsonMessage(object interface{}) error {
-	data, err := json.Marshal(object)
-	if err != nil {
-		return err
-	}
-	for _, client := range wc.clients {
-		client.SendMessage(websocket.TextMessage, data)
-	}
-	return nil
 }
 
 func (ws *WSChannel) AddEventListen(listener WSEventListener) *WSChannel {

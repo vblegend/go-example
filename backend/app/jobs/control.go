@@ -15,7 +15,7 @@ import (
 var tasks = make(map[int]*JobCore)
 var mux sync.RWMutex
 var crontab *cron.Cron
-var WebSocket *socket.JobSocketService
+var WebSocketChannel *socket.JobSocketChannel
 
 // 初始化
 func Setup() {
@@ -44,10 +44,11 @@ func Setup() {
 		}
 	}
 	// 初始化 Job websocket
-	channel := ws.Default.GetChannel("jobs")
-	WebSocket = &socket.JobSocketService{Channel: channel}
-	channel.AddEventListen(WebSocket)
 
+	WebSocketChannel = &socket.JobSocketChannel{}
+	WebSocketChannel.Name = "jobs"
+	channel := ws.Default.GetChannel("jobs")
+	ws.Default.RegisterChannel(channel)
 	// 其中任务
 	crontab.Start()
 	log.Info("JobCore start success.")
