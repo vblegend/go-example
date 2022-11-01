@@ -46,7 +46,7 @@ func Setup() {
 	// 初始化 Job websocket
 
 	WebSocketChannel = &socket.JobSocketChannel{}
-	ws.Default.RegisterChannel(WebSocketChannel)
+	ws.Default.RegisterChannel(WebSocketChannel, ws.Auth_PostAndSendNeedJoin)
 	// 其中任务
 	crontab.Start()
 	log.Info("JobCore start success.")
