@@ -1,6 +1,7 @@
 package plugs
 
 import (
+	"backend/core/log"
 	"fmt"
 
 	"github.com/gin-gonic/gin"
@@ -16,6 +17,7 @@ func NewHttpsHandler(https bool, domain string, prot uint) gin.HandlerFunc {
 		if https {
 			err := secureMiddleware.Process(c.Writer, c.Request)
 			if err != nil {
+				log.Error(err)
 				return
 			}
 		}

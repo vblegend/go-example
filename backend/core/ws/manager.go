@@ -174,11 +174,11 @@ func (ws *WSManager) datarecv(client *WSClient, msg *RequestMessage) {
 			if err != nil {
 				client.Error(msg.TraceId, err)
 			}
-			client.Write2(res)
+			client.Write(res)
 		}
 	default:
 		{
-			client.Write(Failure, msg.TraceId, []byte("无效的权限"))
+			client.Error(msg.TraceId, errors.New("无效的权限"))
 		}
 	}
 	// join channel  增加 参数
