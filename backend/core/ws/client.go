@@ -3,7 +3,6 @@ package ws
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"net/url"
 
 	"github.com/gorilla/websocket"
@@ -15,29 +14,30 @@ type WSClient struct {
 	Cancel  context.CancelFunc
 
 	// 当前连接唯一ID
-	ConnectId string
+	ClientId string
 	// 当前连接信道
 	Channel string
 	// 当前连接所有参数
 	Params url.Values
 
-	channels map[string]*WSChannel
+	channels map[string]IWSChannel
 }
 
 func NewWSClient(conn *websocket.Conn, ctx context.Context, cancel context.CancelFunc, clientId string) *WSClient {
 	wsc := WSClient{
-		Socket:    conn,
-		Context:   ctx,
-		Cancel:    cancel,
-		ConnectId: clientId,
-		channels:  make(map[string]*WSChannel),
+		Socket:   conn,
+		Context:  ctx,
+		Cancel:   cancel,
+		ClientId: clientId,
+		channels: make(map[string]IWSChannel),
 	}
 	return &wsc
 }
 
-func (wsc *WSClient) JoinChannel(channel *WSChannel) {
-	if wsc.channels[channel.Name] == nil {
-		wsc.channels[channel.Name] = channel
+func (wsc *WSClient) JoinChannel(channel IWSChannel) {
+	chanl := wsc.channels[channel.Name()]
+	if chanl == nil {
+		wsc.channels[channel.Name()] = channel
 	}
 }
 
@@ -45,22 +45,61 @@ func (wsc *WSClient) HasChannel(channelName string) bool {
 	return wsc.channels[channelName] != nil
 }
 
-func (wsc *WSClient) LeaveChannel(channel *WSChannel) {
-	if wsc.channels[channel.Name] != nil {
-		delete(wsc.channels, channel.Name)
+func (wsc *WSClient) LeaveChannel(channel IWSChannel) {
+	chanl := wsc.channels[channel.Name()]
+	if chanl != nil {
+		delete(wsc.channels, channel.Name())
 	}
 }
 
-func (wsc *WSClient) Write(channel *WSChannel, code ResponseCode, traceId string, data []byte) error {
-	if channel != nil && !wsc.HasChannel(channel.Name) {
-		return errors.New("未在此频道内")
-	}
+func (wsc *WSClient) Write(code ResponseCode, traceId string, data []byte) error {
 	if msg, err := MallocResponseMessage(); err == nil {
 		msg.Code = code
 		msg.TraceId = traceId
 		msg.Data = data
-		json.Marshal(msg)
-		err = wsc.Socket.WriteMessage(int(TextMessage), data)
+		if bytes, err := json.Marshal(msg); err == nil {
+			err = wsc.Socket.WriteMessage(int(TextMessage), bytes)
+		}
+		FreeResponseMessage(msg)
+		return err
+	}
+	return nil
+}
+func (wsc *WSClient) Write2(msg *ResponseMessage) error {
+	defer func() {
+		FreeResponseMessage(msg)
+	}()
+	var err error
+	var bytes []byte
+	if bytes, err = json.Marshal(msg); err == nil {
+		err = wsc.Socket.WriteMessage(int(TextMessage), bytes)
+	}
+	return err
+}
+
+func (wsc *WSClient) OK(traceId string, data []byte, message string) error {
+	if msg, err := MallocResponseMessage(); err == nil {
+		msg.Code = Success
+		msg.TraceId = traceId
+		msg.Data = data
+		msg.Message = message
+		if bytes, err := json.Marshal(msg); err == nil {
+			err = wsc.Socket.WriteMessage(int(TextMessage), bytes)
+		}
+		FreeResponseMessage(msg)
+		return err
+	}
+	return nil
+}
+
+func (wsc *WSClient) Error(traceId string, data error) error {
+	if msg, err := MallocResponseMessage(); err == nil {
+		msg.Code = Failure
+		msg.TraceId = traceId
+		msg.Message = data.Error()
+		if bytes, err := json.Marshal(msg); err == nil {
+			err = wsc.Socket.WriteMessage(int(TextMessage), bytes)
+		}
 		FreeResponseMessage(msg)
 		return err
 	}
