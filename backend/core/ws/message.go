@@ -59,6 +59,17 @@ type RequestMessage struct {
 	TraceId string `json:"traceId"`
 	// 数据负载
 	Payload []byte `json:"payload"`
+	// 是否为托管的， 非托管对象不会被放入对象池中
+	managed bool `json:"-"`
+}
+
+func (r *RequestMessage) Response(code ResponseCode) *ResponseMessage {
+	if response, err := MallocResponseMessage(); err == nil {
+		response.Code = code
+		response.TraceId = r.TraceId
+		return response
+	}
+	return &ResponseMessage{}
 }
 
 func (r *RequestMessage) Unmarshal(data []byte) error {
@@ -83,6 +94,11 @@ type ResponseMessage struct {
 	Code ResponseCode `json:"code"`
 	// 请求ID
 	TraceId string `json:"traceId"`
+	// 消息
+	Message string `json:"msg"`
 	// 响应数据
 	Data []byte `json:"data"`
+
+	// 是否为托管的， 非托管对象不会被放入对象池中
+	managed bool `json:"-"`
 }

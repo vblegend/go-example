@@ -9,7 +9,9 @@ var requestPool = mpool.NewObjectPool(&mpool.Options{
 	Capacity: 100,
 	MaxIdle:  90,
 	New: func() interface{} {
-		return &RequestMessage{}
+		return &RequestMessage{
+			managed: true,
+		}
 	},
 	MinIdleTime: time.Hour,
 })
@@ -18,7 +20,9 @@ var responsePool = mpool.NewObjectPool(&mpool.Options{
 	Capacity: 100,
 	MaxIdle:  90,
 	New: func() interface{} {
-		return &ResponseMessage{}
+		return &ResponseMessage{
+			managed: true,
+		}
 	},
 	MinIdleTime: time.Hour,
 })
@@ -32,6 +36,9 @@ func MallocRequestMessage() (*RequestMessage, error) {
 }
 
 func FreeRequestMessage(msg *RequestMessage) error {
+	if !msg.managed {
+		return nil
+	}
 	msg.Payload = nil
 	msg.Channel = ""
 	msg.TraceId = ""
@@ -48,6 +55,9 @@ func MallocResponseMessage() (*ResponseMessage, error) {
 }
 
 func FreeResponseMessage(msg *ResponseMessage) error {
+	if !msg.managed {
+		return nil
+	}
 	msg.Data = nil
 	msg.Code = 0
 	msg.TraceId = ""
