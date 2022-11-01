@@ -10,12 +10,13 @@ var ErrorJsonUnmarshalFail = errors.New("invalid json string")
 type AuthType int
 
 const (
+	// 不需要加入频道即可发送 POST SEND 消息
 	Auth_Anonymous = AuthType(0)
-
+	// POST消息 需要加入频道才可以发送
 	Auth_PostNeedJoin = AuthType(1)
-
+	// SEND消息 需要加入频道才可以发送
 	Auth_SendNeedJoin = AuthType(2)
-
+	// POST消息 和 SEND消息 需要加入频道才可以发送
 	Auth_PostAndSendNeedJoin = Auth_PostNeedJoin | Auth_SendNeedJoin
 )
 
@@ -71,13 +72,37 @@ type RequestMessage struct {
 	TraceId string `json:"traceId"`
 	// 数据负载
 	Payload []byte `json:"payload"`
-	// 是否为托管的， 非托管对象不会被放入对象池中
+	// 是否为托管的， 由对象池生成的对象为托管对象，Free时会放回对象池内，非对象池生成的对象 Free时忽略
 	managed bool `json:"-"`
 }
 
-func (r *RequestMessage) Response(code ResponseCode) *ResponseMessage {
+// 返回一个回应结构体
+func (r *RequestMessage) Response(code ResponseCode, message string) *ResponseMessage {
 	if response, err := MallocResponseMessage(); err == nil {
 		response.Code = code
+		response.Message = message
+		response.TraceId = r.TraceId
+		return response
+	}
+	return &ResponseMessage{}
+}
+
+// 返回一个成功的回应消息体
+func (r *RequestMessage) Success(message string) *ResponseMessage {
+	if response, err := MallocResponseMessage(); err == nil {
+		response.Code = Success
+		response.Message = message
+		response.TraceId = r.TraceId
+		return response
+	}
+	return &ResponseMessage{}
+}
+
+// 返回一个失败的回应消息体
+func (r *RequestMessage) Failure(message string) *ResponseMessage {
+	if response, err := MallocResponseMessage(); err == nil {
+		response.Code = Failure
+		response.Message = message
 		response.TraceId = r.TraceId
 		return response
 	}
@@ -109,7 +134,7 @@ type ResponseMessage struct {
 	// 消息
 	Message string `json:"msg"`
 	// 响应数据
-	Data []byte `json:"data"`
+	Payload []byte `json:"payload"`
 
 	// 是否为托管的， 非托管对象不会被放入对象池中
 	managed bool `json:"-"`

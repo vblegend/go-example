@@ -50,11 +50,12 @@ func (wsc *WSClient) LeaveChannel(channel IWSChannel) {
 	}
 }
 
-func (wsc *WSClient) Write(code ResponseCode, traceId string, data []byte) error {
+func (wsc *WSClient) Success(traceId string, message string, data []byte) error {
 	if msg, err := MallocResponseMessage(); err == nil {
-		msg.Code = code
+		msg.Code = Success
 		msg.TraceId = traceId
-		msg.Data = data
+		msg.Payload = data
+		msg.Message = message
 		if bytes, err := json.Marshal(msg); err == nil {
 			err = wsc.Socket.WriteMessage(int(TextMessage), bytes)
 		}
@@ -63,7 +64,7 @@ func (wsc *WSClient) Write(code ResponseCode, traceId string, data []byte) error
 	}
 	return nil
 }
-func (wsc *WSClient) Write2(msg *ResponseMessage) error {
+func (wsc *WSClient) Write(msg *ResponseMessage) error {
 	defer func() {
 		FreeResponseMessage(msg)
 	}()
@@ -79,7 +80,7 @@ func (wsc *WSClient) OK(traceId string, data []byte, message string) error {
 	if msg, err := MallocResponseMessage(); err == nil {
 		msg.Code = Success
 		msg.TraceId = traceId
-		msg.Data = data
+		msg.Payload = data
 		msg.Message = message
 		if bytes, err := json.Marshal(msg); err == nil {
 			err = wsc.Socket.WriteMessage(int(TextMessage), bytes)

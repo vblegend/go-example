@@ -44,12 +44,12 @@ func (wd *wsDemo) OnLeave(client *WSClient) {
 func (wd *wsDemo) OnMessagePost(client *WSClient, msg *RequestMessage) {
 
 	fmt.Printf("收到消息：id:%s, content:%s\n", client.ClientId, string(msg.Payload))
-	client.Write(Success, msg.TraceId, []byte(""))
+	client.Write(msg.Response(Success, ""))
 }
 
 func (wd *wsDemo) OnMessageCall(client *WSClient, msg *RequestMessage) (*ResponseMessage, error) {
 
 	fmt.Printf("收到消息：id:%s, content:%s\n", client.ClientId, string(msg.Payload))
-	client.Write(Success, msg.TraceId, []byte(""))
+	client.Success(msg.TraceId, "", nil)
 	return nil, nil
 }
