@@ -31,6 +31,7 @@ func NewWebSocketManager() *WSManager {
 	return ws
 }
 
+// 注册一个频道 ， 使用perm控制频道的消息处理授权
 func (ws *WSManager) RegisterChannel(channel IWSChannel, perm AuthType) error {
 	if channel.Name() == "" {
 		return errors.New("无效的频道")
