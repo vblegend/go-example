@@ -15,8 +15,6 @@ type WSClient struct {
 
 	// 当前连接唯一ID
 	ClientId string
-	// 当前连接信道
-	Channel string
 	// 当前连接所有参数
 	Params url.Values
 

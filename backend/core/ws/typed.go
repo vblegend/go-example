@@ -7,6 +7,18 @@ import (
 
 var ErrorJsonUnmarshalFail = errors.New("invalid json string")
 
+type AuthType int
+
+const (
+	Auth_Anonymous = AuthType(0)
+
+	Auth_PostNeedJoin = AuthType(1)
+
+	Auth_SendNeedJoin = AuthType(2)
+
+	Auth_PostAndSendNeedJoin = Auth_PostNeedJoin | Auth_SendNeedJoin
+)
+
 type MessageType int
 
 const (

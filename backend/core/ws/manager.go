@@ -15,9 +15,10 @@ import (
 )
 
 type WSManager struct {
-	channels map[string]IWSChannel
-	clients  map[string]*WSClient
-	chanLock sync.Mutex
+	channels    map[string]IWSChannel
+	clients     map[string]*WSClient
+	chanLock    sync.Mutex
+	permissions map[string]AuthType
 }
 
 // 默认的 websocket 管理器
@@ -26,10 +27,12 @@ var Default = NewWebSocketManager()
 func NewWebSocketManager() *WSManager {
 	ws := &WSManager{}
 	ws.channels = make(map[string]IWSChannel)
+	ws.permissions = make(map[string]AuthType)
 	return ws
 }
 
-func (ws *WSManager) RegisterChannel(channel IWSChannel) error {
+// 注册一个频道 ， 使用perm控制频道的消息处理授权
+func (ws *WSManager) RegisterChannel(channel IWSChannel, perm AuthType) error {
 	if channel.Name() == "" {
 		return errors.New("无效的频道")
 	}
@@ -37,6 +40,7 @@ func (ws *WSManager) RegisterChannel(channel IWSChannel) error {
 		return errors.New("重复注册频道")
 	}
 	ws.channels[channel.Name()] = channel
+	ws.permissions[channel.Name()] = perm
 	return nil
 }
 
@@ -125,7 +129,7 @@ func (ws *WSManager) datarecv(client *WSClient, msg *RequestMessage) {
 		client.Error(msg.TraceId, InvalidChannelName)
 		return
 	}
-
+	prem := ws.permissions[msg.Channel]
 	switch msg.Action {
 	case JoinChannel:
 		{
@@ -154,10 +158,18 @@ func (ws *WSManager) datarecv(client *WSClient, msg *RequestMessage) {
 		}
 	case TransferPost:
 		{
+			if prem != Auth_Anonymous && (prem&Auth_PostNeedJoin) == Auth_PostNeedJoin && !client.HasChannel(msg.Channel) {
+				client.Error(msg.TraceId, errors.New("当前动作不被允许"))
+				return
+			}
 			channel.OnMessagePost(client, msg)
 		}
 	case TransferSend:
 		{
+			if prem != Auth_Anonymous && (prem&Auth_SendNeedJoin) == Auth_SendNeedJoin && !client.HasChannel(msg.Channel) {
+				client.Error(msg.TraceId, errors.New("当前动作不被允许"))
+				return
+			}
 			res, err := channel.OnMessageCall(client, msg)
 			if err != nil {
 				client.Error(msg.TraceId, err)
