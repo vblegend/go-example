@@ -27,7 +27,8 @@ import (
 var (
 	configYml string
 	apiCheck  bool
-	StartCmd  = &cobra.Command{
+	// StartCmd 命令行
+	StartCmd = &cobra.Command{
 		Use:          "server",
 		Short:        "Start API server",
 		Example:      "backend server -c config/settings.yml",

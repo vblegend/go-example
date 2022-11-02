@@ -7,48 +7,32 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-type WSClient struct {
+type wsClient struct {
 	Socket  *websocket.Conn
 	Context context.Context
 	Cancel  context.CancelFunc
 	// 当前连接唯一ID
-	ClientId string
-	channels map[string]IWSChannel
+	clientID string
 }
 
-func NewWSClient(conn *websocket.Conn, ctx context.Context, cancel context.CancelFunc, clientId string) *WSClient {
-	wsc := WSClient{
+func newWSClient(ctx context.Context, conn *websocket.Conn, cancel context.CancelFunc, clientId string) *wsClient {
+	wsc := wsClient{
 		Socket:   conn,
 		Context:  ctx,
 		Cancel:   cancel,
-		ClientId: clientId,
-		channels: make(map[string]IWSChannel),
+		clientID: clientId,
 	}
 	return &wsc
 }
 
-func (wsc *WSClient) JoinChannel(channel IWSChannel) {
-	chanl := wsc.channels[channel.Name()]
-	if chanl == nil {
-		wsc.channels[channel.Name()] = channel
-	}
+func (wsc *wsClient) ClientID() string {
+	return wsc.clientID
 }
 
-func (wsc *WSClient) HasChannel(channelName string) bool {
-	return wsc.channels[channelName] != nil
-}
-
-func (wsc *WSClient) LeaveChannel(channel IWSChannel) {
-	chanl := wsc.channels[channel.Name()]
-	if chanl != nil {
-		delete(wsc.channels, channel.Name())
-	}
-}
-
-func (wsc *WSClient) Success(traceId string, message string, data []byte) error {
+func (wsc *wsClient) Success(traceID string, message string, data []byte) error {
 	if msg, err := MallocResponseMessage(); err == nil {
 		msg.Code = Success
-		msg.TraceId = traceId
+		msg.TraceID = traceID
 		msg.Payload = PayloadDomain(data)
 		msg.Message = message
 		if bytes, err := json.Marshal(msg); err == nil {
@@ -59,7 +43,7 @@ func (wsc *WSClient) Success(traceId string, message string, data []byte) error 
 	}
 	return nil
 }
-func (wsc *WSClient) Write(msg *ResponseMessage) error {
+func (wsc *wsClient) Write(msg *ResponseMessage) error {
 	defer func() {
 		FreeResponseMessage(msg)
 	}()
@@ -71,10 +55,10 @@ func (wsc *WSClient) Write(msg *ResponseMessage) error {
 	return err
 }
 
-func (wsc *WSClient) OK(traceId string, data []byte, message string) error {
+func (wsc *wsClient) OK(traceID string, data []byte, message string) error {
 	if msg, err := MallocResponseMessage(); err == nil {
 		msg.Code = Success
-		msg.TraceId = traceId
+		msg.TraceID = traceID
 		msg.Payload = PayloadDomain(data)
 		msg.Message = message
 		if bytes, err := json.Marshal(msg); err == nil {
@@ -86,10 +70,10 @@ func (wsc *WSClient) OK(traceId string, data []byte, message string) error {
 	return nil
 }
 
-func (wsc *WSClient) Error(traceId string, data error) error {
+func (wsc *wsClient) Error(traceID string, data error) error {
 	if msg, err := MallocResponseMessage(); err == nil {
 		msg.Code = Failure
-		msg.TraceId = traceId
+		msg.TraceID = traceID
 		msg.Message = data.Error()
 		if bytes, err := json.Marshal(msg); err == nil {
 			err = wsc.Socket.WriteMessage(int(TextMessage), bytes)
@@ -100,7 +84,7 @@ func (wsc *WSClient) Error(traceId string, data error) error {
 	return nil
 }
 
-func (wsc *WSClient) Close() error {
+func (wsc *wsClient) Close() error {
 	wsc.Socket.WriteMessage(int(CloseMessage), nil)
 	wsc.Cancel()
 	return wsc.Socket.Close()

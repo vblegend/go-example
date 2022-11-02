@@ -1,27 +1,64 @@
 package ws
 
-import "errors"
+import (
+	"errors"
 
-var InvalidChannelName = errors.New("invalid channel name")
-var NotInChannel = errors.New("not in channel")
-var ErrorCannotJoinChannelRepeated = errors.New("cannot join channel repeated")
+	"github.com/gin-gonic/gin"
+)
 
-type IWSChannel interface {
-	Name() string
+var errorJSONUnmarshalFail = errors.New("invalid json string")
+var errorInvalidChannelName = errors.New("invalid channel name")
+var errorNotInChannel = errors.New("not in channel")
+var errorCannotJoinChannelRepeated = errors.New("cannot join channel repeated")
 
-	OnMethodMap()
-	OnJoin(client *WSClient, params Params) error
-	// websocket  连接断开
-	OnLeave(client *WSClient)
-	// websocket  连接断开
-	OnMessagePost(client *WSClient, msg *RequestMessage)
-	OnMessageCall(client *WSClient, msg *RequestMessage) (*ResponseMessage, error)
-	//踢出客户端
-	KickedOut(client *WSClient)
+// IWSManager websocket 管理器
+type IWSManager interface {
+	AcceptHandler(c *gin.Context)
+	RegisterChannel(name string, handler IWSMessageHandler, perm AuthType) error
 }
 
-type IChannelCollection interface {
-	JoinChannel(channel *WSChannel)
-	LeaveChannel(channel *WSChannel)
-	HasChannel(channelName string) bool
+// IWSClient websocket 客户端
+type IWSClient interface {
+
+	// ClientID
+	ClientID() string
+	// Write
+	Write(msg *ResponseMessage) error
+	// OK
+	OK(traceID string, data []byte, message string) error
+	// Error
+	Error(traceID string, data error) error
+	// Success
+	Success(traceID string, message string, data []byte) error
+	// Close
+	Close() error
+}
+
+// IWSChannel websocket 频道
+type IWSChannel interface {
+	Name() string
+	KickedOut(client IWSClient)
+	Broadcast(msg *ResponseMessage)
+	GetClient(clientID string) IWSClient
+	Length() int
+}
+
+// IWSMessageHandler websocket 频道
+type IWSMessageHandler interface {
+	OnJoin(channel IWSChannel, client IWSClient, params Params) error
+	// websocket  连接断开
+	OnLeave(channel IWSChannel, client IWSClient)
+	// websocket  连接断开
+	OnMessagePost(channel IWSChannel, client IWSClient, msg *RequestMessage)
+	OnMessageCall(channel IWSChannel, client IWSClient, msg *RequestMessage) (*ResponseMessage, error)
+}
+
+// Default 默认的 websocket 管理器
+var Default IWSManager = NewWebSocketManager()
+
+// NewWebSocketManager 创建一个websocket 管理器
+func NewWebSocketManager() IWSManager {
+	ws := &wsManager{}
+	ws.channels = make(map[string]*WSChannel)
+	return ws
 }
