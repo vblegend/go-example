@@ -32,24 +32,24 @@ type wsDemo struct {
 }
 
 func (wd *wsDemo) OnJoin(client *WSClient) {
-	fmt.Printf("新连接加入：%s\n", client.Params)
+	fmt.Printf("新连接加入：%s\n", client.ClientId)
 }
 
 // websocket  连接断开
 func (wd *wsDemo) OnLeave(client *WSClient) {
-	fmt.Printf("连接断开：id:%s\n", client.Params)
+	fmt.Printf("连接断开：id:%s\n", client.ClientId)
 }
 
 // websocket  连接断开
 func (wd *wsDemo) OnMessagePost(client *WSClient, msg *RequestMessage) {
 
-	fmt.Printf("收到消息：id:%s, content:%s\n", client.ClientId, string(msg.Payload))
+	fmt.Printf("收到消息：id:%s, content:%s\n", client.ClientId, msg.Payload)
 	client.Write(msg.Response(Success, ""))
 }
 
 func (wd *wsDemo) OnMessageCall(client *WSClient, msg *RequestMessage) (*ResponseMessage, error) {
 
-	fmt.Printf("收到消息：id:%s, content:%s\n", client.ClientId, string(msg.Payload))
+	fmt.Printf("收到消息：id:%s, content:%s\n", client.ClientId, msg.Payload)
 	client.Success(msg.TraceId, "", nil)
 	return nil, nil
 }

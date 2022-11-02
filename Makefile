@@ -1,4 +1,4 @@
-.PHONY: web publish archive
+.PHONY: web publish archive 
 
 
 #============================================================
@@ -43,6 +43,12 @@ endef
 define buildWeb
 	@echo "正在编译Web项目..."
 	@cd ./web; npm run build:prod
+endef
+
+define buildPlugin
+	@echo "正在编译项目插件..."
+	@cd plugins/pprof; CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build  -o pprof.so -buildmode=plugin ./main.go
+
 endef
 
 define buildLinux
@@ -140,3 +146,8 @@ publish:
 #将发布的文件夹归档至tar包
 archive:
 	@$(archive)
+
+#将发布的文件夹归档至tar包
+plugin:
+	@$(buildPlugin)
+

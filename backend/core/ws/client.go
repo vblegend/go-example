@@ -3,7 +3,6 @@ package ws
 import (
 	"context"
 	"encoding/json"
-	"net/url"
 
 	"github.com/gorilla/websocket"
 )
@@ -12,12 +11,8 @@ type WSClient struct {
 	Socket  *websocket.Conn
 	Context context.Context
 	Cancel  context.CancelFunc
-
 	// 当前连接唯一ID
 	ClientId string
-	// 当前连接所有参数
-	Params url.Values
-
 	channels map[string]IWSChannel
 }
 
@@ -54,7 +49,7 @@ func (wsc *WSClient) Success(traceId string, message string, data []byte) error 
 	if msg, err := MallocResponseMessage(); err == nil {
 		msg.Code = Success
 		msg.TraceId = traceId
-		msg.Payload = data
+		msg.Payload = PayloadDomain(data)
 		msg.Message = message
 		if bytes, err := json.Marshal(msg); err == nil {
 			err = wsc.Socket.WriteMessage(int(TextMessage), bytes)
@@ -80,7 +75,7 @@ func (wsc *WSClient) OK(traceId string, data []byte, message string) error {
 	if msg, err := MallocResponseMessage(); err == nil {
 		msg.Code = Success
 		msg.TraceId = traceId
-		msg.Payload = data
+		msg.Payload = PayloadDomain(data)
 		msg.Message = message
 		if bytes, err := json.Marshal(msg); err == nil {
 			err = wsc.Socket.WriteMessage(int(TextMessage), bytes)

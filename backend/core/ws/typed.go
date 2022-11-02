@@ -3,9 +3,166 @@ package ws
 import (
 	"encoding/json"
 	"errors"
+	"reflect"
+	"strconv"
+	"time"
 )
 
 var ErrorJsonUnmarshalFail = errors.New("invalid json string")
+
+type Params map[string]string
+
+func (p Params) Get(key string) (string, bool) {
+	v := p[key]
+	return v, len(v) > 0
+}
+
+func (p Params) Parse(key string, lpObject interface{}) bool {
+	v := p[key]
+	pointer := reflect.ValueOf(lpObject)
+	if pointer.Kind() != reflect.Pointer {
+		return false
+	}
+	ll := pointer.Elem().Interface()
+	switch ll.(type) {
+	case string:
+		{
+			vlp := lpObject.(*string)
+			*vlp = v
+		}
+	case bool:
+		{
+			vlp := lpObject.(*bool)
+			*vlp = (v == "true")
+		}
+	case int8:
+		{
+			vlp := lpObject.(*int8)
+			value, err := strconv.ParseInt(v, 10, 8)
+			if err != nil {
+				return false
+			}
+			*vlp = int8(value)
+		}
+	case int16:
+		{
+			vlp := lpObject.(*int16)
+			value, err := strconv.ParseInt(v, 10, 16)
+			if err != nil {
+				return false
+			}
+			*vlp = int16(value)
+		}
+	case int32:
+		{
+			vlp := lpObject.(*int32)
+			value, err := strconv.ParseInt(v, 10, 32)
+			if err != nil {
+				return false
+			}
+			*vlp = int32(value)
+		}
+	case int64:
+		{
+			vlp := lpObject.(*int64)
+			value, err := strconv.ParseInt(v, 10, 64)
+			if err != nil {
+				return false
+			}
+			*vlp = int64(value)
+		}
+	case int:
+		{
+			vlp := lpObject.(*int)
+			value, err := strconv.Atoi(v)
+			if err != nil {
+				return false
+			}
+			*vlp = value
+		}
+	case uint:
+		{
+			vlp := lpObject.(*uint)
+			value, err := strconv.ParseUint(v, 10, 64)
+			if err != nil {
+				return false
+			}
+			*vlp = uint(value)
+		}
+	case uint8:
+		{
+			vlp := lpObject.(*uint8)
+			value, err := strconv.ParseUint(v, 10, 8)
+			if err != nil {
+				return false
+			}
+			*vlp = uint8(value)
+		}
+	case uint16:
+		{
+			vlp := lpObject.(*uint16)
+			value, err := strconv.ParseUint(v, 10, 16)
+			if err != nil {
+				return false
+			}
+			*vlp = uint16(value)
+		}
+	case uint32:
+		{
+			vlp := lpObject.(*uint32)
+			value, err := strconv.ParseUint(v, 10, 32)
+			if err != nil {
+				return false
+			}
+			*vlp = uint32(value)
+		}
+	case uint64:
+		{
+			vlp := lpObject.(*uint64)
+			value, err := strconv.ParseUint(v, 10, 64)
+			if err != nil {
+				return false
+			}
+			*vlp = value
+		}
+	case time.Time:
+		{
+			var now time.Time
+			vlp := lpObject.(*time.Time)
+			loc, err := time.LoadLocation("Asia/Shanghai")
+			if err == nil {
+				now, err = time.ParseInLocation(`"2006-01-02 15:04:05"`, v, loc)
+			}
+			if err != nil {
+				return false
+			}
+			*vlp = now
+		}
+	case float32:
+		{
+			vlp := lpObject.(*float32)
+			value, err := strconv.ParseFloat(v, 32)
+			if err != nil {
+				return false
+			}
+			*vlp = float32(value)
+		}
+	case float64:
+		{
+			vlp := lpObject.(*float32)
+			value, err := strconv.ParseFloat(v, 64)
+			if err != nil {
+				return false
+			}
+			*vlp = float32(value)
+		}
+	default:
+		{
+			return false
+		}
+	}
+	return true
+}
 
 type AuthType int
 
@@ -54,14 +211,16 @@ const (
 
 const (
 	// 加入频道
-	JoinChannel = RequestAction(-127)
+	JoinChannel = RequestAction(100)
 	// 离开频道
-	LevelChannel = RequestAction(127)
+	LevelChannel = RequestAction(101)
 	// 传输数据 仅发送 不需要考虑响应
-	TransferPost = RequestAction(64)
+	TransferPost = RequestAction(102)
 	// 传输数据 发送后需要回应
-	TransferSend = RequestAction(-64)
+	TransferSend = RequestAction(103)
 )
+
+type PayloadDomain string
 
 type RequestMessage struct {
 	// 动作
@@ -70,8 +229,10 @@ type RequestMessage struct {
 	Channel string `json:"channel"`
 	// 请求ID
 	TraceId string `json:"traceId"`
+	// 方法
+	Method string `json:"method"`
 	// 数据负载
-	Payload []byte `json:"payload"`
+	Payload PayloadDomain `json:"payload,omitempty"`
 	// 是否为托管的， 由对象池生成的对象为托管对象，Free时会放回对象池内，非对象池生成的对象 Free时忽略
 	managed bool `json:"-"`
 }
@@ -134,7 +295,7 @@ type ResponseMessage struct {
 	// 消息
 	Message string `json:"msg"`
 	// 响应数据
-	Payload []byte `json:"payload"`
+	Payload PayloadDomain `json:"payload,omitempty"`
 
 	// 是否为托管的， 非托管对象不会被放入对象池中
 	managed bool `json:"-"`
