@@ -3,6 +3,7 @@ package ws
 import (
 	"backend/core/random"
 	"context"
+	"encoding/json"
 	"errors"
 	"sync"
 
@@ -15,10 +16,9 @@ import (
 )
 
 type WSManager struct {
-	channels    map[string]IWSChannel
-	clients     map[string]*WSClient
-	chanLock    sync.Mutex
-	permissions map[string]AuthType
+	channels map[string]*WSChannel
+	clients  map[string]*WSClient
+	chanLock sync.Mutex
 }
 
 // 默认的 websocket 管理器
@@ -26,21 +26,20 @@ var Default = NewWebSocketManager()
 
 func NewWebSocketManager() *WSManager {
 	ws := &WSManager{}
-	ws.channels = make(map[string]IWSChannel)
-	ws.permissions = make(map[string]AuthType)
+	ws.channels = make(map[string]*WSChannel)
 	return ws
 }
 
 // 注册一个频道 ， 使用perm控制频道的消息处理授权
-func (ws *WSManager) RegisterChannel(channel IWSChannel, perm AuthType) error {
-	if channel.Name() == "" {
+func (ws *WSManager) RegisterChannel(channel *WSChannel, perm AuthType) error {
+	if channel.Name == "" {
 		return errors.New("无效的频道")
 	}
-	if ws.channels[channel.Name()] != nil {
+	if ws.channels[channel.Name] != nil {
 		return errors.New("重复注册频道")
 	}
-	ws.channels[channel.Name()] = channel
-	ws.permissions[channel.Name()] = perm
+	ws.channels[channel.Name] = channel
+	channel.Perm = perm
 	return nil
 }
 
@@ -129,15 +128,12 @@ func (ws *WSManager) datarecv(client *WSClient, msg *RequestMessage) {
 		client.Error(msg.TraceId, InvalidChannelName)
 		return
 	}
-	prem := ws.permissions[msg.Channel]
 	switch msg.Action {
 	case JoinChannel:
 		{
-			if client.HasChannel(msg.Channel) {
-				client.Error(msg.TraceId, ErrorCannotJoinChannelRepeated)
-				return
-			}
-			err := ws.joinChannel(channel, client)
+			p := Params{}
+			json.Unmarshal([]byte(msg.Payload), &p)
+			err := channel.JoinClient(client, p)
 			if err != nil {
 				client.Error(msg.TraceId, err)
 				return
@@ -146,10 +142,7 @@ func (ws *WSManager) datarecv(client *WSClient, msg *RequestMessage) {
 		}
 	case LevelChannel:
 		{
-			if !client.HasChannel(msg.Channel) {
-				client.Error(msg.TraceId, NotInChannel)
-			}
-			err := ws.leaveChannel(channel, client)
+			err := channel.LeaveClient(client)
 			if err != nil {
 				client.Error(msg.TraceId, err)
 				return
@@ -158,23 +151,19 @@ func (ws *WSManager) datarecv(client *WSClient, msg *RequestMessage) {
 		}
 	case TransferPost:
 		{
-			if prem != Auth_Anonymous && (prem&Auth_PostNeedJoin) == Auth_PostNeedJoin && !client.HasChannel(msg.Channel) {
+			if channel.Perm != Auth_Anonymous && (channel.Perm&Auth_PostNeedJoin) == Auth_PostNeedJoin && !client.HasChannel(msg.Channel) {
 				client.Error(msg.TraceId, errors.New("当前动作不被允许"))
 				return
 			}
-			channel.OnMessagePost(client, msg)
+			go channel.MessagePost(client, msg)
 		}
 	case TransferSend:
 		{
-			if prem != Auth_Anonymous && (prem&Auth_SendNeedJoin) == Auth_SendNeedJoin && !client.HasChannel(msg.Channel) {
+			if channel.Perm != Auth_Anonymous && (channel.Perm&Auth_SendNeedJoin) == Auth_SendNeedJoin && !client.HasChannel(msg.Channel) {
 				client.Error(msg.TraceId, errors.New("当前动作不被允许"))
 				return
 			}
-			res, err := channel.OnMessageCall(client, msg)
-			if err != nil {
-				client.Error(msg.TraceId, err)
-			}
-			client.Write(res)
+			go channel.MessageCall(client, msg)
 		}
 	default:
 		{
@@ -185,31 +174,9 @@ func (ws *WSManager) datarecv(client *WSClient, msg *RequestMessage) {
 	// 数据传输 send  post 增加参数
 }
 
-func (ws *WSManager) joinChannel(channel IWSChannel, client *WSClient) error {
-	ws.chanLock.Lock()
-	defer ws.chanLock.Unlock()
-	if client.HasChannel(channel.Name()) {
-		return ErrorCannotJoinChannelRepeated
-	}
-	client.JoinChannel(channel)
-	channel.OnJoin(client)
-	return nil
-}
-
-func (ws *WSManager) leaveChannel(channel IWSChannel, client *WSClient) error {
-	ws.chanLock.Lock()
-	defer ws.chanLock.Unlock()
-	if !client.HasChannel(channel.Name()) {
-		return NotInChannel
-	}
-	client.LeaveChannel(channel)
-	channel.OnLeave(client)
-	return nil
-}
-
 func (ws *WSManager) clientOffline(client *WSClient) {
-	for _, v := range client.channels {
-		ws.leaveChannel(v, client)
+	for _, channel := range ws.channels {
+		channel.LeaveClient(client)
 	}
 	delete(ws.clients, client.ClientId)
 }

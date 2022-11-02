@@ -34,13 +34,14 @@ func GetRootRouter() g.Routers {
 			Url: "",
 			Use: g.Use(
 				middleware.CustomError, // 自定义异常处理
-				plugs.NewHttpsHandler(config.Application.Https, config.Application.Domain, uint(config.Application.Port)),
-				plugs.RequestLogOut(log.GetLogger(), log.TraceLevel), // 请求日志
-				plugs.TraceId("requestId", uuid.NewString),           // 请求UUID
-				plugs.WithContextDB("default"),                       // 数据连接
-				plugs.NoCache,                                        // 禁用缓存
-				plugs.Options,                                        // 跨域请求
-				plugs.Secure,                                         // https相关
+				plugs.NewHttpsHandler(config.Application.Https, config.Application.Domain, uint(config.Application.Port)), // https
+				plugs.RequestLogOut(log.GetLogger(), log.TraceLevel),                                                      // 请求日志
+				plugs.TraceId("requestId", uuid.NewString),                                                                // 请求UUID
+				plugs.WithContextDB("default"),                                                                            // 数据连接
+				plugs.NoCache,                                                                                             // 禁用缓存
+				plugs.Options,                                                                                             // 跨域请求
+				plugs.Secure,                                                                                              // 安全相关
+				plugs.Limit(10),                                                                                           // 并发数控制
 			),
 			Children: GetApiRouter(authMiddleware),
 		},

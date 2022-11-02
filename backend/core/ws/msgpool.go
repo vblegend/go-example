@@ -41,9 +41,10 @@ func FreeRequestMessage(msg *RequestMessage) error {
 	if !msg.managed {
 		return nil
 	}
-	msg.Payload = nil
+	msg.Payload = ""
 	msg.Channel = ""
 	msg.TraceId = ""
+	msg.Method = ""
 	msg.Action = 0
 	return requestPool.Free(msg)
 }
@@ -62,7 +63,7 @@ func FreeResponseMessage(msg *ResponseMessage) error {
 	if !msg.managed {
 		return nil
 	}
-	msg.Payload = nil
+	msg.Payload = ""
 	msg.Code = 0
 	msg.TraceId = ""
 	return responsePool.Free(msg)
