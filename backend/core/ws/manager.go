@@ -142,7 +142,7 @@ func (ws *wsManager) datarecv(client *wsClient, msg *RequestMessage) {
 		}
 	case TransferPost:
 		{
-			if channel.Perm != Auth_Anonymous && (channel.Perm&Auth_PostNeedJoin) == Auth_PostNeedJoin && channel.GetClient(client.ClientID()) == nil {
+			if channel.Perm != AuthAnonymous && (channel.Perm&AuthPostNeedJoin) == AuthPostNeedJoin && channel.GetClient(client.ClientID()) == nil {
 				client.Error(msg.TraceID, errors.New("当前动作不被允许"))
 				return
 			}
@@ -150,7 +150,7 @@ func (ws *wsManager) datarecv(client *wsClient, msg *RequestMessage) {
 		}
 	case TransferSend:
 		{
-			if channel.Perm != Auth_Anonymous && (channel.Perm&Auth_SendNeedJoin) == Auth_SendNeedJoin && channel.GetClient(client.ClientID()) == nil {
+			if channel.Perm != AuthAnonymous && (channel.Perm&AuthSendNeedJoin) == AuthSendNeedJoin && channel.GetClient(client.ClientID()) == nil {
 				client.Error(msg.TraceID, errors.New("当前动作不被允许"))
 				return
 			}

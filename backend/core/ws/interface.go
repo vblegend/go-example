@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+var errorJSONUnmarshalFail = errors.New("invalid json string")
 var errorInvalidChannelName = errors.New("invalid channel name")
 var errorNotInChannel = errors.New("not in channel")
 var errorCannotJoinChannelRepeated = errors.New("cannot join channel repeated")

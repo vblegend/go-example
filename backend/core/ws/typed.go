@@ -2,21 +2,21 @@ package ws
 
 import (
 	"encoding/json"
-	"errors"
 	"reflect"
 	"strconv"
 	"time"
 )
 
-var ErrorJsonUnmarshalFail = errors.New("invalid json string")
-
+// Params socket params
 type Params map[string]string
 
+// Get 获取一个参数
 func (p Params) Get(key string) (string, bool) {
 	v := p[key]
 	return v, len(v) > 0
 }
 
+// Parse 解析一个参数至 lpObject
 func (p Params) Parse(key string, lpObject interface{}) bool {
 	v := p[key]
 	pointer := reflect.ValueOf(lpObject)
@@ -164,22 +164,25 @@ func (p Params) Parse(key string, lpObject interface{}) bool {
 	return true
 }
 
+// AuthType Auth Type
 type AuthType int
 
 const (
-	// 不需要加入频道即可发送 POST SEND 消息
-	Auth_Anonymous = AuthType(0)
-	// POST消息 需要加入频道才可以发送
-	Auth_PostNeedJoin = AuthType(1)
-	// SEND消息 需要加入频道才可以发送
-	Auth_SendNeedJoin = AuthType(2)
-	// POST消息 和 SEND消息 需要加入频道才可以发送
-	Auth_PostAndSendNeedJoin = Auth_PostNeedJoin | Auth_SendNeedJoin
+	// AuthAnonymous 不需要加入频道即可发送 POST SEND 消息
+	AuthAnonymous = AuthType(0)
+	// AuthPostNeedJoin POST消息 需要加入频道才可以发送
+	AuthPostNeedJoin = AuthType(1)
+	// AuthSendNeedJoin SEND消息 需要加入频道才可以发送
+	AuthSendNeedJoin = AuthType(2)
+	// AuthPostAndSendNeedJoin POST消息 和 SEND消息 需要加入频道才可以发送
+	AuthPostAndSendNeedJoin = AuthPostNeedJoin | AuthSendNeedJoin
 )
 
+// MessageType websocket message type
 type MessageType int
 
 const (
+	// TextMessage text
 	TextMessage = MessageType(1)
 
 	// BinaryMessage denotes a binary data message.
@@ -225,8 +228,10 @@ const (
 	TransferSend = RequestAction(103)
 )
 
+// PayloadDomain payload data type
 type PayloadDomain string
 
+// RequestMessage 请求消息类型
 type RequestMessage struct {
 	// 动作
 	Action RequestAction `json:"action"`
@@ -291,19 +296,20 @@ func (r *RequestMessage) Call(method string, message string) *ResponseMessage {
 	return &ResponseMessage{}
 }
 
+// Unmarshal 反序列化
 func (r *RequestMessage) Unmarshal(data []byte) error {
 	if err := json.Unmarshal(data, r); err != nil {
 		return err
 	}
 	// Name不能为空
 	if r.Action == 0 {
-		return ErrorJsonUnmarshalFail
+		return errorJSONUnmarshalFail
 	}
 	if r.Channel == "" {
-		return ErrorJsonUnmarshalFail
+		return errorJSONUnmarshalFail
 	}
 	if r.TraceID == "" {
-		return ErrorJsonUnmarshalFail
+		return errorJSONUnmarshalFail
 	}
 	return nil
 }
