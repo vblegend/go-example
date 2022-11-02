@@ -1,7 +1,6 @@
 package ws
 
 import (
-	"backend/core/random"
 	"context"
 	"encoding/json"
 	"errors"
@@ -15,35 +14,35 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-type WSManager struct {
+type wsManager struct {
 	channels map[string]*WSChannel
-	clients  map[string]*WSClient
+	clients  map[string]*wsClient
 	chanLock sync.Mutex
 }
 
-// 默认的 websocket 管理器
-var Default = NewWebSocketManager()
+// Default 默认的 websocket 管理器
+var Default IWSManager = NewWebSocketManager()
 
-func NewWebSocketManager() *WSManager {
-	ws := &WSManager{}
+// NewWebSocketManager 创建一个websocket 管理器
+func NewWebSocketManager() IWSManager {
+	ws := &wsManager{}
 	ws.channels = make(map[string]*WSChannel)
 	return ws
 }
 
-// 注册一个频道 ， 使用perm控制频道的消息处理授权
-func (ws *WSManager) RegisterChannel(channel *WSChannel, perm AuthType) error {
-	if channel.Name == "" {
+// RegisterChannel 注册一个频道 ， 使用perm控制频道的消息处理授权
+func (ws *wsManager) RegisterChannel(name string, handler IWSMessageHandler, perm AuthType) error {
+	if name == "" {
 		return errors.New("无效的频道")
 	}
-	if ws.channels[channel.Name] != nil {
+	if ws.channels[name] != nil {
 		return errors.New("重复注册频道")
 	}
-	ws.channels[channel.Name] = channel
-	channel.Perm = perm
+	ws.channels[name] = newWSChannel(name, perm, handler)
 	return nil
 }
 
-func (ws *WSManager) parseParams(c *gin.Context) url.Values {
+func (ws *wsManager) parseParams(c *gin.Context) url.Values {
 	params := c.Request.URL.Query()
 	if _, ok := c.GetQuery("clientId"); !ok {
 		return nil
@@ -51,24 +50,16 @@ func (ws *WSManager) parseParams(c *gin.Context) url.Values {
 	return params
 }
 
-func (ws *WSManager) newClientId() string {
-	var clientId string
-	for clientId == "" || ws.clients[clientId] != nil {
-		clientId = random.RandomString(8)
-	}
-	return clientId
-}
-
-// websocket 应答处理器
-func (ws *WSManager) AcceptHandler(c *gin.Context) {
+// AcceptHandler websocket 应答处理器
+func (ws *wsManager) AcceptHandler(c *gin.Context) {
 	params := ws.parseParams(c)
 	if params == nil {
 		c.Writer.Header().Set("error", "missing necessary request parameters")
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"msg": "missing necessary request parameters"})
 		return
 	}
-	clientId := params.Get("clientId")
-	if ws.clients[clientId] != nil {
+	clientID := params.Get("clientId")
+	if ws.clients[clientID] != nil {
 		c.Writer.Header().Set("error", "duplicate client id")
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"msg": "duplicate client id"})
 		return
@@ -86,12 +77,12 @@ func (ws *WSManager) AcceptHandler(c *gin.Context) {
 		return
 	}
 
-	client := NewWSClient(conn, ctx, cancel, clientId)
+	client := newWSClient(ctx, conn, cancel, clientID)
 	// go channel.register(client)
 	go ws.readLoop(client)
 }
 
-func (ws *WSManager) readLoop(client *WSClient) {
+func (ws *wsManager) readLoop(client *wsClient) {
 	defer func() {
 		// 下线 退出所有频道
 		ws.clientOffline(client)
@@ -119,13 +110,13 @@ func (ws *WSManager) readLoop(client *WSClient) {
 	}
 }
 
-func (ws *WSManager) datarecv(client *WSClient, msg *RequestMessage) {
+func (ws *wsManager) datarecv(client *wsClient, msg *RequestMessage) {
 	defer func() {
 		_ = recover()
 	}()
 	channel := ws.channels[msg.Channel]
 	if channel == nil {
-		client.Error(msg.TraceId, InvalidChannelName)
+		client.Error(msg.TraceID, errorInvalidChannelName)
 		return
 	}
 	switch msg.Action {
@@ -133,50 +124,50 @@ func (ws *WSManager) datarecv(client *WSClient, msg *RequestMessage) {
 		{
 			p := Params{}
 			json.Unmarshal([]byte(msg.Payload), &p)
-			err := channel.JoinClient(client, p)
+			err := channel.joinClient(client, p)
 			if err != nil {
-				client.Error(msg.TraceId, err)
+				client.Error(msg.TraceID, err)
 				return
 			}
-			client.OK(msg.TraceId, nil, "welcome")
+			client.OK(msg.TraceID, nil, "welcome")
 		}
 	case LevelChannel:
 		{
-			err := channel.LeaveClient(client)
+			err := channel.leaveClient(client)
 			if err != nil {
-				client.Error(msg.TraceId, err)
+				client.Error(msg.TraceID, err)
 				return
 			}
-			client.OK(msg.TraceId, nil, "goodbye")
+			client.OK(msg.TraceID, nil, "goodbye")
 		}
 	case TransferPost:
 		{
-			if channel.Perm != Auth_Anonymous && (channel.Perm&Auth_PostNeedJoin) == Auth_PostNeedJoin && !client.HasChannel(msg.Channel) {
-				client.Error(msg.TraceId, errors.New("当前动作不被允许"))
+			if channel.Perm != Auth_Anonymous && (channel.Perm&Auth_PostNeedJoin) == Auth_PostNeedJoin && channel.GetClient(client.ClientID()) == nil {
+				client.Error(msg.TraceID, errors.New("当前动作不被允许"))
 				return
 			}
-			go channel.MessagePost(client, msg)
+			go channel.messagePost(client, msg)
 		}
 	case TransferSend:
 		{
-			if channel.Perm != Auth_Anonymous && (channel.Perm&Auth_SendNeedJoin) == Auth_SendNeedJoin && !client.HasChannel(msg.Channel) {
-				client.Error(msg.TraceId, errors.New("当前动作不被允许"))
+			if channel.Perm != Auth_Anonymous && (channel.Perm&Auth_SendNeedJoin) == Auth_SendNeedJoin && channel.GetClient(client.ClientID()) == nil {
+				client.Error(msg.TraceID, errors.New("当前动作不被允许"))
 				return
 			}
-			go channel.MessageCall(client, msg)
+			go channel.messageCall(client, msg)
 		}
 	default:
 		{
-			client.Error(msg.TraceId, errors.New("无效的权限"))
+			client.Error(msg.TraceID, errors.New("无效的权限"))
 		}
 	}
 	// join channel  增加 参数
 	// 数据传输 send  post 增加参数
 }
 
-func (ws *WSManager) clientOffline(client *WSClient) {
+func (ws *wsManager) clientOffline(client *wsClient) {
 	for _, channel := range ws.channels {
-		channel.LeaveClient(client)
+		channel.leaveClient(client)
 	}
-	delete(ws.clients, client.ClientId)
+	delete(ws.clients, client.clientID)
 }

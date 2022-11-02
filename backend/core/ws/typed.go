@@ -199,24 +199,29 @@ const (
 	PongMessage = MessageType(10)
 )
 
+// RequestAction 请求动作 内部协议
 type RequestAction int8
+
+// ResponseCode 响应代码 内部协议
 type ResponseCode int8
 
 const (
-	// 操作成功
+	// Success 操作成功
 	Success = ResponseCode(0)
-	// 操作失败
+	// Failure 操作失败
 	Failure = ResponseCode(-1)
+	// Action 服务器主动回调
+	Action = ResponseCode(127)
 )
 
 const (
-	// 加入频道
+	// JoinChannel 加入频道
 	JoinChannel = RequestAction(100)
-	// 离开频道
+	// LevelChannel 离开频道
 	LevelChannel = RequestAction(101)
-	// 传输数据 仅发送 不需要考虑响应
+	// TransferPost 传输数据 仅发送 不需要考虑响应
 	TransferPost = RequestAction(102)
-	// 传输数据 发送后需要回应
+	// TransferSend 传输数据 发送后需要回应
 	TransferSend = RequestAction(103)
 )
 
@@ -228,43 +233,59 @@ type RequestMessage struct {
 	// 消息属于哪个频道
 	Channel string `json:"channel"`
 	// 请求ID
-	TraceId string `json:"traceId"`
+	TraceID string `json:"traceId"`
 	// 方法
-	Method string `json:"method"`
+	Method string `json:"method,omitempty"`
 	// 数据负载
 	Payload PayloadDomain `json:"payload,omitempty"`
 	// 是否为托管的， 由对象池生成的对象为托管对象，Free时会放回对象池内，非对象池生成的对象 Free时忽略
 	managed bool `json:"-"`
 }
 
-// 返回一个回应结构体
+// Response 返回一个回应结构体
 func (r *RequestMessage) Response(code ResponseCode, message string) *ResponseMessage {
 	if response, err := MallocResponseMessage(); err == nil {
 		response.Code = code
 		response.Message = message
-		response.TraceId = r.TraceId
+		response.TraceID = r.TraceID
+		response.Payload = ""
 		return response
 	}
 	return &ResponseMessage{}
 }
 
-// 返回一个成功的回应消息体
+// Success 返回一个成功的回应消息体
 func (r *RequestMessage) Success(message string) *ResponseMessage {
 	if response, err := MallocResponseMessage(); err == nil {
 		response.Code = Success
 		response.Message = message
-		response.TraceId = r.TraceId
+		response.TraceID = r.TraceID
+		response.Payload = ""
 		return response
 	}
 	return &ResponseMessage{}
 }
 
-// 返回一个失败的回应消息体
+// Failure 返回一个失败的回应消息体
 func (r *RequestMessage) Failure(message string) *ResponseMessage {
 	if response, err := MallocResponseMessage(); err == nil {
 		response.Code = Failure
 		response.Message = message
-		response.TraceId = r.TraceId
+		response.TraceID = r.TraceID
+		response.Payload = ""
+		return response
+	}
+	return &ResponseMessage{}
+}
+
+// Call 返回一个失败的回应消息体
+func (r *RequestMessage) Call(method string, message string) *ResponseMessage {
+	if response, err := MallocResponseMessage(); err == nil {
+		response.Code = Action
+		response.Method = method
+		response.Message = message
+		response.TraceID = r.TraceID
+		response.Payload = ""
 		return response
 	}
 	return &ResponseMessage{}
@@ -281,22 +302,24 @@ func (r *RequestMessage) Unmarshal(data []byte) error {
 	if r.Channel == "" {
 		return ErrorJsonUnmarshalFail
 	}
-	if r.TraceId == "" {
+	if r.TraceID == "" {
 		return ErrorJsonUnmarshalFail
 	}
 	return nil
 }
 
+// ResponseMessage 服务器发送给客户端的消息
 type ResponseMessage struct {
 	// 响应代码
 	Code ResponseCode `json:"code"`
 	// 请求ID
-	TraceId string `json:"traceId"`
+	TraceID string `json:"traceId"`
+	// 方法
+	Method string `json:"method,omitempty"`
 	// 消息
 	Message string `json:"msg"`
 	// 响应数据
 	Payload PayloadDomain `json:"payload,omitempty"`
-
 	// 是否为托管的， 非托管对象不会被放入对象池中
 	managed bool `json:"-"`
 }

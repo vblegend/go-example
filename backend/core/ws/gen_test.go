@@ -31,25 +31,25 @@ func Test_WebSocket(t *testing.T) {
 type wsDemo struct {
 }
 
-func (wd *wsDemo) OnJoin(client *WSClient) {
-	fmt.Printf("新连接加入：%s\n", client.ClientId)
+func (wd *wsDemo) OnJoin(client *wsClient) {
+	fmt.Printf("新连接加入：%s\n", client.ClientID())
 }
 
 // websocket  连接断开
-func (wd *wsDemo) OnLeave(client *WSClient) {
-	fmt.Printf("连接断开：id:%s\n", client.ClientId)
+func (wd *wsDemo) OnLeave(client *wsClient) {
+	fmt.Printf("连接断开：id:%s\n", client.ClientID())
 }
 
 // websocket  连接断开
-func (wd *wsDemo) OnMessagePost(client *WSClient, msg *RequestMessage) {
+func (wd *wsDemo) OnMessagePost(client *wsClient, msg *RequestMessage) {
 
-	fmt.Printf("收到消息：id:%s, content:%s\n", client.ClientId, msg.Payload)
+	fmt.Printf("收到消息：id:%s, content:%s\n", client.ClientID(), msg.Payload)
 	client.Write(msg.Response(Success, ""))
 }
 
-func (wd *wsDemo) OnMessageCall(client *WSClient, msg *RequestMessage) (*ResponseMessage, error) {
+func (wd *wsDemo) OnMessageCall(client *wsClient, msg *RequestMessage) (*ResponseMessage, error) {
 
-	fmt.Printf("收到消息：id:%s, content:%s\n", client.ClientId, msg.Payload)
-	client.Success(msg.TraceId, "", nil)
+	fmt.Printf("收到消息：id:%s, content:%s\n", client.ClientID(), msg.Payload)
+	client.Success(msg.TraceID, "", nil)
 	return nil, nil
 }
