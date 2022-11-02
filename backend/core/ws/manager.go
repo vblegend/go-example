@@ -20,16 +20,6 @@ type wsManager struct {
 	chanLock sync.Mutex
 }
 
-// Default 默认的 websocket 管理器
-var Default IWSManager = NewWebSocketManager()
-
-// NewWebSocketManager 创建一个websocket 管理器
-func NewWebSocketManager() IWSManager {
-	ws := &wsManager{}
-	ws.channels = make(map[string]*WSChannel)
-	return ws
-}
-
 // RegisterChannel 注册一个频道 ， 使用perm控制频道的消息处理授权
 func (ws *wsManager) RegisterChannel(name string, handler IWSMessageHandler, perm AuthType) error {
 	if name == "" {

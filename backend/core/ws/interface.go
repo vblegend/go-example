@@ -52,3 +52,13 @@ type IWSMessageHandler interface {
 	OnMessagePost(channel IWSChannel, client IWSClient, msg *RequestMessage)
 	OnMessageCall(channel IWSChannel, client IWSClient, msg *RequestMessage) (*ResponseMessage, error)
 }
+
+// Default 默认的 websocket 管理器
+var Default IWSManager = NewWebSocketManager()
+
+// NewWebSocketManager 创建一个websocket 管理器
+func NewWebSocketManager() IWSManager {
+	ws := &wsManager{}
+	ws.channels = make(map[string]*WSChannel)
+	return ws
+}
