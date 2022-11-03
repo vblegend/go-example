@@ -8,6 +8,19 @@ Settings:
     CertFile: ./config/server.pem
     KeyFile: ./config/server.key
     Domain: localhost
+    www:
+      static:
+        - /js ./static/www/js
+        - /css ./static/www/css
+        - /imgs ./static/www/imgs
+        - /logo ./static/www/logo
+      
+      redirect:
+        - /401 ./static/www/index.html
+        - /404 ./static/www/index.html
+        - /login ./static/www/index.html
+
+
   Database:
     Default:
       ConnMaxIdleTime: 0
@@ -24,7 +37,7 @@ Settings:
       MaxOpenConns: 0
       Source: root:123456@tcp(127.0.0.1:3306)/test?charset=utf8&parseTime=True&loc=Local&timeout=1000ms
   Jwt:
-    Secret: App-Sidecar
+    Secret: Go-Example
     Timeout: 3600
   Logger:
     Cap: 1024000
@@ -41,8 +54,3 @@ Settings:
     host: 127.0.0.1
     password: 123456
     port: 6379
-  Ssl:
-    Domain: localhost:8080
-    Enable: false
-    Key: ./temp/domain.key
-    Pem: ./temp/domain.crt

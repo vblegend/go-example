@@ -13,7 +13,11 @@ var errorCannotJoinChannelRepeated = errors.New("cannot join channel repeated")
 
 // IWSManager websocket 管理器
 type IWSManager interface {
+	// AcceptHandler
 	AcceptHandler(c *gin.Context)
+	// Broadcast
+	Broadcast(msg *ResponseMessage)
+	// RegisterChannel
 	RegisterChannel(name string, handler IWSMessageHandler, perm AuthType) error
 }
 

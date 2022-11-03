@@ -2,6 +2,7 @@ package restful
 
 import (
 	"backend/core/model"
+	"backend/core/utils"
 	"net/http"
 	"reflect"
 
@@ -9,30 +10,9 @@ import (
 	"gorm.io/gorm"
 )
 
-func MakeSliceFunc(obj interface{}) func() interface{} {
-	t := reflect.TypeOf(obj)
-	if t.Kind() == reflect.Pointer {
-		t = t.Elem()
-	}
-	sliceType := reflect.SliceOf(t)
-	return func() interface{} {
-		return reflect.MakeSlice(sliceType, 0, 0).Interface()
-	}
-}
-
-func MakeModelFunc(obj interface{}) func() interface{} {
-	t := reflect.TypeOf(obj)
-	if t.Kind() == reflect.Pointer {
-		t = t.Elem()
-	}
-	return func() interface{} {
-		return reflect.New(t).Interface()
-	}
-}
-
 // 列表查询处理器
 func ListHander(resultTyped model.IModel) gin.HandlerFunc {
-	makeSclice := MakeSliceFunc(resultTyped)
+	makeSclice := utils.MakeSliceFunc(resultTyped)
 	return func(c *gin.Context) {
 		tx := c.MustGet("db").(*gorm.DB).WithContext(c)
 		sclice := makeSclice()
@@ -45,13 +25,16 @@ func ListHander(resultTyped model.IModel) gin.HandlerFunc {
 	}
 }
 
-// 页查询处理器
-func WherePageHander(queryObject interface{}, page model.IPagination, resultTyped model.IModel) gin.HandlerFunc {
+// WherePageHander 页查询处理器  返回查询的指定页的数据
+// queryModel 查询参数模型（为nil时不做where过滤），可重用 resultModel
+// pageModel 分页参数模型
+// resultModel 返回类型模型
+func WherePageHander(queryModel interface{}, pageModel model.IPagination, resultModel model.IModel) gin.HandlerFunc {
 	var makeQuery func() interface{}
-	makeModel := MakeModelFunc(page)
-	makeSclice := MakeSliceFunc(resultTyped)
-	if queryObject != nil {
-		makeQuery = MakeModelFunc(queryObject)
+	makeModel := utils.MakeModelFunc(pageModel)
+	makeSclice := utils.MakeSliceFunc(resultModel)
+	if queryModel != nil {
+		makeQuery = utils.MakeModelFunc(queryModel)
 	}
 	return func(c *gin.Context) {
 		tx := c.MustGet("db").(*gorm.DB).WithContext(c)
@@ -64,7 +47,7 @@ func WherePageHander(queryObject interface{}, page model.IPagination, resultType
 		sclice := makeSclice()
 		var count int64
 		offset := params.GetPageIndex()*params.GetPageSize() - params.GetPageSize()
-		tx = tx.Table(resultTyped.TableName())
+		tx = tx.Table(resultModel.TableName())
 		if makeQuery != nil {
 			query := makeQuery()
 			err = c.Bind(query)
@@ -83,9 +66,9 @@ func WherePageHander(queryObject interface{}, page model.IPagination, resultType
 	}
 }
 
-// 对象创建处理器
-func CreateHander(resultTyped model.IModel, succeedCallback func(object interface{})) gin.HandlerFunc {
-	makeModel := MakeModelFunc(resultTyped)
+// CreateHander 对象创建处理器，从接口读取 typeModel 并写入库，成功后调用回调函数succeedCallback
+func CreateHander(typeModel model.IModel, succeedCallback func(object interface{})) gin.HandlerFunc {
+	makeModel := utils.MakeModelFunc(typeModel)
 	return func(c *gin.Context) {
 		tx := c.MustGet("db").(*gorm.DB).WithContext(c)
 		model := makeModel()
@@ -94,7 +77,7 @@ func CreateHander(resultTyped model.IModel, succeedCallback func(object interfac
 			Error(c, http.StatusBadRequest, err, "")
 			return
 		}
-		err = tx.Table(resultTyped.TableName()).Create(model).Error
+		err = tx.Table(typeModel.TableName()).Create(model).Error
 		if err != nil {
 			Error(c, http.StatusInternalServerError, err, "")
 		} else {
@@ -106,9 +89,9 @@ func CreateHander(resultTyped model.IModel, succeedCallback func(object interfac
 	}
 }
 
-// 对象更新处理器
-func UpdateHander(resultTyped model.IModel, succeedCallback func(object interface{})) gin.HandlerFunc {
-	t := reflect.TypeOf(resultTyped)
+// UpdateHander 对象更新处理器，从接口读取 typeModel 并写入库，成功后调用回调函数succeedCallback
+func UpdateHander(typeModel model.IModel, succeedCallback func(object interface{})) gin.HandlerFunc {
+	t := reflect.TypeOf(typeModel)
 	if t.Kind() == reflect.Pointer {
 		t = t.Elem()
 	}
@@ -123,7 +106,7 @@ func UpdateHander(resultTyped model.IModel, succeedCallback func(object interfac
 			Error(c, http.StatusBadRequest, err, "")
 			return
 		}
-		err = tx.Table(resultTyped.TableName()).Updates(model).Error
+		err = tx.Table(typeModel.TableName()).Updates(model).Error
 		if err != nil {
 			Error(c, http.StatusInternalServerError, err, "")
 		} else {
@@ -135,9 +118,9 @@ func UpdateHander(resultTyped model.IModel, succeedCallback func(object interfac
 	}
 }
 
-// 对象删除处理器
-func DeleteHander(queryObject interface{}, resultTyped model.IModel, succeedCallback func(queryObject interface{})) gin.HandlerFunc {
-	makeQuery := MakeModelFunc(queryObject)
+// DeleteHander 对象删除处理器，从tableModel 表内删除符合条件的记录，成功后调用回调函数succeedCallback
+func DeleteHander(queryModel interface{}, tableModel model.IModel, succeedCallback func(queryObject interface{})) gin.HandlerFunc {
+	makeQuery := utils.MakeModelFunc(queryModel)
 	return func(c *gin.Context) {
 		query := makeQuery()
 		tx := c.MustGet("db").(*gorm.DB).WithContext(c)
@@ -146,7 +129,7 @@ func DeleteHander(queryObject interface{}, resultTyped model.IModel, succeedCall
 			Error(c, http.StatusBadRequest, err, "")
 			return
 		}
-		err = tx.Table(resultTyped.TableName()).Delete(query).Error
+		err = tx.Table(tableModel.TableName()).Delete(query).Error
 		if err != nil {
 			Error(c, http.StatusInternalServerError, err, "")
 		} else {
@@ -158,10 +141,10 @@ func DeleteHander(queryObject interface{}, resultTyped model.IModel, succeedCall
 	}
 }
 
-// 单例查询处理器
-func WhereFirstHander(queryObject interface{}, resultTyped model.IModel) gin.HandlerFunc {
-	makeModel := MakeModelFunc(resultTyped)
-	makeQuery := MakeModelFunc(queryObject)
+// WhereFirstHander 单例查询处理器  返回 符合 queryModel 的第一条记录
+func WhereFirstHander(queryModel interface{}, resultModel model.IModel) gin.HandlerFunc {
+	makeModel := utils.MakeModelFunc(resultModel)
+	makeQuery := utils.MakeModelFunc(queryModel)
 	return func(c *gin.Context) {
 		tx := c.MustGet("db").(*gorm.DB).WithContext(c)
 		model := makeModel()
@@ -171,7 +154,7 @@ func WhereFirstHander(queryObject interface{}, resultTyped model.IModel) gin.Han
 			Error(c, http.StatusBadRequest, err, "")
 			return
 		}
-		err = tx.Table(resultTyped.TableName()).Where(query).First(&model).Error
+		err = tx.Table(resultModel.TableName()).Where(query).First(&model).Error
 		if err != nil {
 			Error(c, http.StatusInternalServerError, err, "")
 		} else {
@@ -180,10 +163,10 @@ func WhereFirstHander(queryObject interface{}, resultTyped model.IModel) gin.Han
 	}
 }
 
-// 多条件查询处理器
-func WhereListHander(queryObject interface{}, resultTyped model.IModel) gin.HandlerFunc {
-	makeSclice := MakeSliceFunc(resultTyped)
-	makeQuery := MakeModelFunc(queryObject)
+// WhereListHander 列表件查询处理器，根据queryModel 查询指定resultModel对象列表
+func WhereListHander(queryModel interface{}, resultModel model.IModel) gin.HandlerFunc {
+	makeSclice := utils.MakeSliceFunc(resultModel)
+	makeQuery := utils.MakeModelFunc(queryModel)
 	return func(c *gin.Context) {
 		tx := c.MustGet("db").(*gorm.DB)
 		query := makeQuery()
@@ -193,7 +176,7 @@ func WhereListHander(queryObject interface{}, resultTyped model.IModel) gin.Hand
 			return
 		}
 		sclice := makeSclice()
-		err = tx.Table(resultTyped.TableName()).Where(query).Find(&sclice).Error
+		err = tx.Table(resultModel.TableName()).Where(query).Find(&sclice).Error
 		if err != nil {
 			Error(c, http.StatusInternalServerError, err, "")
 		} else {
@@ -202,9 +185,9 @@ func WhereListHander(queryObject interface{}, resultTyped model.IModel) gin.Hand
 	}
 }
 
-// 对象创建处理器
+// ActionHander 动作处理器
 func ActionHander(queryObject interface{}, succeedCallback func(object interface{})) gin.HandlerFunc {
-	makeQuery := MakeModelFunc(queryObject)
+	makeQuery := utils.MakeModelFunc(queryObject)
 	return func(c *gin.Context) {
 		model := makeQuery()
 		err := AutoBind(c, model)

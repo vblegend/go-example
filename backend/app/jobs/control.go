@@ -15,9 +15,8 @@ import (
 var tasks = make(map[int]*JobCore)
 var mux sync.RWMutex
 var crontab *cron.Cron
-var WebSocketChannel *socket.JobSocketChannel
 
-// 初始化
+// Setup 初始化
 func Setup() {
 	log.Info("JobCore Starting...")
 	db := sdk.Runtime.GetDb("default")
@@ -44,14 +43,13 @@ func Setup() {
 		}
 	}
 	// 初始化 Job websocket
-
-	WebSocketChannel = &socket.JobSocketChannel{}
-	ws.Default.RegisterChannel("jobs", WebSocketChannel, ws.AuthAnonymous)
+	ws.Default.RegisterChannel("jobs", &socket.JobSocketChannel{}, ws.AuthAnonymous)
 	// 其中任务
 	crontab.Start()
 	log.Info("JobCore start success.")
 }
 
+// ConfigJob ConfigJob
 func ConfigJob(model models.SysJob) error {
 	StopJob(model.JobId)
 	if model.Enabled {
@@ -60,6 +58,7 @@ func ConfigJob(model models.SysJob) error {
 	return nil
 }
 
+// StartJob StartJob
 func StartJob(model models.SysJob) error {
 	mux.Lock()
 	defer mux.Unlock()
@@ -82,14 +81,15 @@ func StartJob(model models.SysJob) error {
 	return nil
 }
 
-func StopJob(jobId int) error {
+// StopJob  StopJob
+func StopJob(jobID int) error {
 	mux.Lock()
 	defer mux.Unlock()
-	task := tasks[jobId]
+	task := tasks[jobID]
 	if task == nil {
 		return nil
 	}
 	crontab.Remove(cron.EntryID(task.EntryId))
-	delete(tasks, jobId)
+	delete(tasks, jobID)
 	return nil
 }

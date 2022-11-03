@@ -26,7 +26,6 @@ import (
 
 var (
 	configYml string
-	apiCheck  bool
 	// StartCmd 命令行
 	StartCmd = &cobra.Command{
 		Use:          "server",
@@ -44,7 +43,6 @@ var (
 
 func init() {
 	StartCmd.PersistentFlags().StringVarP(&configYml, "config", "c", "config/settings.yml", "Start server with provided configuration file")
-	StartCmd.PersistentFlags().BoolVarP(&apiCheck, "api", "a", false, "Start server with check api data")
 }
 
 func setup() {
@@ -90,16 +88,13 @@ func run() error {
 	}
 	// 注册路由
 	g.Register(engine, GetRootRouter())
-
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-	srv := &http.Server{
-		Addr:    fmt.Sprintf("%s:%d", config.Application.Host, config.Application.Port),
-		Handler: engine,
-	}
 	log.Info(echo.Green("Server run at:"))
 	for _, ip := range network.LocalIpAddres() {
 		log.Infof("- %s://%s:%d/", config.Application.GetHttpProtocol(), ip, config.Application.Port)
+	}
+	srv := &http.Server{
+		Addr:    fmt.Sprintf("%s:%d", config.Application.Host, config.Application.Port),
+		Handler: engine,
 	}
 	go func() {
 		// 服务连接
@@ -113,11 +108,13 @@ func run() error {
 			}
 		}
 	}()
-
 	log.Info("Enter Control + C Shutdown Server")
 	// 等待中断信号以优雅地关闭服务器（设置 5 秒的超时时间）
 	system.WaitQuitSignal()
 	log.Info(echo.Yellow("The server is shut down .... "))
+	// 等待上下文退出
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 	if err := srv.Shutdown(ctx); err != nil {
 		log.Fatal("Server Shutdown:", err)
 	}
