@@ -28,13 +28,13 @@ define clean
 	@echo "正在清理目录.."
 	@rm -rf ${OUT_DIR}
 	@mkdir -p ${PUBLISH_DIR}
-	@if [ -f ./backend/${APP_FILENAME} ] ; then rm ./backend/${APP_FILENAME}; fi
-	@if [ -f ./backend/${APP_FILENAME}.exe ] ; then rm ./backend/${APP_FILENAME}.exe; fi
+	@if [ -f ./server/${APP_FILENAME} ] ; then rm ./server/${APP_FILENAME}; fi
+	@if [ -f ./server/${APP_FILENAME}.exe ] ; then rm ./server/${APP_FILENAME}.exe; fi
 endef
 
 define depend
 	@echo "正在恢复golang项目依赖.."
-	@cd backend; go mod tidy
+	@cd server; go mod tidy
 	@echo "正在恢复web项目依赖.."
 	@cd web; npm install --force
 endef
@@ -50,19 +50,19 @@ define buildPlugin
 	@cd plugins/pprof; CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build  -o pprof.so -buildmode=plugin ./main.go
 
 endef
-
+# -race
 define buildLinux
 	@echo "正在编译后端项目..."
 	@echo "当前版本：${BUILD_VERSION}"
 	@echo "构建时间：${BUILD_TIME}"
 	@echo "提交记录：${COMMIT_ID}"
-	@cd backend; CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build -ldflags "-X 'backend/common/assembly.Version=${BUILD_VERSION}' -X 'backend/common/assembly.BuildTime=${BUILD_TIME}' -X 'backend/common/assembly.CommitID=${COMMIT_ID}'" -o ./${APP_FILENAME} -race ./main.go
+	@cd server; CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build -ldflags "-X 'server/common/assembly.Version=${BUILD_VERSION}' -X 'server/common/assembly.BuildTime=${BUILD_TIME}' -X 'server/common/assembly.CommitID=${COMMIT_ID}'" -o ./${APP_FILENAME}  ./main.go
 	@echo "编译完毕..."
 endef
 
 define buildWindows
 	@echo "正在编译Windows架构可执行文件..."
-	@CGO_ENABLED=1 GOOS=windows GOARCH=amd64 go build $(RACE) -o ./${APP_FILENAME}.exe ./backend/main.go
+	@CGO_ENABLED=1 GOOS=windows GOARCH=amd64 go build $(RACE) -o ./${APP_FILENAME}.exe ./server/main.go
 	@echo "编译完毕..."
 endef
 
@@ -71,19 +71,19 @@ define archive
 endef
 
 define tidy
-	@cd backend; go mod tidy
+	@cd server; go mod tidy
 endef
 
 
 define publish
 	@echo "正在发布文件..."
-	@/bin/cp -rf ./backend/${APP_FILENAME} ${PUBLISH_DIR}/${APP_FILENAME}
+	@/bin/cp -rf ./server/${APP_FILENAME} ${PUBLISH_DIR}/${APP_FILENAME}
 	@chmod 777 ${PUBLISH_DIR}/${APP_FILENAME}
-	@/bin/cp -rf ./backend/bin ${PUBLISH_DIR}/bin
-	@/bin/cp -rf ./backend/config ${PUBLISH_DIR}/config
-	@/bin/cp -rf ./backend/static ${PUBLISH_DIR}/static
-	@/bin/cp -rf ./backend/template ${PUBLISH_DIR}/template
-	@/bin/cp -rf ./backend/version ${PUBLISH_DIR}/version
+	@/bin/cp -rf ./server/bin ${PUBLISH_DIR}/bin
+	@/bin/cp -rf ./server/config ${PUBLISH_DIR}/config
+	@/bin/cp -rf ./server/static ${PUBLISH_DIR}/static
+	@/bin/cp -rf ./server/template ${PUBLISH_DIR}/template
+	@/bin/cp -rf ./server/version ${PUBLISH_DIR}/version
 	@rm -rf ${PUBLISH_DIR}/bin/windows
 	@rm -rf ${PUBLISH_DIR}/static/form-generator
 	@${PUBLISH_DIR}/${APP_FILENAME} config reset

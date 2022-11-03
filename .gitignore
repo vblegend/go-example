@@ -2,12 +2,12 @@
 
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
-backend/logs
-backend/static/www
+server/logs
+server/static/www
 # Dependency directories (remove the comment below to include it)
 # vendor/
-backend/__debug_bin
-backend/sqlite.db
-backend/go-example
-backend/logs/*
-backend/go.sum
+server/__debug_bin
+server/sqlite.db
+server/go-example
+server/logs/*
+server/go.sum
