@@ -22,8 +22,8 @@ var DefaultLanguage = "zh-CN"
 
 // 断言中断器
 type AssertInterrupter struct {
-	Code     int
-	Messsage string
+	Code  int
+	Error error
 }
 
 type Api struct {
@@ -127,8 +127,8 @@ func (e *Api) MakeService(c *service.Service) *Api {
 }
 
 // Error 通常错误数据处理
-func (e Api) Error(code int, err error, msg string) {
-	Error(e.Context, code, err, msg)
+func (e Api) Error(code int, err error) {
+	Error(e.Context, code, err)
 }
 
 // OK 通常成功数据处理
@@ -136,17 +136,17 @@ func (e Api) OK(data interface{}, msg string) {
 	OK(e.Context, data, msg)
 }
 
-// HasError 错误断言
-// 当 error 不为 nil 时触发 panic
-// 对于当前请求不会再执行接下来的代码，并且返回指定格式的错误信息和错误码
-// 若 msg 为空，则默认为 error 中的内容
-func (e Api) AssertError(err error, code int, message ...string) {
+// AssertError 错误断言，中止后面所有行为
+func (e Api) AssertError(err error, code int) {
 	if err != nil {
-		msg := err.Error()
-		if len(message) > 0 {
-			msg = message[0]
-		}
-		panic(AssertInterrupter{Code: code, Messsage: msg})
+		panic(AssertInterrupter{Code: code, Error: err})
+	}
+}
+
+// Assert 条件断言，中止后面所有行为
+func (e Api) Assert(assert bool, code int, message string) {
+	if assert {
+		panic(AssertInterrupter{Code: code, Error: errors.New(message)})
 	}
 }
 

@@ -12,7 +12,7 @@ const TraceIdKey = "{[trace-id]}"
 
 // 接收来自客户端header中的 requestIdKey， 如果没有则调用 fn()生成一个key
 // 当接口返回时 返回该key字段至 traceId
-func TraceId(requestIdKey string, fn TraceGenerator) gin.HandlerFunc {
+func TraceID(requestIdKey string, fn TraceGenerator) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		if c.Request.Method == http.MethodOptions {
 			c.Next()

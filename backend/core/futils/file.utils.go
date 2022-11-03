@@ -13,7 +13,7 @@ func FileExist(addr string) bool {
 	return !s.IsDir()
 }
 
-func MFileExist(files []string) error {
+func FileExists(files []string) error {
 	for _, file := range files {
 		if !FileExist(file) {
 			return errors.New(file)

@@ -28,7 +28,7 @@ func PathExist(addr string) bool {
 }
 
 // 校验目录列表中目录是否存在  若不存在则返回异常
-func MPathExist(dirs []string) error {
+func PathExists(dirs []string) error {
 	for _, dir := range dirs {
 		if !PathExist(dir) {
 			return errors.New(dir)
@@ -37,7 +37,7 @@ func MPathExist(dirs []string) error {
 	return nil
 }
 
-func AbsPathCheck(paths []string) error {
+func AbsPathCheck(paths ...string) error {
 	for _, path := range paths {
 		str := path[:1]
 		if str != "/" {

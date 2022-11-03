@@ -18,7 +18,7 @@ func ListHander(resultTyped model.IModel) gin.HandlerFunc {
 		sclice := makeSclice()
 		err := tx.Table(resultTyped.TableName()).Find(&sclice).Error
 		if err != nil {
-			Error(c, http.StatusInternalServerError, err, "")
+			Error(c, http.StatusInternalServerError, err)
 		} else {
 			OK(c, sclice, "OK")
 		}
@@ -41,7 +41,7 @@ func WherePageHander(queryModel interface{}, pageModel model.IPagination, result
 		params := makeModel().(model.IPagination)
 		err := c.Bind(params)
 		if err != nil {
-			Error(c, http.StatusBadRequest, err, "")
+			Error(c, http.StatusBadRequest, err)
 			return
 		}
 		sclice := makeSclice()
@@ -52,14 +52,14 @@ func WherePageHander(queryModel interface{}, pageModel model.IPagination, result
 			query := makeQuery()
 			err = c.Bind(query)
 			if err != nil {
-				Error(c, http.StatusBadRequest, err, "")
+				Error(c, http.StatusBadRequest, err)
 				return
 			}
 			tx = tx.Where(query)
 		}
 		err = tx.Count(&count).Offset(offset).Limit(params.GetPageSize()).Find(&sclice).Error
 		if err != nil {
-			Error(c, http.StatusInternalServerError, err, "")
+			Error(c, http.StatusInternalServerError, err)
 		} else {
 			PageOK(c, sclice, int(count), params.GetPageIndex(), params.GetPageSize(), "OK")
 		}
@@ -74,12 +74,12 @@ func CreateHander(typeModel model.IModel, succeedCallback func(object interface{
 		model := makeModel()
 		err := c.Bind(model)
 		if err != nil {
-			Error(c, http.StatusBadRequest, err, "")
+			Error(c, http.StatusBadRequest, err)
 			return
 		}
 		err = tx.Table(typeModel.TableName()).Create(model).Error
 		if err != nil {
-			Error(c, http.StatusInternalServerError, err, "")
+			Error(c, http.StatusInternalServerError, err)
 		} else {
 			if succeedCallback != nil {
 				succeedCallback(reflect.ValueOf(model).Elem().Interface())
@@ -103,12 +103,12 @@ func UpdateHander(typeModel model.IModel, succeedCallback func(object interface{
 		model := makeModel()
 		err := c.Bind(model)
 		if err != nil {
-			Error(c, http.StatusBadRequest, err, "")
+			Error(c, http.StatusBadRequest, err)
 			return
 		}
 		err = tx.Table(typeModel.TableName()).Updates(model).Error
 		if err != nil {
-			Error(c, http.StatusInternalServerError, err, "")
+			Error(c, http.StatusInternalServerError, err)
 		} else {
 			if succeedCallback != nil {
 				succeedCallback(model)
@@ -126,12 +126,12 @@ func DeleteHander(queryModel interface{}, tableModel model.IModel, succeedCallba
 		tx := c.MustGet("db").(*gorm.DB).WithContext(c)
 		err := AutoBind(c, query)
 		if err != nil {
-			Error(c, http.StatusBadRequest, err, "")
+			Error(c, http.StatusBadRequest, err)
 			return
 		}
 		err = tx.Table(tableModel.TableName()).Delete(query).Error
 		if err != nil {
-			Error(c, http.StatusInternalServerError, err, "")
+			Error(c, http.StatusInternalServerError, err)
 		} else {
 			if succeedCallback != nil {
 				succeedCallback(query)
@@ -151,12 +151,12 @@ func WhereFirstHander(queryModel interface{}, resultModel model.IModel) gin.Hand
 		query := makeQuery()
 		err := AutoBind(c, query)
 		if err != nil {
-			Error(c, http.StatusBadRequest, err, "")
+			Error(c, http.StatusBadRequest, err)
 			return
 		}
 		err = tx.Table(resultModel.TableName()).Where(query).First(&model).Error
 		if err != nil {
-			Error(c, http.StatusInternalServerError, err, "")
+			Error(c, http.StatusInternalServerError, err)
 		} else {
 			OK(c, model, "OK")
 		}
@@ -172,13 +172,13 @@ func WhereListHander(queryModel interface{}, resultModel model.IModel) gin.Handl
 		query := makeQuery()
 		err := AutoBind(c, query)
 		if err != nil {
-			Error(c, http.StatusBadRequest, err, "")
+			Error(c, http.StatusBadRequest, err)
 			return
 		}
 		sclice := makeSclice()
 		err = tx.Table(resultModel.TableName()).Where(query).Find(&sclice).Error
 		if err != nil {
-			Error(c, http.StatusInternalServerError, err, "")
+			Error(c, http.StatusInternalServerError, err)
 		} else {
 			OK(c, sclice, "OK")
 		}
@@ -192,7 +192,7 @@ func ActionHander(queryObject interface{}, succeedCallback func(object interface
 		model := makeQuery()
 		err := AutoBind(c, model)
 		if err != nil {
-			Error(c, http.StatusBadRequest, err, "")
+			Error(c, http.StatusBadRequest, err)
 			return
 		}
 		if succeedCallback != nil {

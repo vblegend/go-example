@@ -11,23 +11,15 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func WriteError(c *gin.Context, err interface{}) {
-	defer func() {
-		if err := recover(); err != nil {
-			log.Error(err)
-		}
-	}()
-
+//
+func writeError(c *gin.Context, err interface{}) {
 	if c.IsAborted() {
-		c.Status(200)
+		return // c.Status(200)
+
 	}
 	switch errStr := err.(type) {
 	case restful.AssertInterrupter:
-		c.JSON(http.StatusOK, gin.H{
-			"code": errStr.Code,
-			"msg":  errStr.Messsage,
-			"data": nil,
-		})
+		restful.Error(c, errStr.Code, errStr.Error)
 	default:
 		callStack := string(debug.Stack())
 		lines := strings.Split(callStack, "\n")
@@ -37,10 +29,11 @@ func WriteError(c *gin.Context, err interface{}) {
 	}
 }
 
+// CustomError 自定义错误处理中间件
 func CustomError(c *gin.Context) {
 	defer func() {
 		if err := recover(); err != nil {
-			WriteError(c, err)
+			writeError(c, err)
 		}
 	}()
 	c.Next()

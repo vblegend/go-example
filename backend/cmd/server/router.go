@@ -36,7 +36,7 @@ func GetRootRouter() g.Routers {
 				middleware.CustomError, // 自定义异常处理
 				plugs.NewHttpsHandler(config.Application.Https, config.Application.Domain, uint(config.Application.Port)), // https
 				plugs.RequestLogOut(log.GetLogger(), log.TraceLevel),                                                      // 请求日志
-				plugs.TraceId("requestId", uuid.NewString),                                                                // 请求UUID
+				plugs.TraceID("requestId", uuid.NewString),                                                                // 请求UUID
 				plugs.WithContextDB("default"),                                                                            // 数据连接
 				plugs.NoCache,                                                                                             // 禁用缓存
 				plugs.Options,                                                                                             // 跨域请求

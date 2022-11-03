@@ -6,7 +6,7 @@ import (
 )
 
 func InitDevelopmentMenu() {
-	db := sdk.Runtime.GetDb("Default")
+	db := sdk.Runtime.GetDb("default")
 	if db != nil {
 		visible := 0
 		if env.ModeIs(env.Production) {
