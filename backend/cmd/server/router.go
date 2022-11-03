@@ -123,6 +123,9 @@ func GetApiRouter(authMiddleware *jwtauth.GinJWTMiddleware) g.Routers {
 		},
 		g.Router{
 			Url: "",
+			Use: g.Use(
+				plugs.NoCache, // 禁用缓存
+			),
 			Handle: func(r gin.IRoutes) {
 				r.GET("/", func(c *gin.Context) {
 					c.Redirect(http.StatusMovedPermanently, "/login")

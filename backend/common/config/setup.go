@@ -25,6 +25,8 @@ func Setup(configYml string, fs ...func()) {
 	vtoml.SetConfigName(name)
 	vtoml.SetConfigType("yaml")
 	vtoml.AddConfigPath(dir)
+	// vtoml.AutomaticEnv()   // 支持一下 环境变量被
+	// vtoml.SetEnvPrefix("$")
 	if err := vtoml.ReadInConfig(); err != nil {
 		panic(err)
 	}

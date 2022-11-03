@@ -15,7 +15,7 @@ var showVersion bool = false
 
 var rootCmd = &cobra.Command{
 	Use:               assembly.AppFileName,
-	Short:             "服务器管理台",
+	Short:             "go-example",
 	SilenceUsage:      true,
 	Long:              assembly.AppFileName,
 	PersistentPreRunE: func(*cobra.Command, []string) error { return nil },

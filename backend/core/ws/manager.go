@@ -161,3 +161,13 @@ func (ws *wsManager) clientOffline(client *wsClient) {
 	}
 	delete(ws.clients, client.clientID)
 }
+
+// Broadcast 在频道内广播一条消息
+// msg 消息
+func (ws *wsManager) Broadcast(msg *ResponseMessage) {
+	// wc.lock.Lock()
+	// defer wc.lock.Unlock()
+	// for _, client := range wc.Clients {
+	// 	client.Write(msg)
+	// }
+}
