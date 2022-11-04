@@ -5,9 +5,9 @@ Settings:
     Name: Go-Example
     Port: 8080
     Https: false
+    Domain: localhost
     CertFile: ./config/server.pem
     KeyFile: ./config/server.key
-    Domain: localhost
     www:
       static:
         - /js ./static/www/js
@@ -19,8 +19,6 @@ Settings:
         - /401 ./static/www/index.html
         - /404 ./static/www/index.html
         - /login ./static/www/index.html
-
-
   Database:
     Default:
       ConnMaxIdleTime: 0
@@ -35,7 +33,7 @@ Settings:
       Driver: mysql
       MaxIdleConns: 0
       MaxOpenConns: 0
-      Source: root:123456@tcp(127.0.0.1:3306)/test?charset=utf8&parseTime=True&loc=Local&timeout=1000ms
+      Source: root:123456@tcp(172.17.0.1:3306)/test?charset=utf8&parseTime=True&loc=Local&timeout=1000ms
   Jwt:
     Secret: Go-Example
     Timeout: 3600
@@ -47,8 +45,6 @@ Settings:
     FileSuffix: log
     Path: ./logs
     Enabled: true
-  Queue:
-    PoolSize: 100
   Redis:
     db: 0
     host: 127.0.0.1

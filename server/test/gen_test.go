@@ -10,6 +10,7 @@ import (
 	"server/sugar/echo"
 	"server/sugar/mpool"
 	"server/sugar/random"
+	"server/sugar/types"
 	"testing"
 	"time"
 	//"text/template"
@@ -21,14 +22,27 @@ type StructT struct {
 }
 
 func TestRandom(t *testing.T) {
-
-	bytes := make([]byte, 100)
-
-	random.Bytes(bytes)
-
-	for i := 0; i < 100; i++ {
-		fmt.Println(random.Betweenf(8, 10))
+	k := types.SIntMap{}
+	s := types.Strings{}
+	t2 := types.Ints{}
+	for i := 0; i < 10; i++ {
+		s.Append(fmt.Sprintf("%d", random.Between(0, 100)))
+		k.Put(fmt.Sprintf("%d", i), random.Between(0, 100))
+		t2.Append(random.Between(0, 100))
 	}
+	s.Push("-")
+	s.Sort()
+	t2.Sort()
+	t2.Reverse()
+
+	vss := k.SortKeys()
+	t2.Remove(5)
+	inx := t2.IndexOf(7)
+	val := k.Get("5")
+	k.Clear()
+	res := s.Pop()
+	fmt.Println(res, vss, val, inx)
+
 }
 
 func TestPool(t *testing.T) {

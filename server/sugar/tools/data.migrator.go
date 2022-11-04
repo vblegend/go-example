@@ -6,10 +6,40 @@ import (
 	"server/common/models"
 	"server/sugar/echo"
 	"server/sugar/log"
+	"sort"
 	"strings"
 
 	"gorm.io/gorm"
 )
+
+// DataMigratePair 数据迁移器键值对
+type DataMigratePair map[string]IDataMigrator
+
+// Set 设置指定key 的数据迁移器
+func (m DataMigratePair) Set(key string, value IDataMigrator) {
+	m[key] = value
+}
+
+// Keys 获取所有 Keys
+func (m DataMigratePair) Keys() []string {
+	keys := make([]string, 0)
+	for k := range m {
+		keys = append(keys, k)
+	}
+	return keys
+}
+
+// SortKeys  获取所有排序后的Keys
+func (m DataMigratePair) SortKeys() []string {
+	keys := make([]string, 0)
+	for k := range m {
+		keys = append(keys, k)
+	}
+	if !sort.StringsAreSorted(keys) {
+		sort.Strings(keys)
+	}
+	return keys
+}
 
 type IDataPather interface {
 	// 迁移前置，正式迁移之前预处理

@@ -1,12 +1,13 @@
 package initialize
 
 import (
+	"server/common/config"
 	"server/sugar/env"
-	"server/sugar/sdk"
+	"server/sugar/state"
 )
 
 func InitDevelopmentMenu() {
-	db := sdk.Runtime.GetDb("default")
+	db := state.Default.GetDB(config.DefaultDB)
 	if db != nil {
 		visible := 0
 		if env.ModeIs(env.Production) {

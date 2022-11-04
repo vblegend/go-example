@@ -22,20 +22,20 @@ func (l gormLogger) LogMode(level logger.LogLevel) logger.Interface {
 
 // Info print info
 func (l gormLogger) Info(ctx context.Context, msg string, data ...interface{}) {
-	l.logger.Logf(InfoLevel, "┏[%s]%s\t", echo.Green("GORM"), utils.FileWithLineNum())
-	l.logger.Logf(InfoLevel, "┗[%s]%s\t"+msg, echo.Green("GORM"), fmt.Sprintf(msg))
+	l.logger.Logf(InfoLevel, "┏[%s]%s", echo.Green("GORM"), utils.FileWithLineNum())
+	l.logger.Logf(InfoLevel, "┗[%s]%s", echo.Green("GORM"), fmt.Sprintf(msg, data...))
 }
 
 // Warn print warn messages
 func (l gormLogger) Warn(ctx context.Context, msg string, data ...interface{}) {
-	l.logger.Logf(WarnLevel, "┏[%s]%s\t", echo.Yellow("GORM"), utils.FileWithLineNum())
-	l.logger.Logf(WarnLevel, "┗[%s]%s\t"+msg, echo.Yellow("GORM"), fmt.Sprintf(msg))
+	l.logger.Logf(WarnLevel, "┏[%s]%s", echo.Yellow("GORM"), utils.FileWithLineNum())
+	l.logger.Logf(WarnLevel, "┗[%s]%s", echo.Yellow("GORM"), fmt.Sprintf(msg, data...))
 }
 
 // Error print error messages
 func (l gormLogger) Error(ctx context.Context, msg string, data ...interface{}) {
-	l.logger.Logf(ErrorLevel, "┏[%s]%s\t", echo.Red("GORM"), utils.FileWithLineNum())
-	l.logger.Logf(ErrorLevel, "┗[%s]%s\t"+msg, echo.Red("GORM"), fmt.Sprintf(msg))
+	l.logger.Logf(ErrorLevel, "┏[%s]%s", echo.Red("GORM"), utils.FileWithLineNum())
+	l.logger.Logf(ErrorLevel, "┗[%s]%s", echo.Red("GORM"), echo.Red(fmt.Sprintf(msg, data...)))
 }
 
 func (l gormLogger) getUseTimeColor(elapsed time.Duration) func(string) string {

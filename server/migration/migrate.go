@@ -3,49 +3,46 @@ package migration
 import (
 	"fmt"
 	"path/filepath"
+	"runtime"
+	"server/common/config"
 	"server/common/models"
 	"server/sugar/echo"
 	"server/sugar/log"
-	"server/sugar/sdk"
+	"server/sugar/state"
 	"server/sugar/tools"
-	"sort"
 )
 
 var (
-	version map[string]tools.IDataMigrator = make(map[string]tools.IDataMigrator)
+	version tools.DataMigratePair = tools.DataMigratePair{}
 )
 
 func DataBaseMigrate() {
+	migrations := models.Migrations{}
+
 	log.Info(echo.Green("Start Patch Upgrade..."))
-	db := sdk.Runtime.GetDb("default")
+	db := state.Default.GetDB(config.DefaultDB)
 	err := db.AutoMigrate(&models.Migration{})
 	if err != nil {
 		log.Errorf("Table Migration Migrate Fail.. %s\n", echo.Red(err.Error()))
 		panic(0)
 	}
-	versions := make([]string, 0)
-	for k := range version {
-		versions = append(versions, k)
+	// get all Migration record
+	err = db.Table("sys_migration").Find(&migrations).Error
+	if err != nil {
+		log.Errorf("Table Migration Migrate Fail.. %s\n", echo.Red(err.Error()))
+		panic(0)
 	}
-	if !sort.StringsAreSorted(versions) {
-		sort.Strings(versions)
-	}
-	for _, v := range versions {
-		var count int64
-		migrator := version[v]
-		err = db.Table("sys_migration").Where("version = ?", v).Count(&count).Error
-		if err != nil {
-			log.Errorf("Init Error %s\n", echo.Red(err.Error()))
-			break
-		}
-		if count > 0 {
-			continue
-		}
-		log.Info(echo.Green(fmt.Sprintf("Apply Patch %s", v)))
-		err = migrator.Migrate(db)
-		if err != nil {
-			log.Errorf("Data Migrate Error %s\n", echo.Red(err.Error()))
-			break
+	recordMigration := migrations.Map()
+	versions := version.SortKeys()
+	for _, key := range versions {
+		if recordMigration[key] == nil {
+			migrator := version[key]
+			log.Info(echo.Green(fmt.Sprintf("Apply Patch %s", key)))
+			err = migrator.Migrate(db)
+			if err != nil {
+				log.Errorf("Data Migrate Error %s\n", echo.Red(err.Error()))
+				break
+			}
 		}
 	}
 	log.Info(echo.Green("End of patching ..."))
@@ -56,11 +53,15 @@ func GetFilename(s string) string {
 	return s[:len(s)-3]
 }
 
-func SetVersion(k string, dm tools.IDataMigrator) {
+func SetVersion(dm tools.IDataMigrator) {
+
+	_, fileName, _, _ := runtime.Caller(1)
+	k := GetFilename(fileName)
+
 	dm.SetVersion(k)
 	dm.SetPatcher(dm)
 	if version[k] != nil {
 		panic(fmt.Sprintf("检测到重复的版本迁移补丁“%s”，请修正后再使用...", k))
 	}
-	version[k] = dm
+	version.Set(k, dm)
 }
