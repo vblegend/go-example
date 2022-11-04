@@ -7,10 +7,6 @@ type DatabaseConfigure struct {
 	// User            string
 	// Passwd          string
 	// DBName          string
-	Driver          string
-	Source          string
-	ConnMaxIdleTime int
-	ConnMaxLifeTime int
-	MaxIdleConns    int
-	MaxOpenConns    int
+	Driver string
+	Source string
 }

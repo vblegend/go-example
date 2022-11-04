@@ -7,11 +7,12 @@ import (
 
 // Config 配置集合
 type Config struct {
-	Application *types.ApplicationConfigure         `yaml:"application"`
-	Logger      *types.LoggerConfigure              `yaml:"logger"`
-	Jwt         *types.JwtConfigure                 `yaml:"jwt"`
-	Database    map[string]*types.DatabaseConfigure `yaml:"database"`
-	Redis       *types.RedisConfigure               `yaml:"redis"`
+	Application *types.ApplicationConfigure         `yaml:"Application"`
+	Logger      *types.LoggerConfigure              `yaml:"Logger"`
+	Jwt         *types.JwtConfigure                 `yaml:"Jwt"`
+	Database    map[string]*types.DatabaseConfigure `yaml:"Database"`
+	Redis       *types.RedisConfigure               `yaml:"Redis"`
+	Web         *types.WebConfigure                 `yaml:"Web"`
 }
 
 // Settings 兼容原先的配置结构
@@ -41,6 +42,9 @@ var Jwt = new(types.JwtConfigure)
 // Logger 日志配置
 var Logger = new(types.LoggerConfigure)
 
+// Web web服务配置
+var Web = new(types.WebConfigure)
+
 var _config = &Settings{
 	Settings: Config{
 		Application: Application,
@@ -48,5 +52,6 @@ var _config = &Settings{
 		Jwt:         Jwt,
 		Database:    Database,
 		Redis:       Redis,
+		Web:         Web,
 	},
 }

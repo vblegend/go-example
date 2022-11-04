@@ -37,7 +37,7 @@ var (
 			os.Exit(1)
 			return nil
 		},
-		Run: func(cmd *cobra.Command, args []string) {
+		Run: func(cmd *cobra.Command, _ []string) {
 			if cmd.Execute() != nil {
 				os.Exit(1)
 			}

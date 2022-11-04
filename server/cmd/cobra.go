@@ -19,13 +19,13 @@ var rootCmd = &cobra.Command{
 	SilenceUsage:      true,
 	Long:              assembly.AppFileName,
 	PersistentPreRunE: func(*cobra.Command, []string) error { return nil },
-	PreRun: func(cmd *cobra.Command, args []string) {
+	PreRun: func(_ *cobra.Command, _ []string) {
 		if showVersion {
 			fmt.Printf("%s version %s build %s commit %s\n", echo.Green(assembly.AppFileName), echo.Green(assembly.Version), echo.Green(assembly.BuildTime), echo.Green(assembly.CommitID))
 			os.Exit(0)
 		}
 	},
-	Run: func(cmd *cobra.Command, args []string) {
+	Run: func(_ *cobra.Command, _ []string) {
 		assembly.PrintCobraHelp()
 	},
 }
