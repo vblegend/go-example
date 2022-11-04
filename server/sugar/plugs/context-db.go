@@ -1,14 +1,16 @@
 package plugs
 
 import (
-	"server/sugar/sdk"
+	"server/sugar/state"
 
 	"github.com/gin-gonic/gin"
 )
 
-func WithContextDB(dbname string) gin.HandlerFunc {
+// WithContextDB db中间件
+func WithContextDB(db state.DataBaseKey) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		c.Set("db", sdk.Runtime.GetDb(dbname).WithContext(c))
+		db := state.Default.GetDB(db)
+		c.Set("db", db.WithContext(c))
 		c.Next()
 	}
 }

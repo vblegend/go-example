@@ -2,7 +2,6 @@ package versions
 
 import (
 	"fmt"
-	"runtime"
 
 	"server/migration"
 	"server/sugar/tools"
@@ -13,12 +12,11 @@ import (
 )
 
 func init() {
-	_, fileName, _, _ := runtime.Caller(0)
-	migration.SetVersion(migration.GetFilename(fileName), &v20220101{}) //
+	migration.SetVersion(&v20220101{}) //
 }
 
 type v20220101 struct {
-	tools.DataMigrator
+	tools.DataMigrator `version:"2022-01-01"`
 }
 
 // 初始化需要迁移的表对象

@@ -7,7 +7,7 @@ import (
 	"server/common/config"
 	"server/sugar/echo"
 	"server/sugar/log"
-	"server/sugar/sdk"
+	"server/sugar/state"
 
 	"server/common/config/types"
 
@@ -23,10 +23,9 @@ var opens = map[string]func(string) gorm.Dialector{
 	"mysql":   mysql.Open,
 }
 
-func CleanDBConnect(key string) {
-	db := sdk.Runtime.GetDb(key)
+func CleanDBConnect(key state.DataBaseKey) {
+	db := state.Default.GetDB(key)
 	if db != nil {
-
 		d, e := db.DB()
 		if e == nil {
 			d.Close()
@@ -38,15 +37,15 @@ func CleanDBConnect(key string) {
 func InitSQLDB() {
 	configmap := config.Database
 	for key, cfg := range configmap {
-		CleanDBConnect(key)
+		dbkey := state.DataBaseKey(key)
+		CleanDBConnect(dbkey)
 		log.Info(echo.Green(fmt.Sprintf("Connecting to database %s ...", key)))
 		db, err := NewDBConnection(cfg)
 		if err != nil {
 			log.Error(echo.Red(fmt.Sprintf("Database %s connect fail...", key)))
 			continue
 		}
-
-		sdk.Runtime.SetDb(key, db)
+		state.Default.SetDB(dbkey, db)
 		log.Info(echo.Green(fmt.Sprintf("Database %s connect sucess...", key)))
 	}
 }

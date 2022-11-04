@@ -61,18 +61,14 @@ func setup() {
 		initialize.InitLogger,
 		// 打印logo
 		initialize.PrintLogo,
-		// 1.初始化SQLite连接
+		// 1.初始化数据库连接
 		initialize.InitSQLDB,
-		// 1.初始化SQLite连接
+		// 1.初始化Redis连接
 		initialize.InitRedisDB,
 		// 2.执行数据升级&迁移
 		initialize.InitMigration,
 		// 开发模式显示菜单
 		initialize.InitDevelopmentMenu,
-		// 初始化 redis
-		initialize.InitRedisDB,
-		// 时序数据库、队列、缓存 初始化
-		initialize.InitCache,
 		// 任务自动化
 		jobs.Setup,
 	)

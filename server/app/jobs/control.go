@@ -3,8 +3,9 @@ package jobs
 import (
 	"server/app/jobs/models"
 	"server/app/jobs/socket"
+	"server/common/config"
 	"server/sugar/log"
-	"server/sugar/sdk"
+	"server/sugar/state"
 	"server/sugar/utils"
 	"server/sugar/ws"
 	"sync"
@@ -19,21 +20,14 @@ var crontab *cron.Cron
 // Setup 初始化
 func Setup() {
 	log.Info("JobCore Starting...")
-	db := sdk.Runtime.GetDb("default")
-	crontab = sdk.Runtime.GetCrontab("*")
-	if crontab != nil {
-		crontab.Stop().Done()
-		crontab = nil
-	}
-	crontab = utils.NewCronEngine()
-	sdk.Runtime.SetCrontab("*", crontab)
+	db := state.Default.GetDB(config.DefaultDB)
+	crontab = state.Default.SetCrontab("*", utils.NewCronEngine())
 	sysJob := models.SysJob{}
 	jobList := make([]models.SysJob, 0)
 	err := db.Table(sysJob.TableName()).Find(&jobList).Error
 	if err != nil {
 		log.Errorf("JobCore init error\n%v", err)
 	}
-
 	for i := 0; i < len(jobList); i++ {
 		if jobList[i].Enabled {
 			err := StartJob(jobList[i])
