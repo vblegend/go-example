@@ -11,15 +11,13 @@ require (
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/opentracing/opentracing-go v1.2.0 // API链路追踪库
 	github.com/robfig/cron/v3 v3.0.1 // cron 任务调度引擎
-	github.com/spf13/cast v1.5.0 // 数据转换 格式化库
+	github.com/spf13/cast v1.5.0 // indirect; 数据转换 格式化库
 	github.com/spf13/cobra v1.6.1 // CIL命令行框架
 	github.com/unrolled/secure v1.13.0 // gin ssl https
 	golang.org/x/crypto v0.1.0 // 哈希加解密库
 	gorm.io/driver/mysql v1.4.3 // mysql 连接库
 	gorm.io/driver/sqlite v1.4.3 // sqlite 连接库
 	gorm.io/gorm v1.24.0 // go orm框架
-	gorm.io/plugin/dbresolver v1.3.0 // orm 数据库设置
-
 )
 
 require (

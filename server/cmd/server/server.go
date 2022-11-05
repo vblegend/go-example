@@ -32,10 +32,10 @@ var (
 		Short:        "Start API server",
 		Example:      assembly.AppFileName + " server -c config/settings.yml",
 		SilenceUsage: true,
-		PreRun: func(cmd *cobra.Command, args []string) {
+		PreRun: func(_ *cobra.Command, _ []string) {
 			setup()
 		},
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			return run()
 		},
 	}
@@ -82,20 +82,22 @@ func run() error {
 	} else {
 		gin.SetMode(gin.DebugMode)
 	}
+	// engine.Use(plugs.StaticServe("/", "./static/www"))
+
 	// 注册路由
 	g.Register(engine, GetRootRouter())
 	log.Info(echo.Green("Server run at:"))
 	for _, ip := range network.LocalIpAddres() {
-		log.Infof("- %s://%s:%d/", config.Application.GetHttpProtocol(), ip, config.Application.Port)
+		log.Infof("- %s://%s:%d/", config.Web.GetHTTPProtocol(), ip, config.Web.Port)
 	}
 	srv := &http.Server{
-		Addr:    fmt.Sprintf("%s:%d", config.Application.Host, config.Application.Port),
+		Addr:    fmt.Sprintf("%s:%d", config.Web.Host, config.Web.Port),
 		Handler: engine,
 	}
 	go func() {
 		// 服务连接
-		if config.Application.Https {
-			if err := srv.ListenAndServeTLS(config.Application.CertFile, config.Application.KeyFile); err != nil && err != http.ErrServerClosed {
+		if config.Web.Https {
+			if err := srv.ListenAndServeTLS(config.Web.CertFile, config.Web.KeyFile); err != nil && err != http.ErrServerClosed {
 				log.Fatal("listen: ", err)
 			}
 		} else {

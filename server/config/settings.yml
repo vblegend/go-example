@@ -1,38 +1,21 @@
 Settings:
   Application:
-    Host: 0.0.0.0
     Mode: dev
     Name: Go-Example
+  Web:
+    Host: 0.0.0.0
     Port: 8080
     Https: false
+    Root: ./static/www/
     Domain: localhost
     CertFile: ./config/server.pem
     KeyFile: ./config/server.key
-    www:
-      static:
-        - /js ./static/www/js
-        - /css ./static/www/css
-        - /imgs ./static/www/imgs
-        - /logo ./static/www/logo
-      
-      redirect:
-        - /401 ./static/www/index.html
-        - /404 ./static/www/index.html
-        - /login ./static/www/index.html
   Database:
     Default:
-      ConnMaxIdleTime: 0
-      ConnMaxLifeTime: 0
       Driver: sqlite3
-      MaxIdleConns: 0
-      MaxOpenConns: 0
       Source: ./sqlite.db
     Standby:
-      ConnMaxIdleTime: 0
-      ConnMaxLifeTime: 0
       Driver: mysql
-      MaxIdleConns: 0
-      MaxOpenConns: 0
       Source: root:123456@tcp(172.17.0.1:3306)/test?charset=utf8&parseTime=True&loc=Local&timeout=1000ms
   Jwt:
     Secret: Go-Example

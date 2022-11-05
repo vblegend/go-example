@@ -2,7 +2,6 @@ package initialize
 
 import (
 	"fmt"
-	"time"
 
 	"server/common/config"
 	"server/sugar/echo"
@@ -15,7 +14,6 @@ import (
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"gorm.io/gorm/schema"
-	"gorm.io/plugin/dbresolver"
 )
 
 var opens = map[string]func(string) gorm.Dialector{
@@ -63,25 +61,6 @@ func NewDBConnection(c *types.DatabaseConfigure) (*gorm.DB, error) {
 	}
 	if c.Driver == "mysql" {
 		db.Set("gorm:table_options", "ENGINE=InnoDB CHARSET=utf8mb4")
-	}
-	var register *dbresolver.DBResolver
-	if register == nil {
-		register = dbresolver.Register(dbresolver.Config{})
-	}
-	if c.ConnMaxIdleTime > 0 {
-		register = register.SetConnMaxIdleTime(time.Duration(c.ConnMaxIdleTime) * time.Second)
-	}
-	if c.ConnMaxLifeTime > 0 {
-		register = register.SetConnMaxLifetime(time.Duration(c.ConnMaxLifeTime) * time.Second)
-	}
-	if c.MaxOpenConns > 0 {
-		register = register.SetMaxOpenConns(c.MaxOpenConns)
-	}
-	if c.MaxIdleConns > 0 {
-		register = register.SetMaxIdleConns(c.MaxIdleConns)
-	}
-	if register != nil {
-		err = db.Use(register)
 	}
 	return db, err
 

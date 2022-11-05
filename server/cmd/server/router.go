@@ -1,6 +1,7 @@
 package server
 
 import (
+	"fmt"
 	jobModels "server/app/jobs/models"
 	"server/common/config"
 	"server/common/middleware"
@@ -11,7 +12,6 @@ import (
 	"server/sugar/restful"
 	"server/sugar/ws"
 
-	"net/http"
 	"server/sugar/model"
 
 	"github.com/gin-contrib/pprof"
@@ -27,38 +27,41 @@ func createAuthMiddleware() *jwtauth.GinJWTMiddleware {
 	return mid
 }
 
-func GetRootRouter() g.Routers {
+func GetRootRouter() g.Router {
 	var authMiddleware = createAuthMiddleware()
-	return g.Routers{
-		g.Router{ // 公共根路由
-			Url: "",
-			Use: g.Use(
-				middleware.CustomError, // 自定义异常处理
-				plugs.NewHttpsHandler(config.Application.Https, config.Application.Domain, uint(config.Application.Port)), // https
-				plugs.RequestLogOut(log.GetLogger(), log.TraceLevel),                                                      // 请求日志
-				plugs.TraceID("requestId", uuid.NewString),                                                                // 请求UUID
-				plugs.WithContextDB(config.DefaultDB),                                                                     // 数据连接
-				plugs.NoCache,                                                                                             // 禁用缓存
-				plugs.Options,                                                                                             // 跨域请求
-				plugs.Secure,                                                                                              // 安全相关
-				plugs.Limit(10),                                                                                           // 并发数控制
-			),
-			Children: GetApiRouter(authMiddleware),
-		},
+	return g.Router{
+		Url: "", // 根路由
+		Use: g.Use(
+			middleware.CustomError, // 自定义异常处理
+			plugs.NewIPBlockerHandler(func(s string) bool {
+				fmt.Println(s)
+				return true
+			}), //IP拦截器
+			plugs.NewHttpsHandler(config.Web.Https, config.Web.Domain, uint(config.Web.Port)), // https
+			plugs.RequestLogOut(log.GetLogger(), log.TraceLevel),                              // 请求日志
+			plugs.TraceID("requestId", uuid.NewString),                                        // 请求UUID
+			plugs.WithContextDB(config.DefaultDB),                                             // 数据连接
+			plugs.NoCache,                                                                     // 禁用缓存
+			plugs.Options,                                                                     // 跨域请求
+			plugs.Secure,                                                                      // 安全相关
+			plugs.Limit(10),                                                                   // 并发数控制
+			plugs.StaticFileServe("/", "./static/www"),
+		),
+		Children: GetApiRouter(authMiddleware),
 	}
 }
 
 func GetApiRouter(authMiddleware *jwtauth.GinJWTMiddleware) g.Routers {
 	return g.Routers{
-		g.Router{ // websocket 连接
-			Url: "debug",
+		g.Router{
+			Url: "debug", // pprof debug
 			Use: g.Use(plugs.WWWAuthenticator("admin", "admin")),
 			Handle: func(r gin.IRoutes) {
 				pprof.RouteRegister(r.(*gin.RouterGroup), "/")
 			},
 		},
-		g.Router{ // websocket 连接
-			Url: "/ws",
+		g.Router{
+			Url: "/ws", // websocket 连接
 			Handle: func(r gin.IRoutes) {
 				r.GET("", ws.Default.AcceptHandler)
 			},
@@ -75,7 +78,7 @@ func GetApiRouter(authMiddleware *jwtauth.GinJWTMiddleware) g.Routers {
 			},
 			Children: g.Routers{
 				g.Router{ //左侧菜单
-					Url: "",
+					Url: "/",
 					Use: g.Use(authMiddleware.MiddlewareFunc()),
 					Handle: func(r gin.IRoutes) {
 						// api := adminapi.SysMenu{}
@@ -119,26 +122,6 @@ func GetApiRouter(authMiddleware *jwtauth.GinJWTMiddleware) g.Routers {
 						}))
 					},
 				},
-			},
-		},
-		g.Router{
-			Url: "",
-			Use: g.Use(
-				plugs.NoCache, // 禁用缓存
-			),
-			Handle: func(r gin.IRoutes) {
-				r.GET("/", func(c *gin.Context) {
-					c.Redirect(http.StatusMovedPermanently, "/login")
-				})
-				index := func(c *gin.Context) { c.File("./static/www/index.html") }
-				r.GET("/401", index)
-				r.GET("/404", index)
-				r.GET("/login", index)
-
-				r.Static("/js", "static/www/js")
-				r.Static("/css", "static/www/css")
-				r.Static("/fonts", "static/www/fonts")
-				r.Static("/img", "static/www/img")
 			},
 		},
 	}

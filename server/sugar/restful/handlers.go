@@ -200,3 +200,15 @@ func ActionHander(queryObject interface{}, succeedCallback func(object interface
 		}
 	}
 }
+
+// HTTPFileHander 提供Http文件服务 等同于 r.StaticFS("/fs", gin.Dir("./", true))
+// func HTTPFileHander(rootDir string) gin.HandlerFunc {
+// 	staticServer := http.FileServer(http.Dir(rootDir))
+// 	return func(c *gin.Context) {
+// 		file := c.Param("filepath")
+// 		if file != "" {
+// 			c.Request.URL.Path = file
+// 		}
+// 		staticServer.ServeHTTP(c.Writer, c.Request)
+// 	}
+// }

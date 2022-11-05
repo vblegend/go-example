@@ -8,7 +8,7 @@ import (
 )
 
 type Router struct {
-	// relative Path.
+	// relative Path.  为空时不创建层级使用上一级路由
 	Url      string
 	Use      []gin.HandlerFunc
 	Handle   func(r gin.IRoutes)
@@ -20,22 +20,20 @@ func Use(m ...gin.HandlerFunc) []gin.HandlerFunc {
 	return m
 }
 
-func Register(root gin.IRouter, routers Routers) {
-
+func Register(root gin.IRouter, router Router) {
 	gin.DebugPrintRouteFunc = func(httpMethod, absolutePath, handlerName string, nuHandlers int) {
 		log.Tracef("[Register Router] [%v] [%v] [%v] [%v]", echo.Yellow(httpMethod), echo.Green(absolutePath), handlerName, nuHandlers)
 	}
-
-	for _, router := range routers {
-		node := root.Group(router.Url)
-		if len(router.Use) > 0 {
-			node.Use(router.Use...)
-		}
-		if router.Handle != nil {
-			router.Handle(node)
-		}
-		if len(router.Children) > 0 {
-			Register(node, router.Children)
-		}
+	if router.Url != "" {
+		root = root.Group(router.Url)
+	}
+	if len(router.Use) > 0 {
+		root.Use(router.Use...)
+	}
+	if router.Handle != nil {
+		router.Handle(root)
+	}
+	for _, router := range router.Children {
+		Register(root, router)
 	}
 }

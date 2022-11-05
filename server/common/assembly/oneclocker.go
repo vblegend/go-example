@@ -18,6 +18,8 @@ func init() {
 		log.Errorf("init run of onec fail %v", err)
 	}
 }
+
+// RunOfOnec 仅运行一次，重复运行将返回异常
 func RunOfOnec() error {
 	if locker == nil {
 		return errors.New("")
@@ -25,6 +27,7 @@ func RunOfOnec() error {
 	return locker.RunOfOnec()
 }
 
+// IsRuning 检查是否有程序已经调用RunOfOnec
 func IsRuning(pidOut *int) bool {
 	if locker == nil {
 		return false
