@@ -8,6 +8,7 @@ import (
 	"reflect"
 	"regexp"
 	"server/sugar/echo"
+	"server/sugar/encoding"
 	"server/sugar/mpool"
 	"server/sugar/random"
 	"server/sugar/types"
@@ -19,6 +20,32 @@ import (
 type StructT struct {
 	Id   int
 	Name string
+}
+
+func TestSignData(t *testing.T) {
+	// encoding.NewKey()
+	data := []byte("Hello World")
+	signer, err := encoding.NewSignature("./key.pem", "123456")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	out, err := signer.Sign(data)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Println(out)
+	validator, err := encoding.NewValidator("./public.pem")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	err = validator.Verify(data, out)
+
+	fmt.Println(err)
+
 }
 
 func TestRandom(t *testing.T) {

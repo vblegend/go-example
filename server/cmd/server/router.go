@@ -45,7 +45,7 @@ func GetRootRouter() g.Router {
 			plugs.Options,                                                                     // 跨域请求
 			plugs.Secure,                                                                      // 安全相关
 			plugs.Limit(10),                                                                   // 并发数控制
-			plugs.StaticFileServe("/", "./static/www"),
+			plugs.StaticFileServe("/", config.Web.Root),
 		),
 		Children: GetApiRouter(authMiddleware),
 	}
