@@ -1,4 +1,4 @@
-.PHONY: web publish archive 
+.PHONY: web publish archive key
 
 
 #============================================================
@@ -97,6 +97,15 @@ define makePem
 	openssl rsa -in key.pem -out server.key
 endef
 
+ #生成 rsa 私钥/公钥
+KEY_PASSWORD    :=123456
+define makeKey
+	rm -rf private.pem
+	rm -rf public.pem
+	ssh-keygen -t rsa -f private.pem -m pem -P "${KEY_PASSWORD}"
+    openssl rsa -in private.pem -pubout -out public.pem -passin pass:${KEY_PASSWORD}
+	rm -rf private.pem.pub
+endef
 
 
 
@@ -151,3 +160,6 @@ archive:
 plugin:
 	@$(buildPlugin)
 
+
+key:
+	@$(makeKey)

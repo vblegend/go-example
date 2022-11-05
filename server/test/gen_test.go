@@ -25,7 +25,7 @@ type StructT struct {
 func TestSignData(t *testing.T) {
 	// encoding.NewKey()
 	data := []byte("Hello World")
-	signer, err := encoding.NewSignature("./key.pem", "123456")
+	signer, err := encoding.NewSignature("./private.pem", "123456")
 	if err != nil {
 		fmt.Println(err)
 		return
