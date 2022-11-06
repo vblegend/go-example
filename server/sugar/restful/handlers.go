@@ -1,16 +1,51 @@
 package restful
 
 import (
+	"fmt"
 	"net/http"
 	"reflect"
 	"server/sugar/model"
 	"server/sugar/utils"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
 
-// 列表查询处理器
+// HandlerActionCallBack 执行处理函数，model为数据库模型对象
+type HandlerActionCallBack func(model model.IModel) error
+
+// HandlerExeFunc 一个执行方法处理器
+type HandlerExeFunc func(call HandlerActionCallBack)
+
+// HandlerQueryCallBack 查询参数的调用函数，query 为 查询参数，model为数据库模型对象
+type HandlerQueryCallBack func(query interface{}, model model.IModel) error
+
+// HandlerQueryExecFunc 一个查询并执行的方法处理器
+type HandlerQueryExecFunc func(call HandlerQueryCallBack)
+
+func execQueryAfter(origin interface{}) {
+	switch reflect.TypeOf(origin).Kind() {
+	case reflect.Slice, reflect.Array:
+		s := reflect.ValueOf(origin)
+		for i := 0; i < s.Len(); i++ {
+			lpModel := s.Index(i).Addr().Interface()
+			if ia, ok := lpModel.(model.IModelQueryAfter); ok {
+				ia.OnQueryAfter()
+			}
+		}
+	default:
+		if _, ok := origin.(model.IModel); ok {
+			if qa, ok := origin.(model.IModelQueryAfter); ok {
+				qa.OnQueryAfter()
+			}
+		} else {
+			panic("invalid data type with model.IModel")
+		}
+	}
+}
+
+// ListHander 列表查询处理器
 func ListHander(resultTyped model.IModel) gin.HandlerFunc {
 	makeSclice := utils.MakeSliceFunc(resultTyped)
 	return func(c *gin.Context) {
@@ -20,6 +55,10 @@ func ListHander(resultTyped model.IModel) gin.HandlerFunc {
 		if err != nil {
 			Error(c, http.StatusInternalServerError, err)
 		} else {
+			fs := time.Now()
+			execQueryAfter(sclice)
+			l := time.Now().Sub(fs)
+			fmt.Println(l)
 			OK(c, sclice, "OK")
 		}
 	}
@@ -61,83 +100,105 @@ func WherePageHander(queryModel interface{}, pageModel model.IPagination, result
 		if err != nil {
 			Error(c, http.StatusInternalServerError, err)
 		} else {
+			execQueryAfter(sclice)
 			PageOK(c, sclice, int(count), params.GetPageIndex(), params.GetPageSize(), "OK")
 		}
 	}
 }
 
 // CreateHander 对象创建处理器，从接口读取 typeModel 并写入库，成功后调用回调函数succeedCallback
-func CreateHander(typeModel model.IModel, succeedCallback func(object interface{})) gin.HandlerFunc {
-	makeModel := utils.MakeModelFunc(typeModel)
+func CreateHander(handler HandlerExeFunc) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		tx := c.MustGet("db").(*gorm.DB).WithContext(c)
-		model := makeModel()
-		err := c.Bind(model)
-		if err != nil {
-			Error(c, http.StatusBadRequest, err)
-			return
-		}
-		err = tx.Table(typeModel.TableName()).Create(model).Error
-		if err != nil {
-			Error(c, http.StatusInternalServerError, err)
-		} else {
-			if succeedCallback != nil {
-				succeedCallback(reflect.ValueOf(model).Elem().Interface())
+		callback := func(lpModel model.IModel) error {
+			tx := c.MustGet("db").(*gorm.DB).WithContext(c)
+			err := c.Bind(lpModel)
+			if err != nil {
+				Error(c, http.StatusBadRequest, err)
+				return err
 			}
-			OK(c, model, "OK")
+			if ib, ok := lpModel.(model.IModelInsertBefore); ok {
+				if err = ib.OnInsertBefore(); err != nil {
+					Error(c, http.StatusBadRequest, err)
+					return err
+				}
+			}
+			err = tx.Table(lpModel.TableName()).Create(lpModel).Error
+			if ia, ok := lpModel.(model.IModelInsertAfter); ok {
+				ia.OnInsertAfter()
+			}
+			if err != nil {
+				Error(c, http.StatusInternalServerError, err)
+				return err
+			} else {
+				OK(c, lpModel, "OK")
+				return nil
+			}
 		}
+		handler(callback)
 	}
 }
 
 // UpdateHander 对象更新处理器，从接口读取 typeModel 并写入库，成功后调用回调函数succeedCallback
-func UpdateHander(typeModel model.IModel, succeedCallback func(object interface{})) gin.HandlerFunc {
-	t := reflect.TypeOf(typeModel)
-	if t.Kind() == reflect.Pointer {
-		t = t.Elem()
-	}
-	makeModel := func() interface{} {
-		return reflect.New(t).Interface()
-	}
+func UpdateHander(handler HandlerExeFunc) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		tx := c.MustGet("db").(*gorm.DB).WithContext(c)
-		model := makeModel()
-		err := c.Bind(model)
-		if err != nil {
-			Error(c, http.StatusBadRequest, err)
-			return
-		}
-		err = tx.Table(typeModel.TableName()).Updates(model).Error
-		if err != nil {
-			Error(c, http.StatusInternalServerError, err)
-		} else {
-			if succeedCallback != nil {
-				succeedCallback(model)
+		callback := func(lpModel model.IModel) error {
+			tx := c.MustGet("db").(*gorm.DB).WithContext(c)
+			err := c.Bind(lpModel)
+			if err != nil {
+				Error(c, http.StatusBadRequest, err)
+				return err
 			}
-			OK(c, model, "OK")
+			if ub, ok := lpModel.(model.IModelUpdateBefore); ok {
+				if err = ub.OnUpdateBefore(); err != nil {
+					Error(c, http.StatusBadRequest, err)
+					return err
+				}
+			}
+			err = tx.Table(lpModel.TableName()).Updates(lpModel).Error
+			if ua, ok := lpModel.(model.IModelUpdateAfter); ok {
+				ua.OnUpdateAfter()
+			}
+			if err != nil {
+				Error(c, http.StatusInternalServerError, err)
+				return err
+			} else {
+				OK(c, lpModel, "OK")
+				return nil
+			}
 		}
+		handler(callback)
 	}
 }
 
 // DeleteHander 对象删除处理器，从tableModel 表内删除符合条件的记录，成功后调用回调函数succeedCallback
-func DeleteHander(queryModel interface{}, tableModel model.IModel, succeedCallback func(queryObject interface{})) gin.HandlerFunc {
-	makeQuery := utils.MakeModelFunc(queryModel)
+func DeleteHander(handler HandlerQueryExecFunc) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		query := makeQuery()
-		tx := c.MustGet("db").(*gorm.DB).WithContext(c)
-		err := AutoBind(c, query)
-		if err != nil {
-			Error(c, http.StatusBadRequest, err)
-			return
-		}
-		err = tx.Table(tableModel.TableName()).Delete(query).Error
-		if err != nil {
-			Error(c, http.StatusInternalServerError, err)
-		} else {
-			if succeedCallback != nil {
-				succeedCallback(query)
+		callback := func(query interface{}, lpModel model.IModel) error {
+			tx := c.MustGet("db").(*gorm.DB).WithContext(c)
+			err := AutoBind(c, query)
+			if err != nil {
+				Error(c, http.StatusBadRequest, err)
+				return err
 			}
-			OK(c, gin.H{}, "OK")
+			if db, ok := lpModel.(model.IModelDeleteBefore); ok {
+				if err = db.OnDeleteBefore(); err != nil {
+					Error(c, http.StatusBadRequest, err)
+					return err
+				}
+			}
+			err = tx.Table(lpModel.TableName()).Delete(query).Error
+			if da, ok := lpModel.(model.IModelDeleteAfter); ok {
+				da.OnDeleteAfter()
+			}
+			if err != nil {
+				Error(c, http.StatusInternalServerError, err)
+				return err
+			} else {
+				OK(c, gin.H{}, "OK")
+				return nil
+			}
 		}
+		handler(callback)
 	}
 }
 
@@ -147,18 +208,21 @@ func WhereFirstHander(queryModel interface{}, resultModel model.IModel) gin.Hand
 	makeQuery := utils.MakeModelFunc(queryModel)
 	return func(c *gin.Context) {
 		tx := c.MustGet("db").(*gorm.DB).WithContext(c)
-		model := makeModel()
+		lpModel := makeModel()
 		query := makeQuery()
 		err := AutoBind(c, query)
 		if err != nil {
 			Error(c, http.StatusBadRequest, err)
 			return
 		}
-		err = tx.Table(resultModel.TableName()).Where(query).First(&model).Error
+		err = tx.Table(resultModel.TableName()).Where(query).First(&lpModel).Error
 		if err != nil {
 			Error(c, http.StatusInternalServerError, err)
 		} else {
-			OK(c, model, "OK")
+			if da, ok := lpModel.(model.IModelQueryAfter); ok {
+				da.OnQueryAfter()
+			}
+			OK(c, lpModel, "OK")
 		}
 	}
 }
@@ -180,6 +244,7 @@ func WhereListHander(queryModel interface{}, resultModel model.IModel) gin.Handl
 		if err != nil {
 			Error(c, http.StatusInternalServerError, err)
 		} else {
+			execQueryAfter(sclice)
 			OK(c, sclice, "OK")
 		}
 	}
@@ -200,15 +265,3 @@ func ActionHander(queryObject interface{}, succeedCallback func(object interface
 		}
 	}
 }
-
-// HTTPFileHander 提供Http文件服务 等同于 r.StaticFS("/fs", gin.Dir("./", true))
-// func HTTPFileHander(rootDir string) gin.HandlerFunc {
-// 	staticServer := http.FileServer(http.Dir(rootDir))
-// 	return func(c *gin.Context) {
-// 		file := c.Param("filepath")
-// 		if file != "" {
-// 			c.Request.URL.Path = file
-// 		}
-// 		staticServer.ServeHTTP(c.Writer, c.Request)
-// 	}
-// }
