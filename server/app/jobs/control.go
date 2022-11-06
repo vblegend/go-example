@@ -45,7 +45,7 @@ func Setup() {
 
 // ConfigJob ConfigJob
 func ConfigJob(model models.SysJob) error {
-	StopJob(model.JobId)
+	StopJob(model.JobID)
 	if model.Enabled {
 		return StartJob(model)
 	}
@@ -56,21 +56,21 @@ func ConfigJob(model models.SysJob) error {
 func StartJob(model models.SysJob) error {
 	mux.Lock()
 	defer mux.Unlock()
-	task := tasks[model.JobId]
+	task := tasks[model.JobID]
 	if task != nil {
 		return nil
 	}
 	j := &JobCore{}
 	j.InvokeTarget = model.InvokeTarget
 	j.CronExpression = model.CronExpression
-	j.JobId = model.JobId
+	j.JobId = model.JobID
 	j.Name = model.JobName
 	j.Args = model.Args
 	id, err := crontab.AddJob(j.CronExpression, j)
 	if err != nil {
 		return err
 	}
-	tasks[model.JobId] = j
+	tasks[model.JobID] = j
 	j.EntryId = int(id)
 	return nil
 }

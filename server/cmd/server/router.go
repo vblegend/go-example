@@ -1,7 +1,7 @@
 package server
 
 import (
-	"fmt"
+	"server/app/jobs"
 	jobModels "server/app/jobs/models"
 	"server/common/config"
 	"server/common/middleware"
@@ -34,7 +34,6 @@ func GetRootRouter() g.Router {
 		Use: g.Use(
 			middleware.CustomError, // 自定义异常处理
 			plugs.NewIPBlockerHandler(func(s string) bool {
-				fmt.Println(s)
 				return true
 			}), //IP拦截器
 			plugs.NewHttpsHandler(config.Web.Https, config.Web.Domain, uint(config.Web.Port)), // https
@@ -103,11 +102,37 @@ func GetApiRouter(authMiddleware *jwtauth.GinJWTMiddleware) g.Routers {
 					Url: "/job",
 					// Use: g.Use(authMiddleware.MiddlewareFunc()),
 					Handle: func(r gin.IRoutes) {
+						// 列出所有Job模型
+						r.GET("/list", restful.ListHander(&jobModels.SysJob{}))
+						// 分页+条件查询Job模型
 						r.GET("", restful.WherePageHander(&jobModels.SysJob{}, &model.Pagination{}, &jobModels.SysJob{}))
+						// 根据ID 获取Job模型
 						r.GET("/:JobId", restful.WhereFirstHander(&jobModels.SysJobIndex{}, &jobModels.SysJob{}))
-						r.POST("", restful.CreateHander(&jobModels.SysJob{}, func(model interface{}) {}))
-						r.PUT("", restful.UpdateHander(&jobModels.SysJob{}, func(model interface{}) {}))
-						r.DELETE("/:JobId", restful.DeleteHander(&jobModels.SysJobIndex{}, &jobModels.SysJob{}, func(id interface{}) {}))
+						// 创建 job
+						r.POST("", restful.CreateHander(func(create restful.HandlerActionCallBack) {
+							model := jobModels.SysJob{}
+							err := create(&model)
+							if err == nil {
+								jobs.ConfigJob(model)
+							}
+						}))
+						// 修改job
+						r.PUT("", restful.UpdateHander(func(update restful.HandlerActionCallBack) {
+							model := jobModels.SysJob{}
+							err := update(&model)
+							if err == nil {
+								jobs.ConfigJob(model)
+							}
+						}))
+						// 删除job
+						r.DELETE("/:JobId", restful.DeleteHander(func(delete restful.HandlerQueryCallBack) {
+							query := jobModels.SysJobIndex{}
+							model := jobModels.SysJob{}
+							err := delete(query, model)
+							if err == nil {
+								jobs.StopJob(model.JobID)
+							}
+						}))
 					},
 				},
 				g.Router{ // 定时任务操作
