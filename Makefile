@@ -102,9 +102,13 @@ KEY_PASSWORD    :=123456
 define makeKey
 	rm -rf private.pem
 	rm -rf public.pem
-	ssh-keygen -t rsa -f private.pem -m pem -P "${KEY_PASSWORD}"
-    openssl rsa -in private.pem -pubout -out public.pem -passin pass:${KEY_PASSWORD}
-	rm -rf private.pem.pub
+ 	openssl genrsa -aes128 -passout pass:"${KEY_PASSWORD}" -out private.pem 2048
+	openssl rsa -in private.pem  -out public.pem -pubout -outform PEM  -passin pass:"${KEY_PASSWORD}"
+	#
+	# 
+	#ssh-keygen -t rsa -f private.pem -m pem -P "${KEY_PASSWORD}"
+    #openssl rsa -in private.pem -pubout -out public.pem -passin pass:${KEY_PASSWORD}
+	#rm -rf private.pem.pub
 endef
 
 
