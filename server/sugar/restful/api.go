@@ -117,6 +117,14 @@ func (e *Api) MakeOrm() *Api {
 	return e
 }
 
+func (e *Api) TraceID(c *service.Service) string {
+	val, ok := e.Context.Get(plugs.TraceIdKey)
+	if ok {
+		return val.(string)
+	}
+	return ""
+}
+
 func (e *Api) MakeService(c *service.Service) *Api {
 	c.Orm = e.Orm
 	val, ok := e.Context.Get(plugs.TraceIdKey)

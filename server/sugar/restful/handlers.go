@@ -16,13 +16,13 @@ import (
 type HandlerActionCallBack func(model model.IModel) error
 
 // HandlerExeFunc 一个执行方法处理器
-type HandlerExeFunc func(call HandlerActionCallBack)
+type HandlerExeFunc func(call HandlerActionCallBack, api *Api)
 
 // HandlerQueryCallBack 查询参数的调用函数，query 为 查询参数，model为数据库模型对象
 type HandlerQueryCallBack func(query interface{}, model model.IModel) error
 
 // HandlerQueryExecFunc 一个查询并执行的方法处理器
-type HandlerQueryExecFunc func(call HandlerQueryCallBack)
+type HandlerQueryExecFunc func(call HandlerQueryCallBack, api *Api)
 
 func execQueryAfter(origin interface{}) {
 	switch reflect.TypeOf(origin).Kind() {
@@ -109,6 +109,7 @@ func WherePageHander(queryModel interface{}, pageModel model.IPagination, result
 // CreateHander 对象创建处理器，从接口读取 typeModel 并写入库，成功后调用回调函数succeedCallback
 func CreateHander(handler HandlerExeFunc) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		api := new(Api).MakeContext(c).MakeOrm()
 		callback := func(lpModel model.IModel) error {
 			tx := c.MustGet("db").(*gorm.DB).WithContext(c)
 			err := c.Bind(lpModel)
@@ -134,13 +135,14 @@ func CreateHander(handler HandlerExeFunc) gin.HandlerFunc {
 				return nil
 			}
 		}
-		handler(callback)
+		handler(callback, api)
 	}
 }
 
 // UpdateHander 对象更新处理器，从接口读取 typeModel 并写入库，成功后调用回调函数succeedCallback
 func UpdateHander(handler HandlerExeFunc) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		api := new(Api).MakeContext(c).MakeOrm()
 		callback := func(lpModel model.IModel) error {
 			tx := c.MustGet("db").(*gorm.DB).WithContext(c)
 			err := c.Bind(lpModel)
@@ -166,13 +168,14 @@ func UpdateHander(handler HandlerExeFunc) gin.HandlerFunc {
 				return nil
 			}
 		}
-		handler(callback)
+		handler(callback, api)
 	}
 }
 
 // DeleteHander 对象删除处理器，从tableModel 表内删除符合条件的记录，成功后调用回调函数succeedCallback
 func DeleteHander(handler HandlerQueryExecFunc) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		api := new(Api).MakeContext(c).MakeOrm()
 		callback := func(query interface{}, lpModel model.IModel) error {
 			tx := c.MustGet("db").(*gorm.DB).WithContext(c)
 			err := AutoBind(c, query)
@@ -198,7 +201,7 @@ func DeleteHander(handler HandlerQueryExecFunc) gin.HandlerFunc {
 				return nil
 			}
 		}
-		handler(callback)
+		handler(callback, api)
 	}
 }
 
@@ -251,17 +254,18 @@ func WhereListHander(queryModel interface{}, resultModel model.IModel) gin.Handl
 }
 
 // ActionHander 动作处理器
-func ActionHander(queryObject interface{}, succeedCallback func(object interface{})) gin.HandlerFunc {
-	makeQuery := utils.MakeModelFunc(queryObject)
+func ActionHander(handler HandlerExeFunc) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		model := makeQuery()
-		err := AutoBind(c, model)
-		if err != nil {
-			Error(c, http.StatusBadRequest, err)
-			return
+		api := new(Api).MakeContext(c).MakeOrm()
+		callback := func(lpModel model.IModel) error {
+			err := AutoBind(c, lpModel)
+			if err != nil {
+				Error(c, http.StatusBadRequest, err)
+				return err
+			}
+			OK(c, gin.H{}, "OK")
+			return nil
 		}
-		if succeedCallback != nil {
-			succeedCallback(model)
-		}
+		handler(callback, api)
 	}
 }
