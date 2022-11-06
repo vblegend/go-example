@@ -8,7 +8,7 @@ import (
 	"reflect"
 	"regexp"
 	"server/sugar/echo"
-	"server/sugar/encoding"
+	"server/sugar/encoding/pkcs1"
 	"server/sugar/mpool"
 	"server/sugar/random"
 	"server/sugar/types"
@@ -25,7 +25,7 @@ type StructT struct {
 func TestSignData(t *testing.T) {
 	// encoding.NewKey()
 	data := []byte("Hello World")
-	signer, err := encoding.NewSignature("./private.pem", "123456")
+	signer, err := pkcs1.NewSignature("./private.pem", "123456")
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -36,7 +36,7 @@ func TestSignData(t *testing.T) {
 		return
 	}
 	fmt.Println(out)
-	validator, err := encoding.NewValidator("./public.pem")
+	validator, err := pkcs1.NewValidator("./public.pem")
 	if err != nil {
 		fmt.Println(err)
 		return

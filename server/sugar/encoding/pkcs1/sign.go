@@ -1,4 +1,4 @@
-package encoding
+package pkcs1
 
 import (
 	"crypto"
@@ -11,6 +11,7 @@ import (
 	"io/ioutil"
 )
 
+// RSASSA-PKCS1-v1_5
 type dataSign struct {
 	privateKey *rsa.PrivateKey
 	publicKey  *rsa.PublicKey
@@ -18,11 +19,13 @@ type dataSign struct {
 
 // IDataSignature 数据签名器
 type IDataSignature interface {
+	// Sign 用私钥对数据签名
 	Sign(data []byte) (string, error)
 }
 
 // IDataValidator 数据签名验证器
 type IDataValidator interface {
+	// Verify 用公钥验签
 	Verify(data []byte, sign string) (err error)
 }
 
@@ -49,6 +52,9 @@ func NewValidator(publicKeyFile string) (IDataValidator, error) {
 // NewKey 生成密钥对
 // ssh-keygen -t rsa -f private.pem -m pem
 // openssl rsa -in private.pem -pubout -out public.pem
+// ====================================================
+// openssl genrsa -aes128 -passout pass:"123456" -out private.pem 2048
+// openssl rsa -in private.pem  -out public.pem -pubout -outform PEM  -passin pass:123456
 func NewKey() {
 	// privateKey, err := rsa.GenerateKey(rand.Reader, 2048)
 	// if err != nil {
