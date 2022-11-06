@@ -9,6 +9,11 @@ type SysJobIndex struct {
 	JobID int `uri:"JobId" json:"jobId" gorm:"primaryKey;autoIncrement"`
 }
 
+// TableName 模型对应表明
+func (SysJobIndex) TableName() string {
+	return "sys_job"
+}
+
 // SysJob 系统任务模型
 type SysJob struct {
 	SysJobIndex

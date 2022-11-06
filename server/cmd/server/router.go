@@ -109,7 +109,7 @@ func GetApiRouter(authMiddleware *jwtauth.GinJWTMiddleware) g.Routers {
 						// 根据ID 获取Job模型
 						r.GET("/:JobId", restful.WhereFirstHander(&jobModels.SysJobIndex{}, &jobModels.SysJob{}))
 						// 创建 job
-						r.POST("", restful.CreateHander(func(create restful.HandlerActionCallBack) {
+						r.POST("", restful.CreateHander(func(create restful.HandlerActionCallBack, api *restful.Api) {
 							model := jobModels.SysJob{}
 							err := create(&model)
 							if err == nil {
@@ -117,7 +117,7 @@ func GetApiRouter(authMiddleware *jwtauth.GinJWTMiddleware) g.Routers {
 							}
 						}))
 						// 修改job
-						r.PUT("", restful.UpdateHander(func(update restful.HandlerActionCallBack) {
+						r.PUT("", restful.UpdateHander(func(update restful.HandlerActionCallBack, api *restful.Api) {
 							model := jobModels.SysJob{}
 							err := update(&model)
 							if err == nil {
@@ -125,7 +125,7 @@ func GetApiRouter(authMiddleware *jwtauth.GinJWTMiddleware) g.Routers {
 							}
 						}))
 						// 删除job
-						r.DELETE("/:JobId", restful.DeleteHander(func(delete restful.HandlerQueryCallBack) {
+						r.DELETE("/:JobId", restful.DeleteHander(func(delete restful.HandlerQueryCallBack, api *restful.Api) {
 							query := jobModels.SysJobIndex{}
 							model := jobModels.SysJob{}
 							err := delete(query, model)
@@ -139,11 +139,20 @@ func GetApiRouter(authMiddleware *jwtauth.GinJWTMiddleware) g.Routers {
 					Url: "/task",
 					// Use: g.Use(authMiddleware.MiddlewareFunc()),
 					Handle: func(r gin.IRoutes) {
-						r.GET("/stop/:JobId", restful.ActionHander(&jobModels.SysJobIndex{}, func(object interface{}) {
-							// 停止任务
+						r.GET("/stop/:JobId", restful.ActionHander(func(call restful.HandlerActionCallBack, api *restful.Api) {
+							model := jobModels.SysJobIndex{}
+							err := call(&model)
+							if err == nil {
+								jobs.StopJob(model.JobID)
+							}
 						}))
-						r.GET("/start/:JobId", restful.ActionHander(&jobModels.SysJobIndex{}, func(object interface{}) {
-							// 开始任务
+						r.GET("/start/:JobId", restful.ActionHander(func(call restful.HandlerActionCallBack, api *restful.Api) {
+							model := jobModels.SysJobIndex{}
+							err := call(&model)
+							if err == nil {
+								// api.OK()
+								// jobs.StartJob(model.JobID)
+							}
 						}))
 					},
 				},
