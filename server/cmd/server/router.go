@@ -1,10 +1,12 @@
 package server
 
 import (
+	adminApis "server/app/admin/apis"
 	"server/app/jobs"
 	jobModels "server/app/jobs/models"
 	"server/common/config"
 	"server/common/middleware"
+	"server/common/middleware/jwt"
 	g "server/sugar/groute"
 	"server/sugar/jwtauth"
 	"server/sugar/log"
@@ -20,7 +22,7 @@ import (
 )
 
 func createAuthMiddleware() *jwtauth.GinJWTMiddleware {
-	mid, err := jwtauth.NewJWT(&jwtauth.Standard{}, config.Jwt.Timeout, config.Jwt.Secret)
+	mid, err := jwtauth.NewJWT(&jwt.Standard{}, config.Jwt.Timeout, config.Jwt.Secret)
 	if err != nil {
 		panic("初始化身份认证中间件失败。")
 	}
@@ -78,11 +80,11 @@ func GetApiRouter(authMiddleware *jwtauth.GinJWTMiddleware) g.Routers {
 			Children: g.Routers{
 				g.Router{ //左侧菜单
 					Url: "/",
-					Use: g.Use(authMiddleware.MiddlewareFunc()),
+					// Use: g.Use(authMiddleware.MiddlewareFunc()),
 					Handle: func(r gin.IRoutes) {
-						// api := adminapi.SysMenu{}
+						api := adminApis.MenuApi{}
+						r.GET("/menutree", api.GetMenuTree)
 						// user := adminapi.SysUser{}
-						// r.GET("/menutree", api.GetMenuTreeSelect)
 						// r.GET("/getinfo", user.GetInfo)
 					},
 				},

@@ -4,11 +4,11 @@ import (
 	"server/migration/models/common"
 )
 
-type SysJobIndex struct {
+type JobIndex struct {
 	JobId int `uri:"JobId" json:"jobId" gorm:"primaryKey;autoIncrement"`
 }
-type SysJob struct {
-	SysJobIndex
+type Job struct {
+	JobIndex
 	JobName        string `json:"jobName" gorm:"size:255;"`                 // 名称
 	JobGroup       string `form:"jobGroup" json:"jobGroup" gorm:"size:32;"` // 任务分组
 	CronExpression string `json:"cronExpression" gorm:"size:64;"`           // cron表达式
@@ -21,34 +21,37 @@ type SysJob struct {
 	common.ModelTime
 }
 
-func (SysJob) TableName() string {
-	return "sys_job"
+func (Job) TableName() string {
+	return "job"
 }
 
-type SysMenu struct {
-	MenuId     int    `json:"menuId" gorm:"primaryKey;autoIncrement"`
-	MenuName   string `json:"menuName" gorm:"size:128;"`
-	Title      string `json:"title" gorm:"size:128;"`
-	Icon       string `json:"icon" gorm:"size:128;"`
-	Path       string `json:"path" gorm:"size:128;"`
-	Paths      string `json:"paths" gorm:"size:128;"`
-	MenuType   string `json:"menuType" gorm:"size:1;"`
-	Action     string `json:"action" gorm:"size:16;"`
-	ParentId   int    `json:"parentId" gorm:"size:11;"`
-	NoCache    bool   `json:"noCache" gorm:"size:8;"`
-	Breadcrumb string `json:"breadcrumb" gorm:"size:255;"`
-	Component  string `json:"component" gorm:"size:255;"`
-	Sort       int    `json:"sort" gorm:"size:4;"`
-	Visible    string `json:"visible" gorm:"size:1;"`
-	IsFrame    string `json:"isFrame" gorm:"size:1;DEFAULT:0;"`
+type Menu struct {
+	// 菜单ID
+	ID int `json:"id" gorm:"primaryKey;autoIncrement"`
+	// 菜单标识符
+	Name string `json:"name" gorm:"size:32;"`
+	// 菜单类型  0 路由 1 IFrame
+	Type int `json:"type" gorm:"size:2;DEFAULT:0;"`
+	// 菜单标题
+	Title string `json:"title" gorm:"size:64;"`
+	// 菜单的图标
+	Icon string `json:"icon" gorm:"size:32;"`
+	// 菜单的url路径
+	Path string `json:"path" gorm:"size:128;"`
+	// 上级菜单ID
+	ParentID int `json:"parentId" gorm:"size:11;"`
+	// 菜单排序
+	Sort int `json:"sort" gorm:"size:4;"`
+	// 菜单是否可见
+	Visible string `json:"visible" gorm:"size:1;"`
 	common.ModelTime
 }
 
-func (SysMenu) TableName() string {
-	return "sys_menu"
+func (Menu) TableName() string {
+	return "menu"
 }
 
-type SysUser struct {
+type User struct {
 	UserId   int    `gorm:"primaryKey;autoIncrement;comment:编码"  json:"userId"`
 	Username string `json:"username" gorm:"type:varchar(64);comment:用户名"`
 	Password string `json:"-" gorm:"type:varchar(128);comment:密码"`
@@ -63,6 +66,6 @@ type SysUser struct {
 	common.ModelTime
 }
 
-func (SysUser) TableName() string {
-	return "sys_user"
+func (User) TableName() string {
+	return "user"
 }

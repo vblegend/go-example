@@ -21,9 +21,9 @@ type v20220101 struct {
 
 // 初始化需要迁移的表对象
 func (v *v20220101) Init() {
-	v.Apply(m20220101.SysMenu{})
-	v.Apply(m20220101.SysUser{})
-	v.Apply(m20220101.SysJob{})
+	v.Apply(m20220101.Menu{})
+	v.Apply(m20220101.User{})
+	v.Apply(m20220101.Job{})
 }
 
 // 执行初始化脚本 或 gorm 的update/insert/delete等操作

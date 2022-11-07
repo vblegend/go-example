@@ -101,7 +101,7 @@ func (e Api) GetOrm() (*gorm.DB, error) {
 	return e.Orm, err
 }
 
-func (e *Api) Make(c *gin.Context, s *service.Service) *Api {
+func (e *Api) Make(c *gin.Context, s service.IService) *Api {
 	return e.MakeContext(c).MakeOrm().MakeService(s)
 }
 
@@ -125,11 +125,11 @@ func (e *Api) TraceID(c *service.Service) string {
 	return ""
 }
 
-func (e *Api) MakeService(c *service.Service) *Api {
-	c.Orm = e.Orm
+func (e *Api) MakeService(c service.IService) *Api {
+	c.SetOrm(e.Orm)
 	val, ok := e.Context.Get(plugs.TraceIdKey)
 	if ok {
-		c.RequestId = val.(string)
+		c.SetTraceID(val.(string))
 	}
 	return e
 }

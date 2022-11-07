@@ -1,7 +1,8 @@
-package jwtauth
+package jwt
 
 import (
-	"server/app/admin/models"
+	"server/common/models"
+	"server/sugar/jwtauth"
 	"server/sugar/log"
 
 	"golang.org/x/crypto/bcrypt"
@@ -14,9 +15,9 @@ type LoginModel struct {
 	Code     string `form:"Code" json:"code" binding:"required"`
 }
 
-func (u *LoginModel) Verify(tx *gorm.DB) (MapClaims, error) {
-	user := models.SysUser{}
-	err := tx.Table("sys_user").Where("username = ?  and status = 2", u.Username).First(&user).Error
+func (u *LoginModel) Verify(tx *gorm.DB) (jwtauth.MapClaims, error) {
+	user := models.User{}
+	err := tx.Table(user.TableName()).Where("username = ?  and status = 2", u.Username).First(&user).Error
 	if err != nil {
 		log.Errorf("get user error, %s", err.Error())
 		return nil, err
@@ -26,9 +27,9 @@ func (u *LoginModel) Verify(tx *gorm.DB) (MapClaims, error) {
 		log.Errorf("user login error, %s", err.Error())
 		return nil, err
 	}
-	return MapClaims{
-		IdentityKey: user.UserId,
-		NiceKey:     user.NickName,
+	return jwtauth.MapClaims{
+		jwtauth.IdentityKey: user.UserId,
+		jwtauth.NiceKey:     user.NickName,
 	}, nil
 }
 
