@@ -5,7 +5,7 @@ type Menu struct {
 	ID int `json:"id" gorm:"primaryKey;autoIncrement"`
 	// 菜单标识符
 	Name string `json:"name" gorm:"size:32;"`
-	// 菜单类型  0 路由 1 IFrame
+	// 菜单类型  0 路由 1 目录  2 IFrame
 	Type int `json:"type" gorm:"size:2;DEFAULT:0;"`
 	// 菜单标题
 	Title string `json:"title" gorm:"size:64;"`
@@ -19,6 +19,8 @@ type Menu struct {
 	Sort int `json:"sort" gorm:"size:4;"`
 	// 菜单是否可见
 	Visible string `json:"visible" gorm:"size:1;"`
+	// 目录时默认打开状态
+	Opend string `json:"opend" gorm:"size:1;"`
 	//
 	ModelTime
 }
