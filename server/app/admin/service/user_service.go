@@ -1,7 +1,7 @@
 package service
 
 import (
-	"server/app/admin/models"
+	"server/common/models"
 
 	"errors"
 
@@ -16,9 +16,9 @@ type SysUser struct {
 }
 
 // UpdateAvatar 更新用户头像
-func (e *SysUser) UpdateAvatar(c *models.SysUser) error {
+func (e *SysUser) UpdateAvatar(c *models.User) error {
 	var err error
-	var model models.SysUser
+	var model models.User
 	db := e.Orm.First(&model, c.UserId)
 	if err = db.Error; err != nil {
 		log.Errorf("Service UpdateSysUser error: %s", err)
@@ -26,7 +26,6 @@ func (e *SysUser) UpdateAvatar(c *models.SysUser) error {
 	}
 	if db.RowsAffected == 0 {
 		return errors.New("无权更新该数据")
-
 	}
 	err = e.Orm.Table(model.TableName()).Where("user_id =? ", c.UserId).Updates(c).Error
 	if err != nil {
@@ -43,7 +42,7 @@ func (e *SysUser) ResetPwd(id int, newPassword string) error {
 	if newPassword == "" {
 		return nil
 	}
-	c := &models.SysUser{}
+	c := &models.User{}
 
 	err = e.Orm.Model(c).Select("UserId", "Password", "Salt").
 		First(c, id).Error

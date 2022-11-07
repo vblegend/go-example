@@ -1,7 +1,8 @@
-package jwtauth
+package jwt
 
 import (
 	"net/http"
+	"server/sugar/jwtauth"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -16,15 +17,15 @@ type Standard struct {
 func (h *Standard) Authenticator(c *gin.Context) (interface{}, error) {
 	login := LoginModel{}
 	if err := c.ShouldBind(&login); err != nil {
-		return nil, ErrMissingLoginValues
+		return nil, jwtauth.ErrMissingLoginValues
 	}
 	db, ok := c.Get("db")
 	if !ok {
-		return nil, ErrFailedAuthentication
+		return nil, jwtauth.ErrFailedAuthentication
 	}
 	claims, err := login.Verify(db.(*gorm.DB))
 	if err != nil {
-		return nil, ErrFailedAuthentication
+		return nil, jwtauth.ErrFailedAuthentication
 	}
 	return map[string]interface{}{"user": claims}, nil
 }
@@ -33,23 +34,23 @@ func (h *Standard) Authenticator(c *gin.Context) (interface{}, error) {
 // 然后，通过c.Get("JWT_PAYLOAD")在请求期间可用数据。注意，有效负载没有加密。
 // 在jwt中提到的属性。IO不能用作映射的键。可选，默认情况下不设置额外数据。
 // 验证通过 data = user
-func (h *Standard) PayloadFunc(data interface{}) MapClaims {
+func (h *Standard) PayloadFunc(data interface{}) jwtauth.MapClaims {
 	if v, ok := data.(map[string]interface{}); ok {
-		u, ok := v["user"].(MapClaims)
+		u, ok := v["user"].(jwtauth.MapClaims)
 		if ok {
 			return u
 		}
 	}
-	return MapClaims{}
+	return jwtauth.MapClaims{}
 }
 
 // 验证通过 身份
 func (h *Standard) IdentityHandler(c *gin.Context) interface{} {
-	claims := ExtractClaims(c)
+	claims := jwtauth.ExtractClaims(c)
 	return map[string]interface{}{
-		"IdentityKey": claims[IdentityKey],
-		"UserName":    claims[NiceKey],
-		"UserId":      claims[IdentityKey],
+		"IdentityKey": claims[jwtauth.IdentityKey],
+		"UserName":    claims[jwtauth.NiceKey],
+		"UserId":      claims[jwtauth.IdentityKey],
 	}
 }
 

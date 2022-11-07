@@ -1,13 +1,11 @@
 package models
 
 import (
-	"server/common/models"
-
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
 
-type SysUser struct {
+type User struct {
 	UserId   int    `gorm:"primaryKey;autoIncrement;comment:编码"  json:"userId"`
 	Username string `json:"username" gorm:"size:64;comment:用户名"`
 	Password string `json:"-" gorm:"size:128;comment:密码"`
@@ -19,15 +17,15 @@ type SysUser struct {
 	Email    string `json:"email" gorm:"size:128;comment:邮箱"`
 	Remark   string `json:"remark" gorm:"size:255;comment:备注"`
 	Status   string `json:"status" gorm:"size:4;comment:状态"`
-	models.ModelTime
+	ModelTime
 }
 
-func (SysUser) TableName() string {
-	return "sys_user"
+func (User) TableName() string {
+	return "user"
 }
 
 //加密
-func (e *SysUser) Encrypt() (err error) {
+func (e *User) Encrypt() (err error) {
 	if e.Password == "" {
 		return
 	}
@@ -41,11 +39,11 @@ func (e *SysUser) Encrypt() (err error) {
 	}
 }
 
-func (e *SysUser) BeforeCreate(_ *gorm.DB) error {
+func (e *User) BeforeCreate(_ *gorm.DB) error {
 	return e.Encrypt()
 }
 
-func (e *SysUser) BeforeUpdate(_ *gorm.DB) error {
+func (e *User) BeforeUpdate(_ *gorm.DB) error {
 	var err error
 	if e.Password != "" {
 		err = e.Encrypt()
@@ -53,6 +51,6 @@ func (e *SysUser) BeforeUpdate(_ *gorm.DB) error {
 	return err
 }
 
-func (e *SysUser) AfterFind(_ *gorm.DB) error {
+func (e *User) AfterFind(_ *gorm.DB) error {
 	return nil
 }
