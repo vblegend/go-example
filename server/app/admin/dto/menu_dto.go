@@ -16,9 +16,11 @@ type MenuDTO struct {
 	// 菜单的url路径
 	Path string `json:"path"`
 	// 菜单排序
-	Sort int `json:"sort"`
+	Sort int `json:"-"`
 	// 父级ID
 	ParentID int `json:"-"`
+	// 默认状态
+	Opened bool `json:"opened"`
 	// 子菜单
 	Children []*MenuDTO `json:"children"`
 }
@@ -31,6 +33,7 @@ func (dto *MenuDTO) FromModel(model models.Menu) *MenuDTO {
 	dto.Icon = model.Icon
 	dto.Path = model.Path
 	dto.Sort = model.Sort
+	dto.Opened = model.Opened
 	dto.ParentID = model.ParentID
 	dto.Children = make([]*MenuDTO, 0)
 	return dto
