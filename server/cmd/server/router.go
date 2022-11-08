@@ -68,7 +68,7 @@ func GetApiRouter(authMiddleware *jwtauth.GinJWTMiddleware) g.Routers {
 			},
 		},
 		g.Router{
-			Url: "/api/v1",
+			Url: "/api",
 			Handle: func(r gin.IRoutes) {
 				// 登录接口
 				r.POST("login", authMiddleware.LoginHandler)

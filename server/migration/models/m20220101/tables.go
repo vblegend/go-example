@@ -43,7 +43,9 @@ type Menu struct {
 	// 菜单排序
 	Sort int `json:"sort" gorm:"size:4;"`
 	// 菜单是否可见
-	Visible string `json:"visible" gorm:"size:1;"`
+	Visible bool `json:"visible" gorm:"size:1;"`
+	// 目录时默认打开状态
+	Opened bool `json:"opened" gorm:"size:1;"`
 	common.ModelTime
 }
 

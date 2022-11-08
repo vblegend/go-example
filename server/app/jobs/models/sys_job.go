@@ -11,7 +11,7 @@ type SysJobIndex struct {
 
 // TableName 模型对应表明
 func (SysJobIndex) TableName() string {
-	return "sys_job"
+	return "job"
 }
 
 // SysJob 系统任务模型
@@ -31,7 +31,7 @@ type SysJob struct {
 
 // TableName 模型对应表明
 func (SysJob) TableName() string {
-	return "sys_job"
+	return "job"
 }
 
 // OnQueryAfter 数据从数据表读取之后触发
