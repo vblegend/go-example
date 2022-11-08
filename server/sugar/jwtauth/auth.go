@@ -20,6 +20,9 @@ type IJWTAuth interface {
 	// LogOut(c *gin.Context)
 	Authorizator(data interface{}, c *gin.Context) bool
 	Unauthorized(c *gin.Context, code int, message string)
+
+	LoginResponse(c *gin.Context, code int, token string, expire time.Time)
+	RefreshResponse(c *gin.Context, code int, token string, expire time.Time)
 }
 
 // AuthInit jwt验证new
@@ -42,6 +45,8 @@ func NewJWT(jwtAuth IJWTAuth, _timeout int64, secret string) (*GinJWTMiddleware,
 		Authenticator:   jwtAuth.Authenticator,
 		Authorizator:    jwtAuth.Authorizator,
 		Unauthorized:    jwtAuth.Unauthorized,
+		LoginResponse:   jwtAuth.LoginResponse,
+		RefreshResponse: jwtAuth.RefreshResponse,
 		TokenLookup:     "header: Authorization, query: token, cookie: jwt",
 		TokenHeadName:   "Bearer",
 		TimeFunc:        time.Now,

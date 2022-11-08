@@ -202,12 +202,8 @@ var (
 
 	// ErrInvalidPubKey indicates the the given public key is invalid
 	ErrInvalidPubKey = errors.New("public key invalid")
-
 	// IdentityKey default identity key
-	IdentityKey = "identity"
-
-	// NiceKey 昵称
-	NiceKey      = "nice"
+	IdentityKey  = "identity"
 	DataScopeKey = "datascope"
 
 	RKey = "r"

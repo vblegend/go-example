@@ -3,9 +3,17 @@ package jwt
 import (
 	"net/http"
 	"server/sugar/jwtauth"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
+)
+
+const (
+	UserIDKey   = "userId"
+	UserNameKey = "user"
+	TokenKey    = "token"
+	NiceKey     = "nice"
 )
 
 type Standard struct {
@@ -23,11 +31,42 @@ func (h *Standard) Authenticator(c *gin.Context) (interface{}, error) {
 	if !ok {
 		return nil, jwtauth.ErrFailedAuthentication
 	}
-	claims, err := login.Verify(db.(*gorm.DB))
+	userInfo, err := login.Verify(db.(*gorm.DB))
 	if err != nil {
 		return nil, jwtauth.ErrFailedAuthentication
 	}
+	c.Set(UserIDKey, userInfo.UserId)
+	c.Set(NiceKey, userInfo.NickName)
+	c.Set(UserNameKey, userInfo.Username)
+
+	claims := jwtauth.MapClaims{
+		UserIDKey:   userInfo.UserId,
+		NiceKey:     userInfo.NickName,
+		UserNameKey: userInfo.Username,
+	}
+
 	return map[string]interface{}{"user": claims}, nil
+}
+
+// LoginResponse 登录成功 接口返回
+func (h *Standard) LoginResponse(c *gin.Context, code int, token string, expire time.Time) {
+	c.JSON(http.StatusOK, gin.H{
+		"code":      http.StatusOK,
+		"token":     token,
+		UserIDKey:   c.MustGet(UserIDKey),
+		NiceKey:     c.MustGet(NiceKey),
+		UserNameKey: c.MustGet(UserNameKey),
+		"expire":    expire.Format(time.RFC3339),
+	})
+}
+
+// RefreshResponse 刷新token 接口返回
+func (h *Standard) RefreshResponse(c *gin.Context, code int, token string, expire time.Time) {
+	c.JSON(http.StatusOK, gin.H{
+		"code":   http.StatusOK,
+		"token":  token,
+		"expire": expire.Format(time.RFC3339),
+	})
 }
 
 // 在登录时调用的回调函数。使用这个函数可以向webtoken添加额外的有效负载数据。
@@ -48,9 +87,9 @@ func (h *Standard) PayloadFunc(data interface{}) jwtauth.MapClaims {
 func (h *Standard) IdentityHandler(c *gin.Context) interface{} {
 	claims := jwtauth.ExtractClaims(c)
 	return map[string]interface{}{
-		"IdentityKey": claims[jwtauth.IdentityKey],
-		"UserName":    claims[jwtauth.NiceKey],
-		"UserId":      claims[jwtauth.IdentityKey],
+		UserIDKey:   claims[UserIDKey],
+		NiceKey:     claims[NiceKey],
+		UserNameKey: claims[UserNameKey],
 	}
 }
 
@@ -60,8 +99,9 @@ func (h *Standard) IdentityHandler(c *gin.Context) interface{} {
 // 可选，默认为success
 func (h *Standard) Authorizator(data interface{}, c *gin.Context) bool {
 	if v, ok := data.(map[string]interface{}); ok {
-		c.Set("userId", v["UserId"])
-		c.Set("userName", v["UserName"])
+		c.Set(UserIDKey, v[UserIDKey])
+		c.Set(NiceKey, v[NiceKey])
+		c.Set(UserNameKey, v[UserNameKey])
 		return true
 	}
 	return false
