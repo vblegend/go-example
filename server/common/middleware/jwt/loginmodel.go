@@ -2,7 +2,6 @@ package jwt
 
 import (
 	"server/common/models"
-	"server/sugar/jwtauth"
 	"server/sugar/log"
 
 	"golang.org/x/crypto/bcrypt"
@@ -15,7 +14,7 @@ type LoginModel struct {
 	Code     string `form:"Code" json:"code" binding:"required"`
 }
 
-func (u *LoginModel) Verify(tx *gorm.DB) (jwtauth.MapClaims, error) {
+func (u *LoginModel) Verify(tx *gorm.DB) (*models.User, error) {
 	user := models.User{}
 	err := tx.Table(user.TableName()).Where("username = ?  and status = 2", u.Username).First(&user).Error
 	if err != nil {
@@ -27,10 +26,7 @@ func (u *LoginModel) Verify(tx *gorm.DB) (jwtauth.MapClaims, error) {
 		log.Errorf("user login error, %s", err.Error())
 		return nil, err
 	}
-	return jwtauth.MapClaims{
-		jwtauth.IdentityKey: user.UserId,
-		jwtauth.NiceKey:     user.NickName,
-	}, nil
+	return &user, nil
 }
 
 func (u *LoginModel) CompareHashAndPassword(e string, p string) (bool, error) {

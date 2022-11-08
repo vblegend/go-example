@@ -41,6 +41,14 @@ func (s *MenuService) GetMenuTree() []*dto.MenuDTO {
 			result = append(result, menu)
 		}
 	}
+	updateMenuPath("", result)
 	sort.Sort(dto.SortBy(result))
 	return result
+}
+
+func updateMenuPath(basePath string, menus []*dto.MenuDTO) {
+	for _, menu := range menus {
+		menu.Path = basePath + menu.Path
+		updateMenuPath(menu.Path, menu.Children)
+	}
 }
