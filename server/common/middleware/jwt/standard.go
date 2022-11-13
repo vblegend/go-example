@@ -3,6 +3,7 @@ package jwt
 import (
 	"net/http"
 	"server/sugar/jwtauth"
+	"server/sugar/restful"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -11,7 +12,7 @@ import (
 
 const (
 	UserIDKey   = "userId"
-	UserNameKey = "user"
+	UserNameKey = "username"
 	TokenKey    = "token"
 	NiceKey     = "nice"
 )
@@ -50,14 +51,17 @@ func (h *Standard) Authenticator(c *gin.Context) (interface{}, error) {
 
 // LoginResponse 登录成功 接口返回
 func (h *Standard) LoginResponse(c *gin.Context, code int, token string, expire time.Time) {
-	c.JSON(http.StatusOK, gin.H{
-		"code":      http.StatusOK,
+	restful.OK(c, gin.H{
 		"token":     token,
 		UserIDKey:   c.MustGet(UserIDKey),
 		NiceKey:     c.MustGet(NiceKey),
 		UserNameKey: c.MustGet(UserNameKey),
 		"expire":    expire.Format(time.RFC3339),
-	})
+	}, "登录成功")
+}
+
+func (h *Standard) Unauthorized(c *gin.Context, code int, message string) {
+	restful.ErrorS(c, http.StatusBadRequest, message)
 }
 
 // RefreshResponse 刷新token 接口返回
@@ -105,11 +109,4 @@ func (h *Standard) Authorizator(data interface{}, c *gin.Context) bool {
 		return true
 	}
 	return false
-}
-
-func (h *Standard) Unauthorized(c *gin.Context, code int, message string) {
-	c.JSON(http.StatusOK, gin.H{
-		"code": code,
-		"msg":  message,
-	})
 }

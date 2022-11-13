@@ -18,6 +18,17 @@ func Error(c *gin.Context, code int, err error) {
 	c.AbortWithStatusJSON(http.StatusOK, res)
 }
 
+// Error 失败数据处理
+func ErrorS(c *gin.Context, code int, err string) {
+	res := Response{
+		Code:    code,
+		TraceId: GetTraceID(c),
+		Msg:     err,
+		Data:    nil,
+	}
+	c.AbortWithStatusJSON(http.StatusOK, res)
+}
+
 // OK 通常成功数据处理
 func OK(c *gin.Context, data interface{}, msg string) {
 	res := Response{
