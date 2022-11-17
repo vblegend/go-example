@@ -17,7 +17,8 @@
 		"go.toolsEnvVars": {
 			"GOPROXY": "https://goproxy.cn,direct",
 			"GONOPROXY": "none;"
-		}
+		},
+		"go.lintTool": "golint"
 	},
 	"launch": {
 		"version": "0.2.0",
