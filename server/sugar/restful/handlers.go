@@ -1,12 +1,9 @@
 package restful
 
 import (
-	"fmt"
 	"net/http"
-	"reflect"
 	"server/sugar/model"
 	"server/sugar/utils"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -24,41 +21,16 @@ type HandlerQueryCallBack func(query interface{}, model model.IModel) error
 // HandlerQueryExecFunc 一个查询并执行的方法处理器
 type HandlerQueryExecFunc func(call HandlerQueryCallBack, api *Api)
 
-func execQueryAfter(origin interface{}) {
-	switch reflect.TypeOf(origin).Kind() {
-	case reflect.Slice, reflect.Array:
-		s := reflect.ValueOf(origin)
-		for i := 0; i < s.Len(); i++ {
-			lpModel := s.Index(i).Addr().Interface()
-			if ia, ok := lpModel.(model.IModelQueryAfter); ok {
-				ia.OnQueryAfter()
-			}
-		}
-	default:
-		if _, ok := origin.(model.IModel); ok {
-			if qa, ok := origin.(model.IModelQueryAfter); ok {
-				qa.OnQueryAfter()
-			}
-		} else {
-			panic("invalid data type with model.IModel")
-		}
-	}
-}
-
 // ListHander 列表查询处理器
 func ListHander(resultTyped model.IModel) gin.HandlerFunc {
-	makeSclice := utils.MakeSliceFunc(resultTyped)
+	makeSclicePointer := utils.MakeSlicePointerFunc(resultTyped)
 	return func(c *gin.Context) {
 		tx := c.MustGet("db").(*gorm.DB).WithContext(c)
-		sclice := makeSclice()
-		err := tx.Table(resultTyped.TableName()).Find(&sclice).Error
+		sclice := makeSclicePointer()
+		err := tx.Table(resultTyped.TableName()).Find(sclice).Error
 		if err != nil {
 			Error(c, http.StatusInternalServerError, err)
 		} else {
-			fs := time.Now()
-			execQueryAfter(sclice)
-			l := time.Now().Sub(fs)
-			fmt.Println(l)
 			OK(c, sclice, "OK")
 		}
 	}
@@ -71,7 +43,7 @@ func ListHander(resultTyped model.IModel) gin.HandlerFunc {
 func WherePageHander(queryModel interface{}, pageModel model.IPagination, resultModel model.IModel) gin.HandlerFunc {
 	var makeQuery func() interface{}
 	makeModel := utils.MakeModelFunc(pageModel)
-	makeSclice := utils.MakeSliceFunc(resultModel)
+	makeSclice := utils.MakeSlicePointerFunc(resultModel)
 	if queryModel != nil {
 		makeQuery = utils.MakeModelFunc(queryModel)
 	}
@@ -96,11 +68,10 @@ func WherePageHander(queryModel interface{}, pageModel model.IPagination, result
 			}
 			tx = tx.Where(query)
 		}
-		err = tx.Count(&count).Offset(offset).Limit(params.GetPageSize()).Find(&sclice).Error
+		err = tx.Count(&count).Offset(offset).Limit(params.GetPageSize()).Find(sclice).Error
 		if err != nil {
 			Error(c, http.StatusInternalServerError, err)
 		} else {
-			execQueryAfter(sclice)
 			PageOK(c, sclice, int(count), params.GetPageIndex(), params.GetPageSize(), "OK")
 		}
 	}
@@ -117,23 +88,13 @@ func CreateHander(handler HandlerExeFunc) gin.HandlerFunc {
 				Error(c, http.StatusBadRequest, err)
 				return err
 			}
-			if ib, ok := lpModel.(model.IModelInsertBefore); ok {
-				if err = ib.OnInsertBefore(); err != nil {
-					Error(c, http.StatusBadRequest, err)
-					return err
-				}
-			}
 			err = tx.Table(lpModel.TableName()).Create(lpModel).Error
-			if ia, ok := lpModel.(model.IModelInsertAfter); ok {
-				ia.OnInsertAfter()
-			}
 			if err != nil {
 				Error(c, http.StatusInternalServerError, err)
-				return err
 			} else {
 				OK(c, lpModel, "OK")
-				return nil
 			}
+			return err
 		}
 		handler(callback, api)
 	}
@@ -150,23 +111,13 @@ func UpdateHander(handler HandlerExeFunc) gin.HandlerFunc {
 				Error(c, http.StatusBadRequest, err)
 				return err
 			}
-			if ub, ok := lpModel.(model.IModelUpdateBefore); ok {
-				if err = ub.OnUpdateBefore(); err != nil {
-					Error(c, http.StatusBadRequest, err)
-					return err
-				}
-			}
 			err = tx.Table(lpModel.TableName()).Updates(lpModel).Error
-			if ua, ok := lpModel.(model.IModelUpdateAfter); ok {
-				ua.OnUpdateAfter()
-			}
 			if err != nil {
 				Error(c, http.StatusInternalServerError, err)
-				return err
 			} else {
 				OK(c, lpModel, "OK")
-				return nil
 			}
+			return err
 		}
 		handler(callback, api)
 	}
@@ -183,23 +134,13 @@ func DeleteHander(handler HandlerQueryExecFunc) gin.HandlerFunc {
 				Error(c, http.StatusBadRequest, err)
 				return err
 			}
-			if db, ok := lpModel.(model.IModelDeleteBefore); ok {
-				if err = db.OnDeleteBefore(); err != nil {
-					Error(c, http.StatusBadRequest, err)
-					return err
-				}
-			}
 			err = tx.Table(lpModel.TableName()).Delete(query).Error
-			if da, ok := lpModel.(model.IModelDeleteAfter); ok {
-				da.OnDeleteAfter()
-			}
 			if err != nil {
 				Error(c, http.StatusInternalServerError, err)
-				return err
 			} else {
 				OK(c, gin.H{}, "OK")
-				return nil
 			}
+			return err
 		}
 		handler(callback, api)
 	}
@@ -222,9 +163,6 @@ func WhereFirstHander(queryModel interface{}, resultModel model.IModel) gin.Hand
 		if err != nil {
 			Error(c, http.StatusInternalServerError, err)
 		} else {
-			if da, ok := lpModel.(model.IModelQueryAfter); ok {
-				da.OnQueryAfter()
-			}
 			OK(c, lpModel, "OK")
 		}
 	}
@@ -232,7 +170,7 @@ func WhereFirstHander(queryModel interface{}, resultModel model.IModel) gin.Hand
 
 // WhereListHander 列表件查询处理器，根据queryModel 查询指定resultModel对象列表
 func WhereListHander(queryModel interface{}, resultModel model.IModel) gin.HandlerFunc {
-	makeSclice := utils.MakeSliceFunc(resultModel)
+	makeSclice := utils.MakeSlicePointerFunc(resultModel)
 	makeQuery := utils.MakeModelFunc(queryModel)
 	return func(c *gin.Context) {
 		tx := c.MustGet("db").(*gorm.DB)
@@ -243,11 +181,10 @@ func WhereListHander(queryModel interface{}, resultModel model.IModel) gin.Handl
 			return
 		}
 		sclice := makeSclice()
-		err = tx.Table(resultModel.TableName()).Where(query).Find(&sclice).Error
+		err = tx.Table(resultModel.TableName()).Where(query).Find(sclice).Error
 		if err != nil {
 			Error(c, http.StatusInternalServerError, err)
 		} else {
-			execQueryAfter(sclice)
 			OK(c, sclice, "OK")
 		}
 	}

@@ -1,7 +1,10 @@
 package models
 
 import (
+	"fmt"
 	"server/common/models"
+
+	"gorm.io/gorm"
 )
 
 // SysJobIndex 系统任务ID索引模型
@@ -34,36 +37,7 @@ func (SysJob) TableName() string {
 	return "job"
 }
 
-// OnQueryAfter 数据从数据表读取之后触发
-func (job *SysJob) OnQueryAfter() {
-	// job.JobName = "xxoo"
-}
-
-// OnInsertBefore 数据插入数据表之前触发
-func (job *SysJob) OnInsertBefore() error {
-	return nil
-}
-
-// OnInsertAfter 数据插入数据表之后触发
-func (job *SysJob) OnInsertAfter() {
-}
-
-// OnUpdateBefore 数据更新至数据表之前触发
-func (job *SysJob) OnUpdateBefore() error {
-	return nil
-}
-
-// OnUpdateAfter 数据更新至数据表之后触发
-func (job *SysJob) OnUpdateAfter() {
-
-}
-
-// OnDeleteBefore 数据从数据表删除之前触发
-func (job *SysJob) OnDeleteBefore() error {
-	return nil
-}
-
-// OnDeleteAfter 数据从数据表删除之后触发
-func (job *SysJob) OnDeleteAfter() {
-
+func (u *SysJob) AfterFind(tx *gorm.DB) (err error) {
+	fmt.Println(u)
+	return
 }
