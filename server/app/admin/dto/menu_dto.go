@@ -22,7 +22,7 @@ type MenuDTO struct {
 	// 默认状态
 	Opened bool `json:"opened"`
 	// 子菜单
-	Children []*MenuDTO `json:"children"`
+	Children []*MenuDTO `json:"children,omitempty"`
 }
 
 func (dto *MenuDTO) FromModel(model models.Menu) *MenuDTO {

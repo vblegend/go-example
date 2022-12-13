@@ -5,15 +5,17 @@ import "reflect"
 // CreateObjectFunc 创建对象的方法类型
 type CreateObjectFunc func() interface{}
 
-// MakeSliceFunc 提供一个对象，返回一个创建该对象切片的方法
-func MakeSliceFunc(obj interface{}) CreateObjectFunc {
+// MakeSlicePointerFunc 提供一个对象，返回一个创建该对象切片的方法
+func MakeSlicePointerFunc(obj interface{}) CreateObjectFunc {
 	t := reflect.TypeOf(obj)
 	if t.Kind() == reflect.Pointer {
 		t = t.Elem()
 	}
 	sliceType := reflect.SliceOf(t)
 	return func() interface{} {
-		return reflect.MakeSlice(sliceType, 0, 0).Interface()
+		ptr := reflect.New(sliceType)
+		ptr.Elem().Set(reflect.MakeSlice(sliceType, 0, 0))
+		return ptr.Interface()
 	}
 }
 

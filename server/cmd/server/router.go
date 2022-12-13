@@ -92,8 +92,9 @@ func GetApiRouter(authMiddleware *jwtauth.GinJWTMiddleware) g.Routers {
 					Url: "/menu",
 					Use: g.Use(authMiddleware.MiddlewareFunc()),
 					Handle: func(r gin.IRoutes) {
+						api := adminApis.MenuApi{}
 						// api := adminapi.SysMenu{}
-						// r.GET("", api.GetPage)
+						r.GET("/", api.GetMenuTree)
 						// r.GET("/:id", api.Get)
 						// r.POST("", api.Insert)
 						// r.PUT("/:id", api.Update)
