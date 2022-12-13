@@ -43,7 +43,7 @@ func GetRootRouter() g.Router {
 			plugs.TraceID("requestId", uuid.NewString),                                        // 请求UUID
 			plugs.WithContextDB(config.DefaultDB),                                             // 数据连接
 			plugs.NoCache,                                                                     // 禁用缓存
-			plugs.Options,                                                                     // 跨域请求
+			plugs.Cross,                                                                       // 跨域请求
 			plugs.Secure,                                                                      // 安全相关
 			plugs.Limit(10),                                                                   // 并发数控制
 			plugs.StaticFileServe("/", config.Web.Root),
