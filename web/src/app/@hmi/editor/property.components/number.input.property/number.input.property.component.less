@@ -1,0 +1,26 @@
+@import "mixin.less";
+
+.themeMixin({
+    :host {
+      .unit-label {
+        color: fade(@text-color,60%);
+      }
+    }
+});
+
+nz-input-number {
+  width: 100%;
+}
+:host {
+  position: relative;
+}
+.unit-label {
+  position: absolute;
+  right: 30px;
+  top: 0px;
+  bottom: 0px;
+  margin: auto;
+  height: 24px;
+  pointer-events: none;
+  user-select: none;
+}

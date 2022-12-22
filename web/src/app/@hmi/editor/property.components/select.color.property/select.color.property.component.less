@@ -1,0 +1,51 @@
+@import "mixin.less";
+
+.themeMixin({
+    :host {
+      input[type="color"] {
+         border: solid 1px @border-color-base;
+      }
+    }
+});
+
+nz-button-group {
+  display: grid;
+  grid-template-columns: auto 24px 24px;
+}
+
+input[type='text']{
+  border-right-width: 0px;
+}
+button{
+  border-left-width: 0px;
+}
+
+input[type="color"] {
+  width: 24px;
+  height: 24px;
+  margin: 0;
+  padding: 0;
+  background-color: transparent;
+}
+
+::ng-deep {
+  .ant-dropdown-menu {
+    max-height: 410px;
+    overflow-y: auto;
+  }
+  .ant-dropdown .ant-dropdown-menu .ant-dropdown-menu-item {
+    line-height: 24px;
+    padding: 0px 0px 0px 10px;
+  }
+}
+
+.color-block {
+  width: 20px;
+  height: 16px;
+  margin-right: 12px;
+}
+
+::-webkit-color-swatch,
+::-moz-color-swatch {
+  border-color: transparent;
+}

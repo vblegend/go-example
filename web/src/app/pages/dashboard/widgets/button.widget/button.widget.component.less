@@ -1,0 +1,26 @@
+@import "mixin.less";
+.themeMixin({
+  // :host{
+  //    text-shadow: @btn-text-shadow;
+  // }
+
+  // :host:hover{
+  //   color: @link-hover-color;
+  //   opacity: 0.9;
+  // }
+  // :host:active{
+  //   color: @link-active-color;
+  //   opacity: 0.8;
+  // }
+});
+
+:host {
+  cursor: pointer;
+  user-select: none;
+  display: block;
+  text-align: center;
+  div {
+    width: 8px;
+    display: inline-block;
+  }
+}

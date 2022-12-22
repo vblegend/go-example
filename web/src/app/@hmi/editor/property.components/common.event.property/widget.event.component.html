@@ -1,0 +1,76 @@
+<div class="event-frame" *ngIf=" editor.selection.objects.length == 1 ">
+    <ngx-collapse class="event-collapse" *ngFor="let item of events | keyvalue; trackBy :trackByKey"
+        [header]="item.key | uppercase " [expanded]="true">
+        <div class="event-continer">
+            <div class="event-item" *ngFor="let event of item.value; let i = index; trackBy :trackByAny ">
+                <!-- trackBy:trackByEvent; -->
+                <div class="event-item-index">
+                    <div>Action：{{i}}</div>
+                    <button nz-button nzType="dashed" nzSize="small" (click)="deleteEvent(item.key,i)">X</button>
+                </div>
+                <div class="prioerty-row">
+                    <div class="prioerty-name">
+                        <span>目标对象</span>
+                    </div>
+                    <div class="prioerty-value">
+                        <nz-select class="select" [ngModel]="event.target"
+                            (ngModelChange)="targetChanged(item.key,i,$event)" nzPlaceHolder="广播">
+                            <nz-option [nzValue]="null" nzLabel="广播"> </nz-option>
+                            <nz-option *ngFor="let child of editor.canvas.children; trackBy :trackByAny"
+                                [nzValue]="child.instance.configure.id" [nzLabel]="child.instance.configure.name">
+                            </nz-option>
+                        </nz-select>
+                    </div>
+                </div>
+                <div class="prioerty-row">
+                    <div class="prioerty-name">
+                        <span>目标接口</span>
+                    </div>
+                    <div class="prioerty-value">
+                        <nz-select class="select" [ngModel]="event.method"
+                            (ngModelChange)="methodChanged(item.key,i,$event)">
+                            <ng-container *ngFor="let interface of metaData.interfaces; trackBy :trackByName">
+                                <nz-option *ngIf="event.target == null || interface.widgetId == event.target"
+                                    [nzValue]="interface.value" [nzLabel]="interface.name">
+                                </nz-option>
+                            </ng-container>
+                        </nz-select>
+                    </div>
+                </div>
+
+                <div class="prioerty-row">
+                    <div class="prioerty-name">
+                        <span>设置参数</span>
+                    </div>
+                </div>
+
+                <div *ngFor="let arg of metaData.params[event.method!]; trackBy :trackByAny">
+                    <div class="prioerty-row">
+                        <div class="prioerty-name">
+                            <span>{{arg}}</span>
+                        </div>
+                        <div class="prioerty-value">
+                            <input nz-input placeholder="覆盖参数" [ngModel]="event.params![arg]"
+                                (ngModelChange)="paramsChanged(item.key,i,arg,$event)" nzSize="small" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+    </ngx-collapse>
+
+
+
+
+
+    <div class="event-bar">
+        <nz-select class="event-list" [(ngModel)]="selectedEvent">
+            <nz-option *ngFor="let event of metaEvents" [nzValue]="event.event" [nzLabel]="event.eventName">
+            </nz-option>
+        </nz-select>
+        <button class="event-button" (click)="addEvent(selectedEvent)" nz-button nzType="primary">添加事件</button>
+    </div>
+</div>

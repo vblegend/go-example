@@ -1,0 +1,101 @@
+@import "mixin.less";
+
+.themeMixin( {
+    :host {
+      .toolbar{
+        // box-shadow: @text-color 0px 0px 10px 0px;
+        background-color: fade(@component-background,10%);
+      }
+      .hoverline{
+        background-color: @text-color;
+      }
+
+      .toolbar-button{
+        background-color: fade(@text-color,10%);
+        color: fade(@text-color,70%);
+      }
+      .toolbar-button:hover{
+        background-color: fade(@text-color,20%);
+        // color: @link-active-color;
+      }
+    }
+  }
+
+);
+
+
+
+
+
+
+:host {
+  width: 100%;
+  height: 100%;
+  ::ng-deep{
+    .disable-pointer{
+      pointer-events: none;
+    }
+  }
+  .toolbar-retracted {
+    height: 15px !important;
+    box-shadow: none !important;
+    background-color: transparent !important;
+  }
+
+  // .toolbar:hover {
+  //   background-color: #ff0000 !important;
+  // }
+
+  .toolbar {
+    position: absolute;
+    // top: 0px;
+    left: 0;
+    right: 0;
+    bottom: 0px;
+    margin: auto;
+    width: max-content;
+    height: 85px;
+    border-radius: 5px;
+    // animation: height 2s;
+    transition: height 0.1s ease-in-out;
+
+    .toolbar-continer {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      padding: 0px 15px;
+      overflow: hidden;
+
+      nz-space {
+        height: 75px;
+        margin-top: 10px;
+      }
+
+      .hoverline {
+        height: 4px;
+        width: 30%;
+        min-width: 30px;
+        border-radius: 2px;
+        position: absolute;
+        margin: auto;
+        left: 0;
+        right: 0;
+        top: 10px;
+        cursor: pointer;
+      }
+
+      .toolbar-button {
+        width: 64px;
+        height: 48px;
+        line-height: 48px;
+        margin-top: 5px;
+        // background-color: #ffffff;
+        border-radius: 8px;
+
+        i {
+          font-size: 22px;
+        }
+      }
+    }
+  }
+}

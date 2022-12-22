@@ -1,0 +1,7 @@
+<div #TerminalParent>
+  <div class="p-4">
+    <button nbButton matRipple  status="info" (click)="changeTheme(theme.value)" *ngFor="let theme of themes" class="mb-3">
+      <div>{{theme.name}}</div>
+    </button>
+  </div>
+</div>

@@ -1,0 +1,87 @@
+<!-- 
+
+[属性模板]
+ng-template:hmi-properties{
+    tableName 所属选项卡名称
+    groupName 选项卡下所属分组名称
+}
+
+[属性元素]
+hmi-property-element{
+    key 属性的键，用于匹配部件对象，部件通过 @DefineProperties([key1,....]) 定义属性的可以使用该属性
+    multiple 属性是否支持多选设置
+    attributePath 属性路径 根对象为 @WidgetConfigure
+    header 表示属性的名字
+    tooltip 属性名字的提示信息
+}
+
+[属性组件]
+hmi-*-property{
+    具体查看每种属性的详细设置，或参考hmi模块的默认属性设置
+}
+
+ -->
+
+
+ <ng-template hmi-properties tableName="属性" groupName="数据绑定">
+    <hmi-property-element key="data.eqid" [multiple]="false" attributePath="data/eqid" header="绑定设备" tooltip="绑定设备">
+        <hmi-button-action-property [factory]="SelectDeviceFactory">
+        </hmi-button-action-property>
+    </hmi-property-element>
+</ng-template>
+
+<ng-template hmi-properties tableName="属性" groupName="数据绑定">
+    <hmi-property-element key="data.sgid" [multiple]="false" attributePath="data/sgid" header="绑定信号" tooltip="绑定信号">
+        <hmi-button-action-property>
+        </hmi-button-action-property>
+    </hmi-property-element>
+</ng-template>
+
+
+<ng-template hmi-properties tableName="属性" groupName="基础属性">
+    <hmi-property-element key="data.imgSrc" [multiple]="false" attributePath="data/imgSrc" header="设置图片" tooltip="设置图片">
+        <hmi-button-action-property [factory]="SelectDeviceFactory">
+        </hmi-button-action-property>
+    </hmi-property-element>
+</ng-template>
+
+<ng-template hmi-properties tableName="属性" groupName="基础属性">
+    <hmi-property-element key="data.icon" [multiple]="true" attributePath="data/icon" header="图标" tooltip="显示图标">
+        <hmi-iconfont-select-property>
+        </hmi-iconfont-select-property>
+    </hmi-property-element>
+</ng-template>
+
+<ng-template hmi-properties tableName="属性" groupName="基础属性">
+    <hmi-property-element key="data.text" [multiple]="true" attributePath="data/text" header="文本内容"
+        tooltip="文本部件的显示内容">
+        <hmi-text-input-property nullValue="">
+        </hmi-text-input-property>
+    </hmi-property-element>
+</ng-template>
+
+<ng-template hmi-properties tableName="样式" groupName="内容对齐">
+    <hmi-property-element key="data.align" [multiple]="true" attributePath="data/align" header="文本对齐"
+        tooltip="文本部件的显示内容">
+        <hmi-select-string-property nullValue="center"
+            [options]="[{label:'左对齐',value:'left'},{label:'居中',value:'center'},{label:'右对齐',value:'right'}]">
+        </hmi-select-string-property>
+    </hmi-property-element>
+</ng-template>
+
+<ng-template hmi-properties tableName="属性" groupName="基础属性">
+    <hmi-property-element key="data.textformat" [multiple]="true" attributePath="data/text" header="文本格式"
+        tooltip="文本部件的显示内容">
+        <hmi-text-input-property nullValue="">
+        </hmi-text-input-property>
+    </hmi-property-element>
+</ng-template>
+
+
+<ng-template hmi-properties tableName="属性" groupName="基础属性">
+    <hmi-property-element key="data.displayunit" [multiple]="false" attributePath="data/unit" header="显示单位" tooltip="是否显示信号单位">
+        <hmi-switch-boolean-property checked="" unChecked="" [nullValue]="false" [diffValue]="true">
+        </hmi-switch-boolean-property>
+    </hmi-property-element>
+</ng-template>
+ 

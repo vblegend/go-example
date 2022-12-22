@@ -1,0 +1,33 @@
+<div class="icon-preview" [ngStyle]="{
+    'background-size' : '100% 100%',
+    'background-image' : defaultProperty ? ('url(' + defaultProperty +')') : ''
+}">
+
+</div>
+<button nz-button title="选择" (click)="btn_click()">
+    <i nz-icon nzIconfont="grace-24gf-folderOpen"></i>
+</button>
+<button class="clear" title="清除" nz-button (click)="clear()">
+    <i nz-icon nzIconfont="grace-del-grid"></i>
+</button>
+
+
+
+<!-- 组态设置抽屉 -->
+<nz-drawer [nzBodyStyle]="{ overflow: 'auto' }" [nzMaskClosable]="true" [nzWidth]="500" [nzVisible]="visible"
+    nzTitle="选择图标" [nzFooter]="footerTpl" (nzOnClose)="close()">
+    <div *nzDrawerContent>
+        <div class="icon-fonts" [ngStyle]="{
+            'background-size' : '100% 100%',
+            'background-image' : 'url(' + image +')'
+        }" (dblclick)="select(image)" title="双击选择" *ngFor="let image of images;">
+        </div>
+    </div>
+
+    <ng-template #footerTpl>
+        <button class="upload" (click)="upload()" nz-button nzType="primary" nzSize="large">
+            <i nz-icon nzIconfont="grace-yunshangchuan1"></i>
+            上传
+        </button>
+    </ng-template>
+</nz-drawer>

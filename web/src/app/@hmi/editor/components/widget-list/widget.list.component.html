@@ -1,0 +1,12 @@
+<div class="flex">
+    <ngx-collapse [header]="category.name" [expanded]="true" *ngFor="let category of provider.categorys;">
+        <div class="widget-item" draggable="true"
+            (dragstart)="widget_dragstart(widget,$event)" (dragend)="widget_dragend(widget,$event)"
+            (dblclick)="widget_dblClick(widget,$event)"
+            *ngFor="let widget of category.children;">
+            <i nz-icon class="widget-icon" [nzIconfont]="widget.icon"></i>
+            {{widget.name}}
+        </div>
+    </ngx-collapse>
+
+</div>

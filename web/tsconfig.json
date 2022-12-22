@@ -1,0 +1,78 @@
+{
+  "compileOnSave": false,
+  "compilerOptions": {
+    "strict": true,
+    "importHelpers": true,
+    "baseUrl": "src",
+    "module": "es2020",
+    "outDir": "./dist/out-tsc",
+    "sourceMap": true,
+    "declaration": false,
+    "moduleResolution": "node",
+    "experimentalDecorators": true,
+    "noImplicitReturns": true,
+    "downlevelIteration": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitAny": true,
+    "noImplicitThis": true,
+    "alwaysStrict": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    // "strictPropertyInitialization": false,
+    "strictPropertyInitialization": true,
+    "allowSyntheticDefaultImports": true,
+    "target": "es2020",
+    // 允许编译javascript文件
+    "allowJs": true,
+    // 报告.js文件中的错误。与allowJs一起使用
+    "checkJs": false,
+    // 跳过默认库检查
+    "skipLibCheck": true,
+    "rootDirs": [
+      "./"
+    ],
+    "typeRoots": [
+      "node_modules/@types",
+      "./src/typings"
+    ],
+    "lib": [
+      "ES2018",
+      "dom"
+    ],
+    "plugins": [
+      {
+        "name": "tslint-language-service"
+      }
+    ],
+    "paths": {
+      "@node_modules/*": [
+        "../node_modules/*"
+      ],
+      "@core/*": [
+        "app/@core/*"
+      ],
+      "@hmi/*": [
+        "app/@hmi/*"
+      ],
+      "@layouts/*": [
+        "app/@layouts/*"
+      ],
+      "@antd": [
+        "../node_modules/ng-zorro-antd/*"
+      ]
+    }
+  },
+  "exclude": [
+    "node_modules",
+    ".angular",
+    "dist/**",
+    ".git",
+    "**/*.spec.ts",
+    "build/**"
+  ],
+  "angularCompilerOptions": {
+    "strictInjectionParameters": true,
+    "strictInputAccessModifiers": true,
+    "strictTemplates": true,
+  }
+}

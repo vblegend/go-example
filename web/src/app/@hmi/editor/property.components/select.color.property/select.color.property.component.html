@@ -1,0 +1,17 @@
+<nz-button-group>
+    <input type="text" [ngModel]="defaultProperty" nz-input nzSize="small" />
+    <input type="color" [ngModel]="colorBoxValue" class="color-selector" />
+    <button nz-button nzSize="small" nz-dropdown nzTrigger="click" [nzDropdownMenu]="menu1" nzPlacement="bottomRight">
+        <i nz-icon nzType="down" nzTheme="outline"></i>
+    </button>
+</nz-button-group>
+
+<nz-dropdown-menu #menu1="nzDropdownMenu">
+    <ul nz-menu>
+        <div *ngFor="let color of colors" (click)="colorClick(color)" nz-menu-item>
+            <div class="color-block" [style.background]="color.value">
+            </div>
+            {{color.label}}
+        </div>
+    </ul>
+</nz-dropdown-menu>

@@ -1,0 +1,11 @@
+
+node_modules
+
+# output no
+dist
+.angular
+.vscode
+.git
+# no assets
+assets
+# not want to check folder

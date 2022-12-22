@@ -1,0 +1,90 @@
+<div class="toolbar" nz-element #toolBar="nzElement" [class.toolbar-retracted]="!toolbarState">
+  <div class="toolbar-continer">
+    <div class="hoverline" (click)="retracted_click()">
+    </div>
+    <nz-space [nzSize]="20" nzAlign="center">
+      <button *nzSpaceItem class="toolbar-button" (click)="save_click()" nzTooltipTitle="保存配置" nzTooltipColor="#108EE9"
+        [nzTooltipMouseLeaveDelay]="0" [nzTooltipOrigin]="toolBar.elementRef" nzTooltipPlacement="top" nz-button
+        nz-tooltip nzType="link">
+        <i nz-icon nzIconfont="grace-save1"></i>
+      </button>
+      <button *nzSpaceItem class="toolbar-button" (click)="import_click()" nzTooltipTitle="覆盖导入配置"
+        nzTooltipColor="#108EE9" [nzTooltipMouseLeaveDelay]="0" [nzTooltipOrigin]="toolBar.elementRef"
+        nzTooltipPlacement="top" nz-button nz-tooltip nzType="link">
+        <i nz-icon nzIconfont="grace-daoru2"></i>
+      </button>
+      <button *nzSpaceItem class="toolbar-button" (click)="addimport_click()" nzTooltipTitle="增量导入配置"
+        nzTooltipColor="#108EE9" [nzTooltipMouseLeaveDelay]="0" [nzTooltipOrigin]="toolBar.elementRef"
+        nzTooltipPlacement="top" nz-button nz-tooltip nzType="link">
+        <i nz-icon nzIconfont="grace-daoru2"></i>
+      </button>
+
+      <button *nzSpaceItem class="toolbar-button" (click)="export_click()" nzTooltipTitle="导出配置"
+        nzTooltipColor="#108EE9" [nzTooltipMouseLeaveDelay]="0" [nzTooltipOrigin]="toolBar.elementRef"
+        nzTooltipPlacement="top" nz-button nz-tooltip nzType="link">
+        <i nz-icon nzIconfont="grace-daochu1"></i>
+      </button>
+      <button *nzSpaceItem class="toolbar-button" (click)="fullscreen_click()" nzTooltipTitle="全屏切换"
+        nzTooltipColor="#108EE9" [nzTooltipMouseLeaveDelay]="0" [nzTooltipOrigin]="toolBar.elementRef"
+        nzTooltipPlacement="top" nz-button nz-tooltip nzType="link">
+        <i nz-icon nzIconfont="grace-Basic_Screen_a"></i>
+      </button>
+      <button *nzSpaceItem class="toolbar-button" (click)="setting_click()" nzTooltipTitle="组态设置"
+        nzTooltipColor="#108EE9" [nzTooltipMouseLeaveDelay]="0" [nzTooltipOrigin]="toolBar.elementRef"
+        nzTooltipPlacement="top" nz-button nz-tooltip nzType="link">
+        <i nz-icon nzIconfont="grace-a-Basic_setup_a"></i>
+      </button>
+      <button *nzSpaceItem class="toolbar-button" (click)="close_click()" nzTooltipTitle="关闭退出" nzTooltipColor="#108EE9"
+        [nzTooltipMouseLeaveDelay]="0" [nzTooltipOrigin]="toolBar.elementRef" nzTooltipPlacement="top" nz-button
+        nz-tooltip nzType="link">
+        <i nz-icon nzIconfont="grace-iconfontzhuxiao1"></i>
+      </button>
+    </nz-space>
+  </div>
+</div>
+
+
+
+
+<!-- 组态设置抽屉 -->
+<nz-drawer [nzBodyStyle]="{ overflow: 'auto' }" [nzMaskClosable]="false" [nzWidth]="300" [nzVisible]="settingVisible"
+  nzTitle="组态设置" [nzFooter]="footerTpl" (nzOnClose)="closeSetting()">
+  <div *nzDrawerContent>
+    <div class="prioerty-row">
+      <div class="prioerty-name" nz-tooltip nzTooltipTitle="组态的页面宽度，决定了能放置小部件的宽度范围。" nzTooltipPlacement="left">
+        <span>页面宽度</span>
+      </div>
+      <div class="prioerty-value">
+        <nz-input-number nzSize="small" [(ngModel)]="graphicOptions.width" [nzMin]="1" [nzMax]="4096" [nzStep]="1" [nzPrecision]="0">
+        </nz-input-number>
+      </div>
+    </div>
+
+    <div class="prioerty-row">
+      <div class="prioerty-name" nz-tooltip nzTooltipTitle="组态的页面高度，决定了能放置小部件的高度范围。" nzTooltipPlacement="left">
+        <span>页面高度</span>
+      </div>
+      <div class="prioerty-value">
+        <nz-input-number nzSize="small" [(ngModel)]="graphicOptions.height" [nzMin]="1" [nzMax]="2160" [nzStep]="1" [nzPrecision]="0">
+        </nz-input-number>
+      </div>
+    </div>
+
+    <div class="prioerty-row">
+      <div class="prioerty-name" nz-tooltip nzTooltipTitle="调整选项使小部件展示在组态页面上" nzTooltipPlacement="left">
+        <span>页面缩放</span>
+      </div>
+      <div class="prioerty-value">
+        <nz-select nzSize="small" [(ngModel)]="graphicOptions.zoomMode" [nzOptions]="scaleModels">
+        </nz-select>
+      </div>
+    </div>
+  </div>
+
+  <ng-template #footerTpl>
+    <div style="float: right">
+      <button nzType="primary" (click)="saveSetting()" nzDanger nz-button style="margin-right: 12px;">保存</button>
+      <button nzType="primary" (click)="closeSetting()" nz-button>取消</button>
+    </div>
+  </ng-template>
+</nz-drawer>

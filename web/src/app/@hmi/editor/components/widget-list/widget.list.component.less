@@ -1,0 +1,38 @@
+@import "mixin.less";
+
+.themeMixin({
+    :host {
+      .widget-item {
+         border: solid 1px fade(@border-color-base,20%);
+      }
+      .widget-item:hover {
+        background-color: @table-header-bg;
+        border: solid 1px @border-color-split;
+      }
+    }
+});
+
+:host {
+  .flex {
+    overflow-x: hidden;
+    overflow-y: auto;
+    height: 100%;
+  }
+  .widget-continer {
+    display: block;
+  }
+  .widget-icon {
+    font-size: 22px !important;
+    vertical-align: -0.28em !important;
+  }
+}
+.widget-item {
+  user-select: none;
+  width: 120px !important;
+  cursor: pointer;
+  height: 42px !important;
+  line-height: 42px !important;
+  // vertical-align: middle !important;
+  text-align: center !important;
+  display: inline-block !important;
+}

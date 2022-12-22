@@ -1,0 +1,81 @@
+<nz-page-header selectdisable class="site-page-header">
+  <nz-page-header-title>计划任务</nz-page-header-title>
+  <nz-page-header-subtitle>This is a subtitle</nz-page-header-subtitle>
+  <nz-page-header-content>
+
+  </nz-page-header-content>
+  <nz-page-header-footer>
+    <button nz-button nzType="primary" (click)="newTask()">Create Task</button>
+  </nz-page-header-footer>
+</nz-page-header>
+
+
+<nz-table #filterTable nzShowSizeChanger nzShowPagination [nzPageSize]="10" [nzFrontPagination]="true" [nzData]="listOfDisplay"
+   [nzLoading]="loading">
+  <thead>
+    <tr>
+      <th nzColumnKey="taskName" nzCustomFilter nzShowSort [nzSortFn]="taskNameSortFn"> 任务名称
+        <nz-filter-trigger *ngIf="true" [(nzVisible)]="visible" [nzActive]="searchValue.length > 0"
+          [nzDropdownMenu]="menuFiler">
+          <i nz-icon nzType="search"></i>
+        </nz-filter-trigger>
+      </th>
+      <th nzColumnKey="service" [nzFilters]="serviceFilters" [nzFilterFn]="serviceFilterFn">注册服务</th>
+      <th nzColumnKey="mode">触发方式</th>
+      <th nzColumnKey="ipAddress" nzSortOrder="true" [nzSortFn]="true">{{'IP地址' | translator : this}}</th>
+      <th nzRight nzWidth="150px">操作</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let data of filterTable.data; trackBy: trackBydata;">
+      <td>{{ data.taskName }}</td>
+      <td>
+        <nz-tag [nzColor]="data.online?'success':'error'">{{ data.service }}</nz-tag>
+      </td>
+      <td>{{ data.mode }}</td>
+      <td>{{ data.ipAddress }}</td>
+      <td>
+        <a nz-dropdown nzTrigger="click" [nzDropdownMenu]="menu">
+          Click me
+          <i nz-icon nzType="down"></i>
+        </a>
+        <nz-dropdown-menu #menu="nzDropdownMenu">
+          <ul nz-menu>
+            <li nz-submenu>
+              <span title>
+                <i nz-icon [nzIconfont]="'grace-refresh1'"></i>
+                <span>Status</span>
+              </span>
+              <ul>
+                <li nz-menu-item>
+                  <i nz-icon [nzIconfont]="'grace-bofang2'"></i>
+                  Run
+                </li>
+                <li nz-menu-item>
+                  <i nz-icon [nzIconfont]="'grace-stop-full'"></i>
+                  Stop
+                </li>
+              </ul>
+            </li>
+            <li nz-menu-item (nzOnConfirm)="editRow(data)">
+              <i nz-icon [nzIconfont]="'grace-edit'"></i> Edit
+            </li>
+            <li nz-menu-item nz-popconfirm nzPopconfirmTitle="Sure to delete?" (nzOnConfirm)="deleteRow(data)">
+              <i nz-icon [nzIconfont]="'grace-del-grid'"></i> Delete
+            </li>
+          </ul>
+        </nz-dropdown-menu>
+
+      </td>
+    </tr>
+  </tbody>
+</nz-table>
+<nz-dropdown-menu #menuFiler="nzDropdownMenu">
+  <div class="ant-table-filter-dropdown">
+    <div class="search-box">
+      <input type="text" nz-input placeholder="Search name" [(ngModel)]="searchValue" />
+      <button nz-button nzSize="small" nzType="primary" (click)="search()" class="search-button">Search</button>
+      <button nz-button nzSize="small" (click)="reset()">Reset</button>
+    </div>
+  </div>
+</nz-dropdown-menu>

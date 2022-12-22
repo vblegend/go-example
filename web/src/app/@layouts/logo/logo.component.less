@@ -1,0 +1,48 @@
+@import "mixin";
+
+.themeMixin( {
+    :host {
+      div {
+        background-color: @layout-header-background;
+      }
+    }
+  }
+
+);
+
+
+
+:host {
+  position: relative;
+  overflow: hidden;
+  transition: all .3s;
+  user-select: none;
+
+
+  div {
+    height: 64px;
+    line-height: 64px;
+    white-space: nowrap;
+  }
+
+
+  img {
+    display: inline-block;
+    margin-left: 16px;
+    height: 32px;
+    width: 32px;
+    vertical-align: middle;
+  }
+
+  h1 {
+    display: inline-block;
+    margin: 0 0 0 15px;
+    min-width: 120px;
+    font-size: 18px;
+    // font-family: Avenir, Helvetica Neue, Arial, Helvetica, sans-serif;
+    vertical-align: middle;
+    transition: all 0.3s, visibility 0s;
+  }
+
+
+}

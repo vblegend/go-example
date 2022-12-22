@@ -1,0 +1,49 @@
+<!-- 编辑器配置区域 -->
+<div class="hmi-editor-area">
+    <as-split direction="horizontal" [gutterSize]="5" [useTransition]="true" [gutterDblClickDuration]="300"
+        [unit]="'pixel'" (gutterDblClick)="gutterDblClick($event)">
+        <!-- 左侧小部件对象列表  和小部件组件列表 -->
+        <as-split-area [size]="215" [minSize]="190" [visible]="leftAreaVisible" [order]="1">
+            <as-split direction="vertical" [gutterSize]="5" [useTransition]="true" [unit]="'pixel'">
+                <as-split-area class="object-list-area" [size]="420" [minSize]="320">
+                    <nz-tabset class="objects-tabset">
+                        <nz-tab nzTitle="对象列表">
+                            <hmi-object-list #objectList [canvas]="canvas">
+                            </hmi-object-list>
+                        </nz-tab>
+                    </nz-tabset>
+                </as-split-area>
+                <as-split-area>
+                    <nz-tabset class="objects-tabset">
+                        <nz-tab nzTitle="小部件列表">
+                            <hmi-widget-list [canvas]="canvas">
+                            </hmi-widget-list>
+                        </nz-tab>
+                    </nz-tabset>
+                </as-split-area>
+            </as-split>
+        </as-split-area>
+        <!-- 中间工作区 -->
+        <as-split-area [order]="2">
+            <!-- hmi-disigner-hotkey 注册全局快捷键指令 -->
+            <!-- widget-drag 小部件的拖放指令 -->
+            <hmi-disigner-canvas #canvas hmi-disigner-hotkey >
+            </hmi-disigner-canvas>
+            <div *ngIf="!leftAreaVisible" class="sidebar-gutter left" (click)="gutterDblClick({gutterNum:1,sizes:[0]})">
+            </div>
+            <!-- as-split-gutter -->
+            <div *ngIf="!rightAreaVisible" class="sidebar-gutter right"
+                (click)="gutterDblClick({gutterNum:2,sizes:[0]})">
+            </div>
+        </as-split-area>
+        <!-- 右侧属性栏   -->
+        <as-split-area [size]="220" [minSize]="190" [visible]="rightAreaVisible" [order]="3">
+            <hmi-property-grid>
+            </hmi-property-grid>
+        </as-split-area>
+    </as-split>
+</div>
+
+<!-- 顶部工具栏 -->
+<hmi-editor-toolbar>
+</hmi-editor-toolbar>

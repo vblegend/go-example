@@ -1,0 +1,3 @@
+<button nz-button (click)="btn_click()" [disabled]="factoryObject.canExecute(defaultProperty) == false"
+    nzType="primary">
+    {{factoryObject.toBinding(defaultProperty)}}</button>

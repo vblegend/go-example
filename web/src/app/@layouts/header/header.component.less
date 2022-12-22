@@ -1,0 +1,92 @@
+@import 'mixin.less';
+
+.themeMixin( {
+    :host {
+      border-bottom: solid 1px @border-color-base;
+      ::ng-deep {
+        .ant-divider-vertical {
+          border-left: @header-menu-divider;
+          box-shadow: @header-menu-divider-shadow;
+        }
+      }
+    }
+  }
+
+);
+
+
+
+
+
+
+
+
+:host {
+  // height: 64px;
+  // line-height: 64px;
+  display: flex;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+
+.header-trigger {
+  width: 100%;
+  font-size: 20px;
+  //
+  transition: all .3s, padding 0s;
+
+  nz-space {
+    float: right;
+    margin-right: 10px;
+  }
+
+
+}
+
+nz-space {
+  .icon-button {
+    width: 32px;
+    height: 32px;
+    line-height: 32px;
+    text-align: center;
+    vertical-align: middle;
+  }
+}
+
+.anticon {
+  vertical-align: middle !important;
+}
+
+.trigger {
+  margin-left: 15px;
+  cursor: pointer;
+}
+
+.trigger:hover {
+  color: #1890ff;
+}
+
+nz-select {
+  width: 150px;
+  height: 32px;
+  margin: auto 20px;
+}
+
+
+.ant-btn-icon-only {
+  padding: 0;
+  font-size: 20px;
+}
+
+.ant-btn-icon-only>* {
+  font-size: 20px;
+}
+
+
+.ant-divider-vertical {
+  top: -3px;
+  height: 40px;
+  vertical-align: middle;
+}

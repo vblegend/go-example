@@ -1,0 +1,42 @@
+<form nz-form class="login-form" (ngSubmit)="submit()">
+
+  <nz-form-item>
+    <nz-form-label [nzSm]="6" [nzXs]="24" nzRequired nzFor="email">E-mail</nz-form-label>
+    <nz-form-control nzErrorTip="Please input your username!">
+      <input type="text" nz-input placeholder="Username" />
+    </nz-form-control>
+  </nz-form-item>
+  <nz-form-item>
+    <nz-form-label [nzSm]="6" [nzXs]="24" nzRequired nzFor="email">Password</nz-form-label>
+    <nz-form-control nzErrorTip="Please input your Password!">
+      <input type="password" nz-input placeholder="Password" />
+    </nz-form-control>
+  </nz-form-item>
+  <nz-form-item>
+    <nz-form-label [nzSm]="6" [nzXs]="24" nzRequired nzFor="email">Timer</nz-form-label>
+    <nz-form-control nzErrorTip="Please input your Password!">
+      <nz-date-picker nzShowTime nzAllowClear="false"></nz-date-picker>
+    </nz-form-control>
+  </nz-form-item>
+
+  <nz-form-item>
+    <nz-form-label [nzSm]="6" [nzXs]="24" nzFor="email"></nz-form-label>
+    <nz-form-control nzErrorTip="Please input your Password!">
+      <label nz-checkbox>
+        <span>Remember me</span>
+      </label>
+    </nz-form-control>
+  </nz-form-item>
+ 
+</form>
+
+
+
+<nz-divider></nz-divider>
+
+<div style="width: 600px;">
+  <div nz-row>
+    <button nz-col nzOffset="16" nzType="dashed" (click)="submit()" nz-button>Submit</button>
+    <button nz-col nzOffset="1" nzType="default" (click)="cancel()" nz-button>Cancel</button>
+  </div>
+</div>

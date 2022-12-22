@@ -1,0 +1,25 @@
+<div class="icon-preview">
+    <i nz-icon [nzIconfont]="defaultProperty"></i>
+</div>
+<button nz-button title="选择" (click)="btn_click()">
+    <i nz-icon nzIconfont="grace-24gf-folderOpen"></i>
+</button>
+<button class="clear" title="清除" nz-button (click)="clear()">
+    <i nz-icon nzIconfont="grace-del-grid"></i>
+</button>
+
+
+
+<!-- 组态设置抽屉 -->
+<nz-drawer [nzBodyStyle]="{ overflow: 'auto' }" [nzMaskClosable]="true" [nzWidth]="500" [nzVisible]="visible"
+    nzTitle="选择图标" [nzFooter]="footerTpl" (nzOnClose)="close()">
+    <div *nzDrawerContent>
+        <div class="icon-fonts" (dblclick)="select(icon)" title="双击选择" *ngFor="let icon of iconfont.icons;">
+            <i nz-icon [nzIconfont]="icon"></i>
+        </div>
+    </div>
+
+    <ng-template #footerTpl>
+
+    </ng-template>
+</nz-drawer>

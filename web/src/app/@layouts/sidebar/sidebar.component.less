@@ -1,0 +1,38 @@
+// @import "mixin";
+
+// .themeMixin( {
+//     :host {
+//       ::ng-deep {
+
+//         // .nz-menu-item,
+//         // .ant-menu-item,
+//         // // .ant-menu-submenu,
+//         // .ant-menu-submenu-title {
+//         //   // border:@menu-item-border;
+//         //   border-color: @menu-item-border-color;
+//         //   // border-bottom: @menu-border-bottom;
+//         // }
+//       }
+//     }
+//   }
+
+// );
+
+:host {
+  display: flex;
+  user-select: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  z-index: 10;
+  box-shadow: 2px 0 6px rgba(0, 21, 41, 0.35);
+
+  .title {
+    display: flex;
+    align-items: center;
+  }
+}
+
+// ::ng-deep {
+
+// }

@@ -1,0 +1,51 @@
+<!-- zoom-control 鼠标滚轮缩放指令 -->
+<!-- rubber-band 橡皮筋指令，用于框选对象 -->
+<div class="scrollViewer" #scrollViewer zoom-control rubber-band (contextmenu)="contextMenu($event, menu)">
+  <div class="continer" widget-drag [ngClass]="{
+    'designer-background-01' : zoomScale === 0.1,
+    'designer-background-02' : zoomScale === 0.2,
+    'designer-background-05' : zoomScale === 0.5,
+    'designer-background' : zoomScale >= 0.8 && zoomScale < 5,
+    'designer-background-max' : zoomScale >= 5
+  }" [ngStyle]="{'transform': 'scale(' + zoomScale + ')',
+                  width : editor.width + 'px',
+                  height : editor.height + 'px'
+                }">
+    <hmi-selection-area #selectionArea></hmi-selection-area>
+    <ng-container #ChildrenView>
+    </ng-container>
+  </div>
+
+  <!-- scrollViewer 平移组件 用于鼠标控制区域平移 -->
+  <hmi-pan-control *ngIf="spaceKeyDown">
+    <!-- 编辑器工作区域平移面板 -->
+  </hmi-pan-control>
+
+  <!-- 拖动对齐线 -->
+  <hmi-snap-line *ngIf="hSnapLines[0]" [position]="hSnapLines[0]" class="snap-line-h">
+  </hmi-snap-line>
+  <hmi-snap-line *ngIf="hSnapLines[1]" [position]="hSnapLines[1]" class="snap-line-h">
+  </hmi-snap-line>
+  <hmi-snap-line *ngIf="hSnapLines[2]" [position]="hSnapLines[2]" class="snap-line-h">
+  </hmi-snap-line>
+  <hmi-snap-line *ngIf="vSnapLines[0]" [position]="vSnapLines[0]" class="snap-line-v">
+  </hmi-snap-line>
+  <hmi-snap-line *ngIf="vSnapLines[1]" [position]="vSnapLines[1]" class="snap-line-v">
+  </hmi-snap-line>
+  <hmi-snap-line *ngIf="vSnapLines[2]" [position]="vSnapLines[2]" class="snap-line-v">
+  </hmi-snap-line>
+</div>
+
+
+
+<nz-dropdown-menu #menu="nzDropdownMenu">
+  <ul nz-menu>
+    <li nz-menu-item (click)="editor.executeUndo()">撤销</li>
+    <li nz-menu-item (click)="editor.executeRedo()">重做</li>
+    <hr>
+    <!-- <li nz-menu-item>剪切</li> -->
+    <li nz-menu-item>刷新</li>
+    <li nz-menu-item (click)="editor.executePasteCommand()">粘贴</li>
+    <li nz-menu-item>全选</li>
+  </ul>
+</nz-dropdown-menu>

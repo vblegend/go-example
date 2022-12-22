@@ -1,0 +1,23 @@
+@import 'mixin';
+
+.themeMixin( {
+        :host {
+            ::ng-deep {}
+        }
+    }
+
+);
+
+
+
+
+::ng-deep {
+    .ant-modal-body {
+        padding: 0px !important;
+    }
+
+    .xterm-viewport {
+        overflow-y: hidden;
+    }
+
+}

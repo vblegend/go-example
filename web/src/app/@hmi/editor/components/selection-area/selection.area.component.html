@@ -1,0 +1,50 @@
+<div [ngStyle]="{ 'pointer-events': canvas.ctrlPressed ? 'none' : ''}" class="move-button"
+  (contextmenu)="contextMenu($event, menu)" moveAnchor> </div>
+
+<div class="anchor left-button" *ngIf="!editor.selection.hasLocking" resizeAnchor [position]="AnchorPosition.Left">
+</div>
+<div class="anchor right-button" *ngIf="!editor.selection.hasLocking" resizeAnchor [position]="AnchorPosition.Right">
+</div>
+<div class="anchor top-button" *ngIf="!editor.selection.hasLocking" resizeAnchor [position]="AnchorPosition.Top">
+</div>
+<div class="anchor down-button" *ngIf="!editor.selection.hasLocking" resizeAnchor [position]="AnchorPosition.Down">
+</div>
+<div class="anchor lTop-button" *ngIf="!editor.selection.hasLocking" resizeAnchor [position]="AnchorPosition.LeftTop">
+</div>
+<div class="anchor rTop-button" *ngIf="!editor.selection.hasLocking" resizeAnchor [position]="AnchorPosition.RightTop">
+</div>
+<div class="anchor lDown-button" *ngIf="!editor.selection.hasLocking" resizeAnchor [position]="AnchorPosition.LeftDown">
+</div>
+<div class="anchor rDown-button" *ngIf="!editor.selection.hasLocking" resizeAnchor
+  [position]="AnchorPosition.RightDown">
+</div>
+
+<div class="anchor center-button" *ngIf="!editor.selection.hasLocking">
+</div>
+
+
+<nz-dropdown-menu #menu="nzDropdownMenu">
+  <ul nz-menu>
+    <li nz-menu-item disabled >选中：{{editor.selection.length}}项</li>
+
+    <li nz-menu-item>置于顶层</li>
+    <li nz-menu-item>置于底层</li>
+    <li nz-menu-item>移至上一层</li>
+    <li nz-menu-item>移至下一层</li>
+    <li nz-menu-item *ngIf="!editor.selection.hasGrouping && editor.selection.objects.length > 1"
+      (click)="editor.executeGroupCommand()">组合</li>
+    <li nz-menu-item *ngIf="editor.selection.hasGrouping  && editor.selection.objects.length > 1"
+      (click)="editor.executeUnGroupCommand()">拆分</li>
+
+    <li nz-menu-item *ngIf="!editor.selection.hasLocking && editor.selection.objects.length > 0"
+      (click)="editor.executeLockCommand()">锁定</li>
+    <li nz-menu-item *ngIf="editor.selection.hasLocking && editor.selection.objects.length > 0"
+      (click)="editor.executeUnlockCommand()">解除锁定</li>
+    <li nz-menu-item>拷贝样式</li>
+    <hr>
+    <li nz-menu-item (click)="editor.executeCutCommand()">剪切(ctrl + x)</li>
+    <li nz-menu-item (click)="editor.executeCopyCommand()">拷贝(ctrl + c)</li>
+    <li nz-menu-item (click)="editor.executePasteCommand()">粘贴(ctrl + v)</li>
+    <li nz-menu-item (click)="editor.executeDeleteCommand()">删除(delete)</li>
+  </ul>
+</nz-dropdown-menu>

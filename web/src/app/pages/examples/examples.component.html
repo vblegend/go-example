@@ -1,0 +1,14 @@
+<button class="editable" nz-button  (click)="show_window()">
+    Open Window
+    </button>
+
+<ng-window *ngIf="showPortal" title="Hello Window" (afterClose)="portal_Closed()">
+    <hmi-viewer #viewer>
+    </hmi-viewer>
+    <div>
+        <button class="editable" nz-button nzType="link" (click)="edit_click()">
+            <i nz-icon nzIconfont="grace-tiaozheng"></i>
+        </button>
+    </div>
+</ng-window>
+

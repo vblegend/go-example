@@ -18,7 +18,17 @@
 			"GOPROXY": "https://goproxy.cn,direct",
 			"GONOPROXY": "none;"
 		},
-		"go.lintTool": "golint"
+		"go.lintTool": "golint",
+		"typescript.tsdk": "./node_modules/typescript/lib",
+		"files.exclude": {
+			"**/node_modules": true,
+			"**/.angular": true
+		},
+		"files.associations": {
+			"*.res": "json",
+			"*.uv": "json",
+		},
+		"commentTranslate.multiLineMerge": true,
 	},
 	"launch": {
 		"version": "0.2.0",
@@ -33,6 +43,7 @@
 					"server",
 				],
 				"env": {
+					"CGO_ENABLED": "1",
 					"GIN_MODE": "release",
 					"RUN_MODE": "dev",
 					"LOG_LEVEL": "trace"
@@ -46,7 +57,7 @@
 				"runtimeExecutable": "npm",
 				"runtimeArgs": [
 					"run-script",
-					"serve"
+					"dev"
 				]
 			}
 		],

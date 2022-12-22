@@ -1,0 +1,138 @@
+// https://github.com/NG-ZORRO/ng-zorro-antd/blob/master/components/style/themes/default.less
+@import (multiple) '../../../node_modules/ng-zorro-antd/src/style/themes/dark.less';
+@import './base.less';
+// 
+
+
+
+
+@body-background: #1F1F22;
+
+@component-background: #28292C;
+
+@border-color-base: #323336;
+@border-color-split: #323336;
+
+@menu-border-bottom: solid 1px #323336;
+
+@menu-item-border-color: #323336;
+
+@menu-item-active-bg : transparent;
+
+
+
+@layout-sider-background: @component-background;
+@layout-trigger-background: @component-background;
+@layout-header-background: @component-background;
+
+
+
+@scroll-width: 5px;
+@scroll-height: 5px;
+@scroll-background: transparent;
+@scroll-thumb-radius: 2px;
+@scroll-thumb-color: #48494B;
+@scroll-thumb-hover-color: #5D5E60;
+@scroll-thumb-active-color: #5D5E60;
+
+
+@header-menu-divider: 1px solid rgba(255, 255, 255, 0.12);
+@header-menu-divider-shadow: 0px 0px 10px 1px #373737;
+
+
+// Tooltip max width
+@tooltip-max-width: 250px;
+@tooltip-color: @text-color;
+@tooltip-bg: @component-background;
+@tooltip-arrow-width: 5px;
+@tooltip-distance: @tooltip-arrow-width - 1px + 4px;
+@tooltip-arrow-color: @tooltip-bg;
+
+
+// Table
+// --
+@table-bg: @component-background;
+@table-header-bg: @background-color-light;
+@table-header-color: @heading-color;
+@table-header-sort-bg: @background-color-base;
+@table-body-sort-bg: #fafafa;
+@table-row-hover-bg: @background-color-light;
+@table-selected-row-color: inherit;
+@table-selected-row-bg: @primary-1;
+@table-body-selected-sort-bg: @table-selected-row-bg;
+@table-selected-row-hover-bg: darken(@table-selected-row-bg, 2%);
+@table-expanded-row-bg: #fbfbfb;
+@table-padding-vertical: 16px;
+@table-padding-horizontal: 16px;
+@table-padding-vertical-md: (@table-padding-vertical * 3 / 4);
+@table-padding-horizontal-md: (@table-padding-horizontal / 2);
+@table-padding-vertical-sm: (@table-padding-vertical / 2);
+@table-padding-horizontal-sm: (@table-padding-horizontal / 2);
+@table-border-color: @border-color-split;
+@table-border-radius-base: @border-radius-base;
+@table-footer-bg: @background-color-light;
+@table-footer-color: @heading-color;
+@table-header-bg-sm: @table-header-bg;
+@table-font-size: @font-size-base;
+@table-font-size-md: @table-font-size;
+@table-font-size-sm: @table-font-size;
+@table-header-cell-split-color: rgba(0, 0, 0, 0.03);
+// Sorter
+// Legacy: `table-header-sort-active-bg` is used for hover not real active
+@table-header-sort-active-bg: rgba(0, 0, 0, 0.04);
+@table-fixed-header-sort-active-bg: hsv(0, 0, 96%);
+
+// Filter
+@table-header-filter-active-bg: rgba(0, 0, 0, 0.04);
+@table-filter-btns-bg: inherit;
+@table-filter-dropdown-bg: @component-background;
+@table-expand-icon-bg: @component-background;
+@table-selection-column-width: 32px;
+// Sticky
+@table-sticky-scroll-bar-bg: fade(#000, 35%);
+@table-sticky-scroll-bar-radius: 4px;
+
+
+//Dropdown
+@dropdown-menu-bg: @component-background;
+@dropdown-vertical-padding: 2px;
+@dropdown-edge-child-vertical-padding: 0px;
+@dropdown-font-size: @font-size-base;
+@dropdown-line-height: 22px;
+
+
+// Drawer
+// ---
+@drawer-header-padding: @padding-md @padding-lg;
+@drawer-body-padding: @padding-lg;
+@drawer-bg: @component-background;
+@drawer-footer-padding-vertical: @modal-footer-padding-vertical;
+@drawer-footer-padding-horizontal: @modal-footer-padding-horizontal;
+@drawer-header-close-size: 56px;
+
+// TimePicker
+// ---
+@picker-bg: @component-background;
+@picker-basic-cell-hover-color: @item-hover-bg;
+@picker-basic-cell-active-with-range-color: @primary-1;
+@picker-basic-cell-hover-with-range-color: lighten(@primary-color, 35%);
+@picker-basic-cell-disabled-bg: rgba(0, 0, 0, 0.04);
+@picker-border-color: @border-color-split;
+@picker-date-hover-range-border-color: lighten(@primary-color, 20%);
+@picker-date-hover-range-color: @picker-basic-cell-hover-with-range-color;
+@picker-time-panel-column-width: 56px;
+@picker-time-panel-column-height: 224px;
+@picker-time-panel-cell-height: 28px;
+@picker-panel-cell-height: 24px;
+@picker-panel-cell-width: 36px;
+@picker-text-height: 40px;
+@picker-panel-without-time-cell-height: 66px;
+
+// Calendar
+// ---
+@calendar-bg: @component-background;
+@calendar-input-bg: @input-bg;
+@calendar-border-color: @border-color-inverse;
+@calendar-item-active-bg: @item-active-bg;
+@calendar-full-bg: @calendar-bg;
+@calendar-full-panel-bg: @calendar-full-bg;

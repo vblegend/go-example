@@ -1,0 +1,59 @@
+@import "mixin.less";
+
+.themeMixin({
+    :host {
+        .collapse-header {
+            background-color: @table-header-bg;
+        }
+        .collapse-wrapper {
+          border-bottom: solid 1px @border-color-split;
+        }
+    }
+});
+
+.collapse-wrapper {
+  overflow: hidden;
+}
+
+.collapse-header {
+  height: 32px;
+  padding: 0 10px;
+  display: flex;
+  user-select: none;
+  align-items: center;
+  ion-icon[name="chevron-forward-outline"],
+  ion-icon[name="chevron-down-outline"] {
+    margin-left: auto;
+  }
+
+  i {
+    font-size: 10px;
+  }
+
+  .header-text {
+    width: 100%;
+  }
+}
+
+.collapse-body {
+  // max-height: 500px;
+  transition: max-height 0.5s linear;
+}
+
+.collapsed .collapse-body {
+  max-height: 0 !important;
+  transition: max-height 0.2s linear;
+}
+.hidden-body {
+  visibility: hidden;
+}
+.collapse-body-content {
+  padding: 0px;
+  height: 100%;
+  overflow-x: hidden;
+  overflow-y: hidden;
+}
+
+.hide-header {
+  display: none;
+}

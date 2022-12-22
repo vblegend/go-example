@@ -1,0 +1,51 @@
+:host {
+  .flex {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+
+  .search-row {
+    height: 24px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    padding: 0px 10px;
+    nz-input-group{
+      height: 24px;
+      padding: 2px
+    }
+  }
+
+  .object-continer {
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+  .search {
+    height: 18px;
+  }
+  .search-btn {
+    width: 60px;
+  }
+
+  .selected {
+    background-color: #007acc;
+  }
+
+  .object-item {
+    user-select: none;
+    height: 30px;
+    line-height: 30px;
+    vertical-align: middle;
+    padding: 0px 0px 0px 10px;
+
+    .anticon {
+      font-size: 16px;
+      line-height: 20px;
+      margin-right: 5px;
+    }
+  }
+
+  .object-item:hover {
+    background-color: fade(#1a81e3, 35%);
+  }
+}

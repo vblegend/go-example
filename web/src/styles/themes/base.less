@@ -1,0 +1,212 @@
+// https://github.com/NG-ZORRO/ng-zorro-antd/blob/master/components/style/themes/default.less
+
+@font-family: Roboto, sans-serif, "Microsoft Yahei UI", "Segoe UI",
+  -apple-system, BlinkMacSystemFont, Roboto, "Helvetica Neue", sans-serif;
+
+// .ant-btn>.anticon {
+//   line-height: 0px;
+//   vertical-align: middle;
+// }
+body {
+  overflow: hidden;
+}
+
+// none select
+.none-select {
+  user-select: none;
+}
+
+.anticon {
+  vertical-align: normal;
+}
+
+// icon button
+.icon-button {
+  cursor: pointer;
+  color: @text-color;
+}
+
+.icon-button:hover {
+  color: @primary-3;
+}
+
+.icon-button:active {
+  color: @primary-5;
+}
+
+.ant-layout .ant-layout-content {
+  position: relative;
+}
+
+.ant-layout .ant-layout-content>.ng-star-inserted {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+}
+
+body {
+  margin: 0;
+  font-size: 14px;
+  font-family: Roboto, "Segoe UI", Arial, sans-serif;
+  font-weight: 400;
+  line-height: 1.5715;
+  font-feature-settings: "tnum", "tnum";
+}
+
+// side menu style
+.ant-menu.ant-menu-inline-collapsed {
+  width: 64px !important;
+}
+
+.ant-menu-submenu-popup>.ant-menu {
+  background-color: @component-background;
+}
+
+.ant-menu-submenu-popup>.ant-menu>.nz-menu-item,
+.ant-menu-item,
+.ant-menu-submenu,
+.ant-menu-submenu-title {
+  line-height: 0px !important;
+  margin-top: 0px !important;
+  margin-bottom: 0px !important;
+  border-bottom: solid 1px;
+  border-color: @menu-item-border-color;
+}
+
+.ant-menu-item .ant-menu-item-icon,
+.ant-menu-submenu-title .ant-menu-item-icon,
+.ant-menu-item .anticon,
+.ant-menu-submenu-title .anticon {
+  min-width: 14px;
+  font-size: 20px;
+  transition: font-size 0.15s cubic-bezier(0.215, 0.61, 0.355, 1),
+    margin 0.3s cubic-bezier(0.645, 0.045, 0.355, 1), color 0.3s;
+}
+
+.ant-tabs>.ant-tabs-nav .ant-tabs-nav-wrap,
+.ant-tabs>div>.ant-tabs-nav .ant-tabs-nav-wrap {
+  padding: 0px 5px;
+}
+
+.ant-tooltip {
+  user-select: none;
+  pointer-events: none;
+}
+
+// fix side menu border-botton
+.ant-menu-submenu.ant-menu-submenu-inline {
+  border-bottom: solid 0px;
+}
+
+// drop down icon
+.ant-dropdown-menu .anticon {
+  margin-left: 15px;
+  margin-right: 15px;
+}
+
+.ant-dropdown {
+  min-width: 150px;
+  user-select: none;
+
+  .ant-dropdown-menu {
+    border-width: 1px;
+    border-style: solid;
+    border-color: @border-color-base;
+
+    .ant-dropdown-menu-item {
+      line-height: 30px;
+    }
+
+    hr {
+      margin: 3px 10px;
+    }
+  }
+}
+
+/* 全局滚动条样式 */
+@scroll-width: 3px;
+@scroll-height: 3px;
+@scroll-background: #1d1d1d;
+@scroll-thumb-radius: 2px;
+@scroll-thumb-color: #535353;
+@scroll-thumb-hover-color: #164a72;
+@scroll-thumb-active-color: #157dcf;
+
+/*滚动条整体样式*/
+::-webkit-scrollbar {
+  width: @scroll-width;
+  /*高宽分别对应横竖滚动条的尺寸*/
+  height: @scroll-height;
+}
+
+/*滚动条里面小方块*/
+::-webkit-scrollbar-thumb {
+  border-radius: @scroll-thumb-radius;
+  // box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
+  background: @scroll-thumb-color;
+}
+
+/* 滚动条右下角边角*/
+::-webkit-scrollbar-corner {
+  background-color: @scroll-background;
+}
+
+
+/*滚动条里面小方块*/
+::-webkit-scrollbar-thumb:hover {
+  background: @scroll-thumb-hover-color;
+}
+
+/*滚动条里面小方块*/
+::-webkit-scrollbar-thumb:active {
+  background: @scroll-thumb-active-color;
+}
+
+/*滚动条里面轨道*/
+::-webkit-scrollbar-track {
+  // box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
+  // border-radius: 5px;
+  background: @scroll-background;
+}
+
+/* 去除input自动填充的背景色 */
+input:-internal-autofill-previewed,
+input:-internal-autofill-selected {
+  -webkit-text-fill-color: @text-color  !important;
+  transition: background-color 50000s ease-in-out 0s !important;
+}
+
+
+
+
+// 页头 菜单的分割线
+@header-menu-divider: 1px solid rgba(255, 255, 255, 0.12);
+@header-menu-divider-shadow: 0px 0px 10px 1px #3a3e3e;
+
+@layout-footer-padding: 10px 10px;
+@layout-footer-background: @component-background;
+
+
+
+.ant-modal-close-x {
+  width: 48px;
+  height: 32px;
+  line-height: 32px;
+}
+
+.ant-modal-header{
+  padding: 5px 24px;
+  height: 32px;
+  line-height: 32px;
+}
+
+
+// .ant-tooltip-content>.ant-tooltip-arrow>.ant-tooltip-arrow-content {
+//   background-color: red;
+// }
+
+// .ant-tooltip-content>.ant-tooltip-inner {
+//   background-color: #ff0000;
+//   box-shadow: 0 3px 6px -4px rgba(0, 0, 0, 0.48), 0 6px 16px 0 rgba(0, 0, 0, 0.32), 0 9px 28px 8px rgba(0, 0, 0, 0.2);
+// }

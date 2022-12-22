@@ -1,0 +1,49 @@
+<nz-layout>
+  <nz-layout class="background no-select" [style.background-image]="background"></nz-layout>
+  <nz-layout class="background blur no-select" [style.background-image]="background"></nz-layout>
+  <ng-template #prefixTemplateUser><span nz-icon nzIconfont="grace-yonghu"></span></ng-template>
+  <ng-template #prefixTemplatePasswd><span nz-icon nzIconfont="grace-mima"></span></ng-template>
+  <nz-layout>
+    <div class="pos-center">
+      <label class="mb-30 title-label no-select ts-5">Go Ng Admin</label>
+      <form nz-form [formGroup]="validateForm" class="login-form" (ngSubmit)="submitForm()">
+        <nz-form-item>
+          <nz-form-control class="no-select" nzErrorTip="Please input your username!">
+            <nz-input-group  [nzPrefix]="prefixTemplateUser" >
+              <input type="text" nz-input formControlName="username" placeholder="Username" />
+            </nz-input-group>
+          </nz-form-control>
+        </nz-form-item>
+        <nz-form-item>
+          <nz-form-control class="no-select" nzErrorTip="Please input your Password!">
+            <nz-input-group [nzPrefix]="prefixTemplatePasswd" >
+              <input type="password" nz-input formControlName="password" placeholder="Password" />
+            </nz-input-group>
+          </nz-form-control>
+        </nz-form-item>
+        <div nz-row class="login-form-margin no-select">
+          <div nz-col [nzSpan]="12">
+            <label nz-checkbox formControlName="remember">
+              <span>Remember me</span>
+            </label>
+          </div>
+          <div nz-col [nzSpan]="12">
+            <a class="login-form-forgot no-select">Forgot password</a>
+          </div>
+        </div>
+        <button nz-button class="login-form-button login-form-margin" [nzType]="'primary'">Log in</button>
+      </form>
+    </div>
+  </nz-layout>
+
+  <!-- <nz-layout>
+    <nz-avatar [nzSize]="48" nz-icon [nzIconfont]="'grace-jiqunguanli'" nz-popover 
+      nzPopoverTrigger="click" nzPopoverPlacement="left" [nzPopoverContent]="contentTemplate"></nz-avatar>
+    <ng-template #contentTemplate>
+      <a >Close</a>
+    </ng-template>
+  </nz-layout>
+
+ -->
+
+</nz-layout>

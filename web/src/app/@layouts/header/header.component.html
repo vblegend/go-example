@@ -1,0 +1,75 @@
+<div class="header-trigger">
+  <app-logo></app-logo>
+  <i class="trigger" (click)="menuService.toggleCollapsed()" nz-icon
+    [nzIconfont]="menuService.isCollapsed ? 'grace-menu-unfold' : 'grace-menu-fold'">
+  </i>
+
+
+  <nz-select name="currentTheme" [(ngModel)]="currentTheme" (ngModelChange)="changeTheme($event)">
+    <nz-option *ngFor="let theme of themes" [nzValue]="theme.key" [nzLabel]="theme.value"></nz-option>
+  </nz-select>
+
+
+  <nz-space [nzSplit]="spaceSplit" [nzSize]="'small'">
+    <ng-template #spaceSplit>
+      <nz-divider nzType="vertical"></nz-divider>
+    </ng-template>
+
+
+    <button nz-button *nzSpaceItem nzType="primary" (click)="serachClick()">
+      <i nz-icon nzType="search"></i>
+      Search
+    </button>
+
+    <!-- <div > -->
+    <i class="icon-button" *nzSpaceItem nz-icon nz-tooltip nzTooltipPlacement="bottom" [nzTooltipTitle]="'应用服务'"
+      [nzIconfont]="'grace-yingyongfuwu'"></i>
+    <!-- </div> -->
+
+    <!-- <div class="icon-button" *nzSpaceItem> -->
+    <i class="icon-button" *nzSpaceItem nz-icon nz-tooltip nzTooltipPlacement="bottom" [nzTooltipTitle]="'数据'"
+      [nzIconfont]="'grace-beehive-full'"></i>
+    <!-- </div> -->
+
+
+    <!-- <nz-badge [nzCount]="20">
+    </nz-badge> -->
+    <!-- <div class="icon-button" *nzSpaceItem> -->
+    <i class="icon-button" *nzSpaceItem nz-icon nz-tooltip nzTooltipPlacement="bottom" [nzTooltipTitle]="'日志'"
+      [nzIconfont]="'grace-Error'"></i>
+    <!-- </div> -->
+
+
+
+    <!-- <a nz-button *nzSpaceItem nzType="link">
+      <i nz-icon [nzIconfont]="'grace-alarm2'"></i>
+    </a> -->
+
+    <!-- <div class="icon-button" *nzSpaceItem> -->
+    <i class="icon-button" *nzSpaceItem nz-icon nz-tooltip nzTooltipPlacement="bottom" [nzTooltipTitle]="'终端'"
+      (click)="tclick()" [nzIconfont]="'grace-terminal2'"></i>
+    <!-- </div> -->
+
+
+    <i class="icon-button" *nzSpaceItem nz-icon nz-tooltip nzTooltipPlacement="bottom" [nzTooltipTitle]="'系统设置'"
+      (click)="systemSetting()" [nzIconfont]="'grace-shezhi2'"></i>
+
+    <!-- <div class="icon-button" *nzSpaceItem> -->
+    <i class="icon-button" *nzSpaceItem nz-icon nz-tooltip nzTooltipPlacement="bottom" [nzTooltipTitle]="'退出'"
+      nz-popconfirm nzPopconfirmTitle="Are you sure to log out ?" nzPopconfirmPlacement="bottom"
+      (nzOnConfirm)="logout()" [nzIconfont]="'grace-iconfontzhuxiao1'"></i>
+    <!-- </div> -->
+  </nz-space>
+
+
+  <span class="none-select">{{today | date:'yyyy-MM-dd HH:mm:ss'}}</span>
+
+
+  <ng-window *ngIf="showPortal" title="Hello Window" (afterClose)="portal_Closed()">
+    <h2>Hello world from amother window!!</h2>
+    <button (click)="this.showPortal = false">Close me!</button>
+  </ng-window>
+
+
+
+</div>

@@ -1,0 +1,25 @@
+<div class="flex">
+    <div class="search-row">
+        <!-- <input class="search" [(ngModel)]="searchText" type="text" nz-input placeholder="输入搜索关键字" /> -->
+
+        <nz-input-group [nzSuffix]="suffixTemplate">
+            <input type="text" class="search" nz-input placeholder="输入搜索关键字" [(ngModel)]="searchText" />
+        </nz-input-group>
+        <ng-template #suffixTemplate>
+            <i nz-icon style="cursor: pointer;" nzIconfont="icon-delete1" (click)="searchText = ''"></i>
+        </ng-template>
+
+
+
+    </div>
+    <div class="object-continer">
+        <div *ngFor="let child of filterWidgets(searchText); trackBy trackByName;">
+            <div class="object-item" (click)="widget_click($event,child)"
+                [class.selected]="editor.selection.contains(child)">
+                <!-- <i nz-icon [nzIconfont]="child['icon']"></i> -->
+                {{child.instance.configure.name}}
+            </div>
+        </div>
+    </div>
+
+</div>
